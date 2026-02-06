@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
-import sequelize from './src/config/db.js';
-import { app } from './src/app.js';
-import './src/models/User.js';
-import './src/models/Address.js';
+import sequelize from './config/db.js';
+import { app } from './app.js';
+import './models/index.js'; 
+import seedAdmin from './seeders/admin.seeder.js';
 
 dotenv.config();
 
@@ -10,6 +10,8 @@ const syncDB = async () => {
     try {
         await sequelize.sync({ alter: true });
         console.log('Database synced successfully');
+
+        await seedAdmin();
     } catch (error) {
         console.error('Error syncing database:', error);
     }
