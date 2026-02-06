@@ -47,13 +47,10 @@ const User = sequelize.define(
             field: 'is_active'
         },
 
-        address_id: {
-            type: DataTypes.INTEGER,
-            field: 'address_id',
-            references: {
-                model: 'addresses',
-                key: 'id'
-            }
+        address_ids: {
+            type: DataTypes.JSON,
+            allowNull: true,
+            defaultValue: []
         }
     },
     {

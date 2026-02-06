@@ -56,4 +56,15 @@ export const logout = async (req, res, next) => {
     }
 };
 
+export const getUserProfile = async (req, res, next) => {
+    try {
+        const user = await userService.getUserProfile(req.user.id);
+        return sendResponse(res, 200, true, "User profile fetched successfully", user);
+    } catch (error) {
+        next(error);
+    }
+};
+
+
+
 

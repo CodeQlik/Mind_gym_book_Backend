@@ -1,5 +1,5 @@
 import express from 'express';
-import { registerUser, login, logout } from '../controllers/user.controller.js';
+import { registerUser, login, logout, getUserProfile } from '../controllers/user.controller.js';
 import upload from '../middlewares/multer.js';
 import { registerValidation, loginValidation } from '../validations/user.validation.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
@@ -13,6 +13,8 @@ router.post('/register', upload.fields([
 
 router.post('/login', loginValidation, login);
 router.post('/logout', verifyJWT, logout);
+router.get('/profile', verifyJWT, getUserProfile);
+
 
 
 

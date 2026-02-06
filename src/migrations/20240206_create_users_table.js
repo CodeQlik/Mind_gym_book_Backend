@@ -37,14 +37,10 @@ export const up = async (queryInterface, Sequelize) => {
             defaultValue: true,
         },
 
-        address_id: {
-            type: Sequelize.INTEGER,
-            references: {
-                model: 'addresses',
-                key: 'id',
-            },
-            onUpdate: 'CASCADE',
-            onDelete: 'SET NULL',
+        address_ids: {
+            type: Sequelize.JSON,
+            allowNull: true,
+            defaultValue: [],
         },
         created_at: {
             allowNull: false,

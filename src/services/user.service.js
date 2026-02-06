@@ -1,4 +1,4 @@
-import { User } from '../models/index.js';
+import { User, Address } from '../models/index.js';
 import bcrypt from 'bcryptjs';
 import { uploadOnCloudinary } from '../config/cloudinary.js';
 import generateToken from '../utils/generateToken.js';
@@ -141,6 +141,34 @@ class UserService {
             token: generateToken(user.id)
         };
     }
+
+    async getUserProfile(userId) {
+        // Fetch user without password
+        const user = await User.findByPk(userId, {
+            attributes: { exclude: ['password'] }
+        });
+
+        if (!user) return null;
+
+        const userJson = user.toJSON();
+
+        // If there are address IDs, fetch all corresponding addresses
+        if (Array.isArray(userJson.address_ids) && userJson.address_ids.length > 0) {
+            const addresses = await Address.findAll({
+                where: {
+                    id: userJson.address_ids
+                }
+            });
+            userJson.all_addresses = addresses;
+        } else {
+            userJson.all_addresses = [];
+        }
+
+
+        return userJson;
+    }
+
 }
+
 
 export default new UserService();
