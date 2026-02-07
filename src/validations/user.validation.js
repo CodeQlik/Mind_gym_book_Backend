@@ -54,8 +54,15 @@ export const resetPasswordValidation = [
         }
         return true;
     }),
+]; export const deleteAccountValidation = [
+    body('password').notEmpty().withMessage('Password is required to delete account'),
 ];
 
+export const verifyEmailValidation = [
+    body('email').isEmail().withMessage('Please provide a valid email'),
+    body('otp').notEmpty().withMessage('OTP is required').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits'),
+];
 
-
-
+export const sendOTPValidation = [
+    body('email').isEmail().withMessage('Please provide a valid email'),
+];

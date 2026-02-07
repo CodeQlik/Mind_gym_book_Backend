@@ -53,7 +53,7 @@ const sendEmail = async (recipientEmail, subject, message, company) => {
     try {
         console.log("Sending email to:", recipientEmail);
         const info = await transport.sendMail({
-            from: `"${(company) ? company.name : 'CodeDev'}" <${email}>`,
+            from: `"${(company) ? company.name : 'Mind Gym Book'}" <${email}>`,
             to: recipientEmail,
             subject: subject,
             html: message,

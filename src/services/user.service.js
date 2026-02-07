@@ -5,6 +5,7 @@ import generateToken from '../utils/generateToken.js';
 import { Op } from 'sequelize';
 import crypto from 'crypto';
 import sendEmail from '../config/sendEmail.js';
+import jwt from 'jsonwebtoken';
 
 
 class UserService {
@@ -117,10 +118,12 @@ class UserService {
             is_active: true
         });
 
+        // Send Verification Email and get OTP token
+        const otpToken = await this.sendVerificationEmail(user);
 
         const userResponse = user.toJSON();
         delete userResponse.password;
-        return userResponse;
+        return { user: userResponse, otpToken };
     }
 
     async login(email, password) {
@@ -270,14 +273,8 @@ class UserService {
             throw new Error("No account found with this email");
         }
 
-        // Generate reset token
-        const resetToken = crypto.randomBytes(32).toString('hex');
-        const resetExpiry = new Date(Date.now() + 3600000); // 1 hour from now
-
-        await user.update({
-            reset_password_token: resetToken,
-            reset_password_expiry: resetExpiry
-        });
+        // Generate reset token using JWT
+        const resetToken = jwt.sign({ email: user.email, type: 'reset' }, process.env.JWT_SECRET || 'secret', { expiresIn: '1h' });
 
         // Send Email
         const resetUrl = `${process.env.FRONTEND_URL || 'http://localhost:3000'}/reset-password?token=${resetToken}`;
@@ -294,29 +291,143 @@ class UserService {
     }
 
     async resetPassword(token, newPassword) {
-        const user = await User.findOne({
-            where: {
-                reset_password_token: token,
-                reset_password_expiry: {
-                    [Op.gt]: new Date()
-                }
-            }
-        });
+        let decoded;
+        try {
+            decoded = jwt.verify(token, process.env.JWT_SECRET || 'secret');
+        } catch (error) {
+            throw new Error("Invalid or expired reset token");
+        }
+
+        if (decoded.type !== 'reset') {
+            throw new Error("Invalid token type");
+        }
+
+        const user = await User.findOne({ where: { email: decoded.email } });
 
         if (!user) {
-            throw new Error("Invalid or expired reset token");
+            throw new Error("User not found");
         }
 
         const salt = await bcrypt.genSalt(10);
         const hashedPassword = await bcrypt.hash(newPassword, salt);
 
         await user.update({
-            password: hashedPassword,
-            reset_password_token: null,
-            reset_password_expiry: null
+            password: hashedPassword
         });
 
         return true;
+    }
+
+    async deleteAccount(userId, password) {
+        const user = await User.findByPk(userId);
+        if (!user) {
+            throw new Error("User not found");
+        }
+
+        // Verify password
+        const isMatch = await bcrypt.compare(password, user.password);
+        if (!isMatch) {
+            throw new Error("Invalid password. Account deletion failed.");
+        }
+
+        // Delete associated addresses
+        if (Array.isArray(user.address_ids) && user.address_ids.length > 0) {
+            await Address.destroy({
+                where: {
+                    id: user.address_ids
+                }
+            });
+        }
+
+        // Delete the user
+        await user.destroy();
+        return true;
+    }
+
+    async sendOTPForVerification(email) {
+        // Generate 6-digit OTP
+        const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+        // Sign OTP and email into a JWT (valid for 10 mins)
+        const otpToken = jwt.sign({ email, otp, type: 'verify' }, process.env.JWT_SECRET || 'secret', { expiresIn: '10m' });
+
+        const message = `
+            <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
+                <h2 style="color: #007bff;">Email Verification</h2>
+                <p>Hello,</p>
+                <p>Your OTP for email verification is:</p>
+                <h1 style="background: #f4f4f4; padding: 10px; text-align: center; border-radius: 5px; letter-spacing: 5px;">${otp}</h1>
+                <p>This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
+            </div>
+        `;
+        await sendEmail(email, "Your Verification OTP", message);
+        return otpToken;
+    }
+
+    async sendVerificationEmail(user) {
+        return await this.sendOTPForVerification(user.email);
+    }
+
+    async verifyEmail(email, otp, otpToken) {
+        if (!otpToken) {
+            throw new Error("Verification session expired. Please resend OTP.");
+        }
+
+        let decoded;
+        try {
+            decoded = jwt.verify(otpToken, process.env.JWT_SECRET || 'secret');
+        } catch (error) {
+            throw new Error("Invalid or expired verification session. Please resend OTP.");
+        }
+
+        if (decoded.type !== 'verify' || decoded.email !== email) {
+            throw new Error("Invalid verification session.");
+        }
+
+        if (decoded.otp !== otp) {
+            throw new Error("Invalid OTP. Please try again.");
+        }
+
+        const user = await User.findOne({ where: { email } });
+
+        if (user) {
+            await user.update({
+                is_verified: true
+            });
+        }
+
+        return true;
+
+        return true;
+    }
+
+    async sendOTP(email) {
+        const user = await User.findOne({ where: { email } });
+        if (user && user.is_verified) {
+            throw new Error("Email is already verified");
+        }
+
+        return await this.sendOTPForVerification(email);
+    }
+
+    async getAllUsers() {
+        const users = await User.findAll({
+            attributes: { exclude: ['password'] }
+        });
+
+        const usersWithAddresses = await Promise.all(users.map(async (user) => {
+            const userJson = user.toJSON();
+            if (Array.isArray(userJson.address_ids) && userJson.address_ids.length > 0) {
+                userJson.all_addresses = await Address.findAll({
+                    where: { id: userJson.address_ids }
+                });
+            } else {
+                userJson.all_addresses = [];
+            }
+            return userJson;
+        }));
+
+        return usersWithAddresses;
     }
 }
 

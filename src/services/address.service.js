@@ -77,6 +77,32 @@ class AddressService {
         return true;
     }
 
+    async setDefaultAddress(userId, addressId) {
+        const user = await User.findByPk(userId);
+        if (!user || !Array.isArray(user.address_ids)) {
+            throw new Error("User or addresses not found");
+        }
+
+        const addressIdNum = parseInt(addressId);
+        if (!user.address_ids.includes(addressIdNum)) {
+            throw new Error("Address does not belong to this user");
+        }
+
+        // Set all user's addresses to not default
+        await Address.update(
+            { is_default: false },
+            { where: { id: user.address_ids } }
+        );
+
+        // Set the chosen one to default
+        const address = await Address.findByPk(addressId);
+        if (!address) {
+            throw new Error("Address not found");
+        }
+
+        return await address.update({ is_default: true });
+    }
+
 }
 
 export default new AddressService();

@@ -62,6 +62,17 @@ export const deleteAddress = async (req, res, next) => {
     }
 };
 
+export const setDefaultAddress = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const userId = req.user.id;
+        const address = await addressService.setDefaultAddress(userId, id);
+        return sendResponse(res, 200, true, "Address set as default successfully", address);
+    } catch (error) {
+        next(error);
+    }
+};
+
 
 
 

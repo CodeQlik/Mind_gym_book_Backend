@@ -1,8 +1,9 @@
 import express from 'express';
-import { registerUser, login, logout, getUserProfile, updateProfile, changePassword, forgotPassword, resetPassword } from '../controllers/user.controller.js';
+import { registerUser, login, logout, getUserProfile, updateProfile, changePassword, forgotPassword, resetPassword, deleteAccount, verifyEmail, sendOTP, getAllUsers } from '../controllers/user.controller.js';
 import upload from '../middlewares/multer.js';
-import { registerValidation, loginValidation, updateProfileValidation, changePasswordValidation, forgotPasswordValidation, resetPasswordValidation } from '../validations/user.validation.js';
+import { registerValidation, loginValidation, updateProfileValidation, changePasswordValidation, forgotPasswordValidation, resetPasswordValidation, deleteAccountValidation, verifyEmailValidation, sendOTPValidation } from '../validations/user.validation.js';
 import { verifyJWT } from '../middlewares/auth.middleware.js';
+import { isAdmin } from '../middlewares/admin.middleware.js';
 
 const router = express.Router();
 
@@ -22,6 +23,13 @@ router.post('/change-password', verifyJWT, changePasswordValidation, changePassw
 
 router.post('/forgot-password', forgotPasswordValidation, forgotPassword);
 router.post('/reset-password', resetPasswordValidation, resetPassword);
+router.delete('/delete-account', verifyJWT, deleteAccountValidation, deleteAccount);
+
+router.post('/verify-email', verifyEmailValidation, verifyEmail);
+router.post('/send-otp', sendOTPValidation, sendOTP);
+
+// Admin Routes
+router.get('/all-users', verifyJWT, isAdmin, getAllUsers);
 
 
 export default router;
