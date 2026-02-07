@@ -12,7 +12,7 @@ export const registerUser = async (req, res, next) => {
         const result = await userService.registerUser(req.body, req.files);
 
         const options = {
-            expires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+            expires: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'None'
@@ -189,7 +189,7 @@ export const sendOTP = async (req, res, next) => {
         const otpToken = await userService.sendOTP(email);
 
         const options = {
-            expires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+            expires: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             sameSite: 'None'

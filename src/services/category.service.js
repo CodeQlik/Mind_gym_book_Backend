@@ -87,54 +87,101 @@ class CategoryService {
         return true;
     }
 
-    async getCategories() {
+    async getCategories(activeOnly = true) {
+        const where = { parent_id: null };
+        if (activeOnly) where.is_active = true;
+
+        const include = [
+            {
+                model: Category,
+                as: 'children',
+                required: false,
+                include: [
+                    {
+                        model: Category,
+                        as: 'children',
+                        required: false
+                    }
+                ]
+            }
+        ];
+
+        if (activeOnly) {
+            include[0].where = { is_active: true };
+            include[0].include[0].where = { is_active: true };
+        }
+
         return await Category.findAll({
-            where: {
-                parent_id: null,
-                is_active: true
-            },
-            include: [
-                {
-                    model: Category,
-                    as: 'children',
-                    where: { is_active: true },
-                    required: false,
-                    include: [
-                        {
-                            model: Category,
-                            as: 'children',
-                            where: { is_active: true },
-                            required: false
-                        }
-                    ]
-                }
-            ]
+            where,
+            include
         });
     }
 
-    async getCategoryById(id) {
+    async getCategoryById(id, activeOnly = true) {
+        const where = { id };
+        if (activeOnly) where.is_active = true;
+
+        const include = [
+            {
+                model: Category,
+                as: 'children',
+                required: false
+            }
+        ];
+
+        if (activeOnly) {
+            include[0].where = { is_active: true };
+        }
+
         const category = await Category.findOne({
-            where: { id, is_active: true },
-            include: [
-                {
-                    model: Category,
-                    as: 'children',
-                    where: { is_active: true },
-                    required: false
-                }
-            ]
+            where,
+            include
         });
-        if (!category) throw new Error("Category not found or inactive");
+
+        if (!category) throw new Error(activeOnly ? "Category not found or inactive" : "Category not found");
         return category;
     }
 
-    async getCategoriesByParentId(parent_id) {
+    async getCategoriesByParentId(parent_id, activeOnly = true) {
+        const where = { parent_id: parent_id || null };
+        if (activeOnly) where.is_active = true;
+
         return await Category.findAll({
-            where: {
-                parent_id: parent_id || null,
-                is_active: true
-            }
+            where
         });
+    }
+
+    async getCategoryBySlug(slug, activeOnly = true) {
+        const where = { slug };
+        if (activeOnly) where.is_active = true;
+
+        const include = [
+            {
+                model: Category,
+                as: 'children',
+                required: false,
+                include: [
+                    {
+                        model: Category,
+                        as: 'children',
+                        required: false
+                    }
+                ]
+            }
+        ];
+
+        if (activeOnly) {
+            include[0].where = { is_active: true };
+            include[0].include[0].where = { is_active: true };
+        }
+
+        const category = await Category.findOne({
+            where,
+            include
+        });
+
+        if (!category) throw new Error(activeOnly ? "Category not found or inactive" : "Category not found");
+        return category;
     }
 
     async toggleCategoryStatus(id) {

@@ -1,14 +1,15 @@
 import User from './user.model.js';
 import Address from './address.model.js';
 import Category from './category.model.js';
+import Book from './book.model.js';
 
-// Link for the primary/default address - Commented out because we are using address_ids JSON
-// User.belongsTo(Address, { foreignKey: 'address_id', as: 'primaryAddress' });
-// Address.hasOne(User, { foreignKey: 'address_id' });
-
+// Associations
+Category.hasMany(Book, { foreignKey: 'category_id', as: 'books' });
+Book.belongsTo(Category, { foreignKey: 'category_id', as: 'category' });
 
 export {
     User,
     Address,
-    Category
+    Category,
+    Book
 };

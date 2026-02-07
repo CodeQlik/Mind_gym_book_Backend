@@ -348,8 +348,8 @@ class UserService {
         // Generate 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
-        // Sign OTP and email into a JWT (valid for 10 mins)
-        const otpToken = jwt.sign({ email, otp, type: 'verify' }, process.env.JWT_SECRET || 'secret', { expiresIn: '10m' });
+        // Sign OTP and email into a JWT (valid for 2 mins)
+        const otpToken = jwt.sign({ email, otp, type: 'verify' }, process.env.JWT_SECRET || 'secret', { expiresIn: '2m' });
 
         const message = `
             <div style="font-family: Arial, sans-serif; padding: 20px; border: 1px solid #ddd; border-radius: 10px;">
@@ -357,7 +357,7 @@ class UserService {
                 <p>Hello,</p>
                 <p>Your OTP for email verification is:</p>
                 <h1 style="background: #f4f4f4; padding: 10px; text-align: center; border-radius: 5px; letter-spacing: 5px;">${otp}</h1>
-                <p>This OTP is valid for 10 minutes. Please do not share it with anyone.</p>
+                <p>This OTP is valid for 2 minutes. Please do not share it with anyone.</p>
             </div>
         `;
         await sendEmail(email, "Your Verification OTP", message);
