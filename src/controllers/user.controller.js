@@ -11,11 +11,12 @@ export const registerUser = async (req, res, next) => {
 
         const result = await userService.registerUser(req.body, req.files);
 
+        const isProduction = process.env.NODE_ENV === 'production';
         const options = {
             expires: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'None'
+            secure: isProduction,
+            sameSite: isProduction ? 'None' : 'Lax'
         };
 
         res.cookie('otpToken', result.otpToken, options);
@@ -36,11 +37,12 @@ export const login = async (req, res, next) => {
         const { email, password } = req.body;
         const result = await userService.login(email, password);
 
+        const isProduction = process.env.NODE_ENV === 'production';
         const options = {
             expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'None'
+            secure: isProduction,
+            sameSite: isProduction ? 'None' : 'Lax'
         };
 
 
@@ -163,13 +165,16 @@ export const verifyEmail = async (req, res, next) => {
         }
 
         const { email, otp } = req.body;
-        const otpToken = req.cookies?.otpToken;
+        const otpToken = req.cookies?.otpToken || req.headers['x-otp-token'];
+
+        console.log(`[UserController] verifyEmail hit for ${email}. Token source: ${req.cookies?.otpToken ? 'Cookie' : (req.headers['x-otp-token'] ? 'Header (x-otp-token)' : 'None')}`);
+
         await userService.verifyEmail(email, otp, otpToken);
 
         res.clearCookie('otpToken', {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
-            sameSite: 'None'
+            sameSite: process.env.NODE_ENV === 'production' ? 'None' : 'Lax'
         });
 
         return sendResponse(res, 200, true, "Email verified successfully");
@@ -188,11 +193,12 @@ export const sendOTP = async (req, res, next) => {
         const { email } = req.body;
         const otpToken = await userService.sendOTP(email);
 
+        const isProduction = process.env.NODE_ENV === 'production';
         const options = {
             expires: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',
-            sameSite: 'None'
+            secure: isProduction,
+            sameSite: isProduction ? 'None' : 'Lax'
         };
 
         res.cookie('otpToken', otpToken, options);

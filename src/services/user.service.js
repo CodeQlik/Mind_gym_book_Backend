@@ -345,6 +345,7 @@ class UserService {
     }
 
     async sendOTPForVerification(email) {
+        console.log(`[OTP Service] Generating OTP for: ${email}`);
         // Generate 6-digit OTP
         const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -361,6 +362,7 @@ class UserService {
             </div>
         `;
         await sendEmail(email, "Your Verification OTP", message);
+        console.log(`[OTP Service] OTP sent successfully to: ${email}`);
         return otpToken;
     }
 
@@ -369,7 +371,10 @@ class UserService {
     }
 
     async verifyEmail(email, otp, otpToken) {
+        console.log(`[OTP Service] Verification attempt for: ${email} with OTP: ${otp}`);
+
         if (!otpToken) {
+            console.error(`[OTP Service] Verification failed: No otpToken provided for ${email}`);
             throw new Error("Verification session expired. Please resend OTP.");
         }
 
@@ -377,16 +382,21 @@ class UserService {
         try {
             decoded = jwt.verify(otpToken, process.env.JWT_SECRET || 'secret');
         } catch (error) {
+            console.error(`[OTP Service] Verification failed: JWT verification error for ${email} - ${error.message}`);
             throw new Error("Invalid or expired verification session. Please resend OTP.");
         }
 
         if (decoded.type !== 'verify' || decoded.email !== email) {
+            console.error(`[OTP Service] Verification failed: Token payload mismatch for ${email}. Expected ${email}, got ${decoded.email}`);
             throw new Error("Invalid verification session.");
         }
 
         if (decoded.otp !== otp) {
+            console.error(`[OTP Service] Verification failed: Invalid OTP entered for ${email}. Expected ${decoded.otp}, got ${otp}`);
             throw new Error("Invalid OTP. Please try again.");
         }
+
+        console.log(`[OTP Service] OTP validated successfully for: ${email}`);
 
         const user = await User.findOne({ where: { email } });
 
@@ -394,9 +404,10 @@ class UserService {
             await user.update({
                 is_verified: true
             });
+            console.log(`[OTP Service] User marked as verified in DB: ${email}`);
+        } else {
+            console.log(`[OTP Service] Pre-registration verification successful for: ${email}`);
         }
-
-        return true;
 
         return true;
     }
