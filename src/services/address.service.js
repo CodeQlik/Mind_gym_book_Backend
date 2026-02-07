@@ -32,6 +32,20 @@ class AddressService {
         return addresses;
     }
 
+    async getAddressesByType(userId, type) {
+        const user = await User.findByPk(userId);
+        if (!user || !Array.isArray(user.address_ids) || user.address_ids.length === 0) {
+            return [];
+        }
+
+        return await Address.findAll({
+            where: {
+                id: user.address_ids,
+                addresstype: type
+            }
+        });
+    }
+
 
 
     async getAddressById(addressId) {

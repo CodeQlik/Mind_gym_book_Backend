@@ -28,6 +28,10 @@ const Address = sequelize.define(
         country: {
             type: DataTypes.STRING,
             defaultValue: "India"
+        },
+        addresstype: {
+            type: DataTypes.ENUM('home', 'work', 'other'),
+            allowNull: false
         }
     },
     {

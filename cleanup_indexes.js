@@ -7,7 +7,7 @@ const cleanupIndexes = async () => {
             .filter(idx => idx.Key_name !== 'PRIMARY')
             .map(idx => idx.Key_name);
 
-        // Remove duplicates from indexesToDrop (SHOW INDEX returns one row per column in composite index)
+     
         const uniqueIndexes = [...new Set(indexesToDrop)];
 
         console.log(`Found ${uniqueIndexes.length} indexes to drop.`);
@@ -15,12 +15,10 @@ const cleanupIndexes = async () => {
         for (const indexName of uniqueIndexes) {
             console.log(`Dropping index: ${indexName}`);
             try {
-                // For MySQL, we need to handle foreign keys differently if the index is a FK
-                // But usually these are just UNIQUE or BTREE indexes created by Sequelize
+              
                 await sequelize.query(`ALTER TABLE users DROP INDEX \`${indexName}\``);
             } catch (err) {
                 console.error(`Failed to drop index ${indexName}: ${err.message}`);
-                // If it's a foreign key, try dropping FK first
                 try {
                     await sequelize.query(`ALTER TABLE users DROP FOREIGN KEY \`${indexName}\``);
                     await sequelize.query(`ALTER TABLE users DROP INDEX \`${indexName}\``);
