@@ -10,12 +10,15 @@ import errorMiddleware from './middlewares/error.middleware.js';
 
 const app = express();
 
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || 'http://localhost:5173', // Adjust to your frontend URL
+const corsOptions = {
+    origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH', 'OPTIONS'],
-    allowedHeaders: ['Content-Type', 'Authorization']
-}));
+    allowedHeaders: ['Content-Type', 'Authorization', 'x-otp-token']
+};
+
+app.use(cors(corsOptions));
+app.options('*', cors(corsOptions)); // Handle pre-flight requests globally
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
