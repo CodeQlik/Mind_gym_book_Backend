@@ -51,6 +51,14 @@ const User = sequelize.define(
             type: DataTypes.JSON,
             allowNull: true,
             defaultValue: []
+        },
+        reset_password_token: {
+            type: DataTypes.STRING,
+            allowNull: true
+        },
+        reset_password_expiry: {
+            type: DataTypes.DATE,
+            allowNull: true
         }
     },
     {

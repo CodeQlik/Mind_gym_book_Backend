@@ -42,6 +42,14 @@ export const up = async (queryInterface, Sequelize) => {
             allowNull: true,
             defaultValue: [],
         },
+        reset_password_token: {
+            type: Sequelize.STRING,
+            allowNull: true,
+        },
+        reset_password_expiry: {
+            type: Sequelize.DATE,
+            allowNull: true,
+        },
         created_at: {
             allowNull: false,
             type: Sequelize.DATE,
