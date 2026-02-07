@@ -1,8 +1,8 @@
 import dotenv from 'dotenv';
-import sequelize from './config/db.js';
-import { app } from './app.js';
-import './models/index.js'; 
-import seedAdmin from './seeders/admin.seeder.js';
+import sequelize from './src/config/db.js';
+import { app } from './src/app.js';
+import './src/models/index.js'; 
+import seedAdmin from './src/seeders/admin.seeder.js';
 
 dotenv.config();
 
