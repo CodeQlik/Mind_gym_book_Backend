@@ -31,7 +31,7 @@ const connectDB = async () => {
   }
 };
 
-// Initial connection handled in index.js
+// Initial connection handled in index.js  dfdfdfd
 export { connectDB };
 
 export default sequelize;
