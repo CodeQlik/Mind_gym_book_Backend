@@ -1,0 +1,57 @@
+import { body } from "express-validator";
+
+export const bookValidation = [
+  body("title").notEmpty().withMessage("Book title is required").trim(),
+  body("author").notEmpty().withMessage("Author is required").trim(),
+  body("price").isDecimal().withMessage("Price must be a valid number"),
+  body("category_id")
+    .notEmpty()
+    .withMessage("Category ID is required")
+    .isInt()
+    .withMessage("Category ID must be an integer"),
+  body("subcategory_id")
+    .optional({ checkFalsy: true })
+    .isInt()
+    .withMessage("Subcategory ID must be an integer"),
+  body("stock")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Stock must be a non-negative integer"),
+  body("condition")
+    .optional()
+    .isIn(["new", "like_new", "good", "acceptable"])
+    .withMessage("Invalid book condition"),
+];
+
+export const updateBookValidation = [
+  body("title")
+    .optional()
+    .notEmpty()
+    .withMessage("Title cannot be empty")
+    .trim(),
+  body("author")
+    .optional()
+    .notEmpty()
+    .withMessage("Author cannot be empty")
+    .trim(),
+  body("price")
+    .optional()
+    .isDecimal()
+    .withMessage("Price must be a valid number"),
+  body("category_id")
+    .optional()
+    .isInt()
+    .withMessage("Category ID must be an integer"),
+  body("subcategory_id")
+    .optional({ checkFalsy: true })
+    .isInt()
+    .withMessage("Subcategory ID must be an integer"),
+  body("stock")
+    .optional()
+    .isInt({ min: 0 })
+    .withMessage("Stock must be a non-negative integer"),
+  body("condition")
+    .optional()
+    .isIn(["new", "like_new", "good", "acceptable"])
+    .withMessage("Invalid book condition"),
+];
