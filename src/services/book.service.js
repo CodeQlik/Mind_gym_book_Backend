@@ -14,7 +14,8 @@ class BookService {
       .replace(/^-+|-+$/g, "");
   }
 
-  async createBook(data, file) {
+  async createBook(data, files) {
+    console.log("Files received in createBook:", Object.keys(files || {}));
     const {
       title,
       description,
@@ -27,6 +28,7 @@ class BookService {
       subcategory_id,
       is_active,
       published_date,
+      is_premium,
     } = data;
 
     const category = await Category.findByPk(category_id);
@@ -43,17 +45,33 @@ class BookService {
       throw new Error("Book title already exists (slug conflict)");
 
     let thumbnailData = { url: "", public_id: "" };
-    if (file) {
+    if (files?.thumbnail?.[0]) {
       const uploadResult = await uploadOnCloudinary(
-        file.path,
-        "books/thumbnails",
+        files.thumbnail[0].path,
+        "mindgymbook/books/thumbnails",
       );
-      if (uploadResult) {
-        thumbnailData = {
-          url: uploadResult.secure_url,
-          public_id: uploadResult.public_id,
-        };
+      if (!uploadResult) {
+        throw new Error("Failed to upload thumbnail to Cloudinary");
       }
+      thumbnailData = {
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id,
+      };
+    }
+
+    let pdfFileData = { url: "", public_id: "" };
+    if (files?.pdf_file?.[0]) {
+      const uploadResult = await uploadOnCloudinary(
+        files.pdf_file[0].path,
+        "mindgymbook/books/pdfs",
+      );
+      if (!uploadResult) {
+        throw new Error("Failed to upload PDF file to Cloudinary");
+      }
+      pdfFileData = {
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id,
+      };
     }
 
     return await Book.create({
@@ -66,10 +84,12 @@ class BookService {
       condition: condition || "good",
       stock: stock || 1,
       thumbnail: thumbnailData,
+      pdf_file: pdfFileData,
       category_id,
       subcategory_id: subcategory_id || null,
       is_active: is_active !== undefined ? is_active : true,
       published_date: published_date || null,
+      is_premium: is_premium === "true" || is_premium === true,
     });
   }
 
@@ -175,7 +195,7 @@ class BookService {
     return book;
   }
 
-  async updateBook(id, data, file) {
+  async updateBook(id, data, files) {
     const book = await Book.findByPk(id);
     if (!book) throw new Error("Book not found");
 
@@ -193,20 +213,42 @@ class BookService {
       if (!subCategory) throw new Error("Invalid subcategory ID");
     }
 
-    if (file) {
+    if (files?.thumbnail?.[0]) {
       if (book.thumbnail?.public_id) {
         await deleteFromCloudinary(book.thumbnail.public_id);
       }
       const uploadResult = await uploadOnCloudinary(
-        file.path,
-        "books/thumbnails",
+        files.thumbnail[0].path,
+        "mindgymbook/books/thumbnails",
       );
-      if (uploadResult) {
-        data.thumbnail = {
-          url: uploadResult.secure_url,
-          public_id: uploadResult.public_id,
-        };
+      if (!uploadResult) {
+        throw new Error("Failed to upload updated thumbnail to Cloudinary");
       }
+      data.thumbnail = {
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id,
+      };
+    }
+
+    if (files?.pdf_file?.[0]) {
+      if (book.pdf_file?.public_id) {
+        await deleteFromCloudinary(book.pdf_file.public_id);
+      }
+      const uploadResult = await uploadOnCloudinary(
+        files.pdf_file[0].path,
+        "mindgymbook/books/pdfs",
+      );
+      if (!uploadResult) {
+        throw new Error("Failed to upload updated PDF file to Cloudinary");
+      }
+      data.pdf_file = {
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id,
+      };
+    }
+
+    if (data.is_premium !== undefined) {
+      data.is_premium = data.is_premium === "true" || data.is_premium === true;
     }
 
     await book.update(data);
@@ -225,7 +267,13 @@ class BookService {
     return true;
   }
 
-  async searchBooks(query, activeOnly = true, page = 1, limit = 10) {
+  async searchBooks(
+    query,
+    activeOnly = true,
+    page = 1,
+    limit = 10,
+    status = "",
+  ) {
     const { Op } = (await import("sequelize")).default;
     const offset = (page - 1) * limit;
     const where = {
@@ -236,7 +284,12 @@ class BookService {
       ],
     };
 
-    if (activeOnly) where.is_active = true;
+    if (status) {
+      if (status === "active") where.is_active = true;
+      if (status === "inactive") where.is_active = false;
+    } else if (activeOnly) {
+      where.is_active = true;
+    }
 
     const { count, rows } = await Book.findAndCountAll({
       where,

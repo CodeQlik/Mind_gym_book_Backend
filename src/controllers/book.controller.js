@@ -15,7 +15,7 @@ export const createBook = async (req, res, next) => {
       );
     }
 
-    const book = await bookService.createBook(req.body, req.file);
+    const book = await bookService.createBook(req.body, req.files);
     return sendResponse(res, 201, true, "Book added successfully", book);
   } catch (error) {
     next(error);
@@ -26,9 +26,16 @@ export const getAllBooks = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
+    const status = req.query.status;
 
     const isAdminRequest = req.user && req.user.user_type === "admin";
-    const filters = isAdminRequest ? {} : { is_active: true };
+    let filters = isAdminRequest ? {} : { is_active: true };
+
+    if (status && isAdminRequest) {
+      if (status === "active") filters.is_active = true;
+      if (status === "inactive") filters.is_active = false;
+    }
+
     const result = await bookService.getBooks(filters, page, limit);
 
     if (result.books.length === 0) {
@@ -146,7 +153,7 @@ export const updateBook = async (req, res, next) => {
     const book = await bookService.updateBook(
       req.params.id,
       req.body,
-      req.file,
+      req.files,
     );
     return sendResponse(res, 200, true, "Book updated successfully", book);
   } catch (error) {
@@ -179,7 +186,7 @@ export const toggleBookStatus = async (req, res, next) => {
 };
 export const searchBooks = async (req, res, next) => {
   try {
-    const { q } = req.query;
+    const { q, status } = req.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
@@ -189,6 +196,7 @@ export const searchBooks = async (req, res, next) => {
       !isAdminRequest,
       page,
       limit,
+      status,
     );
 
     if (result.books.length === 0) {

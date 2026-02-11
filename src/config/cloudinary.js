@@ -10,24 +10,40 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const uploadOnCloudinary = async (localFilePath) => {
+const uploadOnCloudinary = async (localFilePath, folderName = "") => {
   try {
     if (!localFilePath || !fs.existsSync(localFilePath)) {
-      throw new Error("File not found at the specified path");
+      console.error("Upload Error: File not found at path:", localFilePath);
+      return null;
     }
+
+    const isPdf = localFilePath.toLowerCase().endsWith(".pdf");
+
+    const uploadFolder =
+      folderName || (isPdf ? "mindgymbook/pdfs" : "mindgymbook/images");
+
+    console.log(
+      `Uploading to Cloudinary: ${localFilePath} -> Folder: ${uploadFolder}`,
+    );
 
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
-      folder: "mindgymbook/images",
+      folder: uploadFolder,
+      use_filename: true,
+      unique_filename: true,
       access_mode: "public",
     });
 
-    console.log("file uploaded successfully", response.url);
-    fs.unlinkSync(localFilePath);
+    // Clean up local file
+    if (fs.existsSync(localFilePath)) {
+      fs.unlinkSync(localFilePath);
+    }
+
     return response;
   } catch (error) {
-    console.log(error);
-    if (fs.existsSync(localFilePath)) {
+    console.error("Cloudinary Upload Error detail:", error);
+    // Ensure cleanup on failure
+    if (localFilePath && fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
     return null;

@@ -37,7 +37,10 @@ router.post(
   "/add",
   verifyJWT,
   isAdmin,
-  upload.single("thumbnail"),
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "pdf_file", maxCount: 1 },
+  ]),
   bookValidation,
   createBook,
 );
@@ -45,7 +48,10 @@ router.put(
   "/update/:id",
   verifyJWT,
   isAdmin,
-  upload.single("thumbnail"),
+  upload.fields([
+    { name: "thumbnail", maxCount: 1 },
+    { name: "pdf_file", maxCount: 1 },
+  ]),
   updateBookValidation,
   updateBook,
 );

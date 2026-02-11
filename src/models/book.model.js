@@ -43,6 +43,14 @@ const Book = sequelize.define(
     thumbnail: {
       type: DataTypes.JSON,
       defaultValue: { url: "", public_id: "" },
+      get() {
+        const rawValue = this.getDataValue("thumbnail");
+        try {
+          return typeof rawValue === "string" ? JSON.parse(rawValue) : rawValue;
+        } catch (e) {
+          return rawValue;
+        }
+      },
     },
     category_id: {
       type: DataTypes.INTEGER,
@@ -61,6 +69,23 @@ const Book = sequelize.define(
     published_date: {
       type: DataTypes.DATEONLY,
       allowNull: true,
+    },
+    pdf_file: {
+      type: DataTypes.JSON,
+      defaultValue: { url: "", public_id: "" },
+      allowNull: true,
+      get() {
+        const rawValue = this.getDataValue("pdf_file");
+        try {
+          return typeof rawValue === "string" ? JSON.parse(rawValue) : rawValue;
+        } catch (e) {
+          return rawValue;
+        }
+      },
+    },
+    is_premium: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   {

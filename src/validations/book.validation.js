@@ -25,6 +25,11 @@ export const bookValidation = [
     .optional({ checkFalsy: true })
     .isDate()
     .withMessage("Published date must be a valid date"),
+  body("is_premium")
+    .optional()
+    .toBoolean()
+    .isBoolean()
+    .withMessage("is_premium must be a boolean"),
 ];
 
 export const updateBookValidation = [
@@ -62,4 +67,9 @@ export const updateBookValidation = [
     .optional({ checkFalsy: true })
     .isDate()
     .withMessage("Published date must be a valid date"),
+  body("is_premium")
+    .optional()
+    .toBoolean()
+    .isBoolean()
+    .withMessage("is_premium must be a boolean"),
 ];
