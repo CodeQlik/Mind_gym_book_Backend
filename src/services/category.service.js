@@ -150,6 +150,23 @@ class CategoryService {
     await category.save();
     return category;
   }
+
+  async searchCategories(query, activeOnly = true) {
+    const { Op } = (await import("sequelize")).default;
+    const where = {
+      [Op.or]: [
+        { name: { [Op.like]: `%${query}%` } },
+        { description: { [Op.like]: `%${query}%` } },
+      ],
+    };
+
+    if (activeOnly) where.is_active = true;
+
+    return await Category.findAll({
+      where,
+      order: [["name", "ASC"]],
+    });
+  }
 }
 
 export default new CategoryService();

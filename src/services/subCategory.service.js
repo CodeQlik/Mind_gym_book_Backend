@@ -59,7 +59,7 @@ class SubcategoryService {
     });
   }
 
-  async getSubCategoryById(id) {
+  async getSubCategoryById(id, activeOnly = true) {
     const subCategory = await SubCategory.findByPk(id, {
       include: [
         {
@@ -70,6 +70,11 @@ class SubcategoryService {
       ],
     });
     if (!subCategory) throw new Error("Subcategory not found");
+
+    if (activeOnly && !subCategory.is_active) {
+      throw new Error("Subcategory is currently inactive");
+    }
+
     return subCategory;
   }
 
@@ -119,9 +124,62 @@ class SubcategoryService {
 
   async getSubCategoriesByCategoryId(category_id, activeOnly = true) {
     const where = { category_id };
+    if (activeOnly) {
+      where.is_active = true;
+    }
+
+    return await SubCategory.findAll({
+      where,
+      order: [["name", "ASC"]],
+    });
+  }
+
+  async getSubCategoriesByCategorySlug(slug, activeOnly = true) {
+    const category = await Category.findOne({ where: { slug } });
+    if (!category) throw new Error("Category not found");
+
+    const where = { category_id: category.id };
+    if (activeOnly) {
+      where.is_active = true;
+    }
+
+    return await SubCategory.findAll({
+      where,
+      order: [["name", "ASC"]],
+    });
+  }
+
+  async toggleSubCategoryStatus(id) {
+    const subCategory = await SubCategory.findByPk(id);
+    if (!subCategory) throw new Error("Subcategory not found");
+
+    subCategory.is_active = !subCategory.is_active;
+    await subCategory.save();
+    return subCategory;
+  }
+
+  async searchSubCategories(query, activeOnly = true) {
+    const { Op } = (await import("sequelize")).default;
+    const where = {
+      [Op.or]: [
+        { name: { [Op.like]: `%${query}%` } },
+        { description: { [Op.like]: `%${query}%` } },
+      ],
+    };
+
     if (activeOnly) where.is_active = true;
 
-    return await SubCategory.findAll({ where });
+    return await SubCategory.findAll({
+      where,
+      include: [
+        {
+          model: Category,
+          as: "category",
+          attributes: ["id", "name", "slug"],
+        },
+      ],
+      order: [["name", "ASC"]],
+    });
   }
 }
 

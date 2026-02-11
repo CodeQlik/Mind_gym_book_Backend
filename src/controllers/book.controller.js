@@ -24,11 +24,22 @@ export const createBook = async (req, res, next) => {
 
 export const getAllBooks = async (req, res, next) => {
   try {
-    const books = await bookService.getBooks({ is_active: true });
-    if (books.length === 0) {
-      return sendResponse(res, 200, true, "No books found", []);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const isAdminRequest = req.user && req.user.user_type === "admin";
+    const filters = isAdminRequest ? {} : { is_active: true };
+    const result = await bookService.getBooks(filters, page, limit);
+
+    if (result.books.length === 0) {
+      return sendResponse(res, 200, true, "No books found", {
+        books: [],
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: page,
+      });
     }
-    return sendResponse(res, 200, true, "Books fetched successfully", books);
+    return sendResponse(res, 200, true, "Books fetched successfully", result);
   } catch (error) {
     next(error);
   }
@@ -37,16 +48,25 @@ export const getAllBooks = async (req, res, next) => {
 // Admin: All books including inactive
 export const getAdminBooks = async (req, res, next) => {
   try {
-    const books = await bookService.getBooks();
-    if (books.length === 0) {
-      return sendResponse(res, 200, true, "No books found in inventory", []);
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const result = await bookService.getBooks({}, page, limit);
+
+    if (result.books.length === 0) {
+      return sendResponse(res, 200, true, "No books found in inventory", {
+        books: [],
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: page,
+      });
     }
     return sendResponse(
       res,
       200,
       true,
       "Admin books fetched successfully",
-      books,
+      result,
     );
   } catch (error) {
     next(error);
@@ -79,26 +99,31 @@ export const getBookBySlug = async (req, res, next) => {
 
 export const getBooksByCategory = async (req, res, next) => {
   try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
     const isAdminRequest = req.user && req.user.user_type === "admin";
-    const books = await bookService.getBooksByCategoryId(
+
+    const result = await bookService.getBooksByCategoryId(
       req.params.categoryId,
       !isAdminRequest,
+      page,
+      limit,
     );
-    if (books.length === 0) {
-      return sendResponse(
-        res,
-        200,
-        true,
-        "No books found for this category",
-        [],
-      );
+
+    if (result.books.length === 0) {
+      return sendResponse(res, 200, true, "No books found for this category", {
+        books: [],
+        totalItems: 0,
+        totalPages: 0,
+        currentPage: page,
+      });
     }
     return sendResponse(
       res,
       200,
       true,
       "Category books fetched successfully",
-      books,
+      result,
     );
   } catch (error) {
     next(error);
@@ -148,6 +173,39 @@ export const toggleBookStatus = async (req, res, next) => {
       `Book ${book.is_active ? "activated" : "deactivated"} successfully`,
       book,
     );
+  } catch (error) {
+    next(error);
+  }
+};
+export const searchBooks = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+
+    const isAdminRequest = req.user && req.user.user_type === "admin";
+    const result = await bookService.searchBooks(
+      q,
+      !isAdminRequest,
+      page,
+      limit,
+    );
+
+    if (result.books.length === 0) {
+      return sendResponse(
+        res,
+        200,
+        true,
+        "No books found matches your search",
+        {
+          books: [],
+          totalItems: 0,
+          totalPages: 0,
+          currentPage: page,
+        },
+      );
+    }
+    return sendResponse(res, 200, true, "Search results fetched", result);
   } catch (error) {
     next(error);
   }

@@ -26,6 +26,7 @@ class BookService {
       category_id,
       subcategory_id,
       is_active,
+      published_date,
     } = data;
 
     const category = await Category.findByPk(category_id);
@@ -68,40 +69,63 @@ class BookService {
       category_id,
       subcategory_id: subcategory_id || null,
       is_active: is_active !== undefined ? is_active : true,
+      published_date: published_date || null,
     });
   }
 
-  async getBooks(filters = {}) {
-    return await Book.findAll({
+  async getBooks(filters = {}, page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    const { count, rows } = await Book.findAndCountAll({
       where: filters,
       include: [
         { model: Category, as: "category", attributes: ["name", "slug"] },
         { model: SubCategory, as: "subcategory", attributes: ["name", "slug"] },
       ],
+      offset,
+      limit,
       order: [["createdAt", "DESC"]],
     });
+
+    return {
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      books: rows,
+    };
   }
 
-  async getBooksByCategoryId(category_id, activeOnly = true) {
+  async getBooksByCategoryId(
+    category_id,
+    activeOnly = true,
+    page = 1,
+    limit = 10,
+  ) {
+    const offset = (page - 1) * limit;
     const where = { category_id };
     if (activeOnly) where.is_active = true;
 
-    return await Book.findAll({
+    const { count, rows } = await Book.findAndCountAll({
       where,
       include: [
         { model: Category, as: "category", attributes: ["name", "slug"] },
         { model: SubCategory, as: "subcategory", attributes: ["name", "slug"] },
       ],
+      offset,
+      limit,
       order: [["createdAt", "DESC"]],
     });
+
+    return {
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      books: rows,
+    };
   }
 
   async getBookBySlug(slug, activeOnly = true) {
-    const where = { slug };
-    if (activeOnly) where.is_active = true;
-
     const book = await Book.findOne({
-      where,
+      where: { slug },
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
         {
@@ -111,19 +135,18 @@ class BookService {
         },
       ],
     });
-    if (!book)
-      throw new Error(
-        activeOnly ? "Book not found or inactive" : "Book not found",
-      );
+
+    if (!book) throw new Error("Book not found");
+
+    if (activeOnly && !book.is_active) {
+      throw new Error("Book is currently inactive");
+    }
+
     return book;
   }
 
   async getBookById(id, activeOnly = true) {
-    const where = { id };
-    if (activeOnly) where.is_active = true;
-
-    const book = await Book.findOne({
-      where,
+    const book = await Book.findByPk(id, {
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
         {
@@ -133,7 +156,13 @@ class BookService {
         },
       ],
     });
-    if (!book) throw new Error("Book not found or inactive");
+
+    if (!book) throw new Error("Book not found");
+
+    if (activeOnly && !book.is_active) {
+      throw new Error("Book is currently inactive");
+    }
+
     return book;
   }
 
@@ -194,6 +223,38 @@ class BookService {
 
     await book.destroy();
     return true;
+  }
+
+  async searchBooks(query, activeOnly = true, page = 1, limit = 10) {
+    const { Op } = (await import("sequelize")).default;
+    const offset = (page - 1) * limit;
+    const where = {
+      [Op.or]: [
+        { title: { [Op.like]: `%${query}%` } },
+        { author: { [Op.like]: `%${query}%` } },
+        { description: { [Op.like]: `%${query}%` } },
+      ],
+    };
+
+    if (activeOnly) where.is_active = true;
+
+    const { count, rows } = await Book.findAndCountAll({
+      where,
+      include: [
+        { model: Category, as: "category", attributes: ["name", "slug"] },
+        { model: SubCategory, as: "subcategory", attributes: ["name", "slug"] },
+      ],
+      offset,
+      limit,
+      order: [["createdAt", "DESC"]],
+    });
+
+    return {
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      books: rows,
+    };
   }
 }
 

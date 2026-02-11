@@ -31,7 +31,9 @@ export const createCategory = async (req, res, next) => {
 // Public categories (Only active)
 export const getCategories = async (req, res, next) => {
   try {
-    const categories = await categoryService.getCategories(true);
+    const isAdminRequest = req.user && req.user.user_type === "admin";
+    const categories = await categoryService.getCategories(!isAdminRequest);
+
     if (categories.length === 0) {
       return sendResponse(res, 200, true, "No categories found", []);
     }
@@ -153,6 +155,20 @@ export const toggleCategoryStatus = async (req, res, next) => {
       `Category ${category.is_active ? "activated" : "deactivated"} successfully`,
       category,
     );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchCategories = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    const isAdminRequest = req.user && req.user.user_type === "admin";
+    const categories = await categoryService.searchCategories(
+      q,
+      !isAdminRequest,
+    );
+    return sendResponse(res, 200, true, "Search results fetched", categories);
   } catch (error) {
     next(error);
   }

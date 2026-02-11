@@ -12,6 +12,10 @@ import {
   verifyEmail,
   sendOTP,
   getAllUsers,
+  updateUser,
+  getUserById,
+  deleteUser,
+  searchUsers,
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -69,5 +73,16 @@ router.delete(
 
 // Admin Only Routes (Admin Panel)
 router.get("/all-users", verifyJWT, isAdmin, getAllUsers);
+router.get("/search", verifyJWT, isAdmin, searchUsers);
+router.get("/:id", verifyJWT, isAdmin, getUserById);
+router.put(
+  "/update/:id",
+  verifyJWT,
+  isAdmin,
+  upload.fields([{ name: "profile_image", maxCount: 1 }]),
+  updateProfileValidation,
+  updateUser,
+);
+router.delete("/delete/:id", verifyJWT, isAdmin, deleteUser);
 
 export default router;

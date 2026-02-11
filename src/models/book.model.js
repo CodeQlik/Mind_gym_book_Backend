@@ -33,7 +33,7 @@ const Book = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
     },
     condition: {
-      type: DataTypes.ENUM("new", "like_new", "good", "acceptable"),
+      type: DataTypes.ENUM("new", "fair", "good", "acceptable"),
       defaultValue: "good",
     },
     stock: {
@@ -57,6 +57,10 @@ const Book = sequelize.define(
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
+    },
+    published_date: {
+      type: DataTypes.DATEONLY,
+      allowNull: true,
     },
   },
   {

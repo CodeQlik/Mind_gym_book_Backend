@@ -34,7 +34,7 @@ export const createSubCategory = async (req, res, next) => {
 
 export const getSubCategories = async (req, res, next) => {
   try {
-    const isAdminRequest = req.user && req.user.role === "admin";
+    const isAdminRequest = req.user && req.user.user_type === "admin";
     const subCategories =
       await subcategoryService.getSubCategories(!isAdminRequest);
     return sendResponse(
@@ -51,8 +51,10 @@ export const getSubCategories = async (req, res, next) => {
 
 export const getSubCategoryById = async (req, res, next) => {
   try {
+    const isAdminRequest = req.user && req.user.user_type === "admin";
     const subCategory = await subcategoryService.getSubCategoryById(
       req.params.id,
+      !isAdminRequest,
     );
     return sendResponse(
       res,
@@ -107,14 +109,99 @@ export const deleteSubCategory = async (req, res, next) => {
 
 export const getSubCategoriesByCategoryId = async (req, res, next) => {
   try {
+    const { categoryId } = req.params;
+    const isAdminRequest = req.user && req.user.user_type === "admin";
+
     const subCategories = await subcategoryService.getSubCategoriesByCategoryId(
-      req.params.categoryId,
+      categoryId,
+      !isAdminRequest,
+    );
+
+    if (!subCategories || subCategories.length === 0) {
+      return sendResponse(
+        res,
+        200,
+        true,
+        "Is category ke liye koi subcategories nahi mili!",
+        [],
+      );
+    }
+
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Subcategories successfully fetch ho gayi!",
+      subCategories,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const getSubCategoriesByCategorySlug = async (req, res, next) => {
+  try {
+    const { slug } = req.params;
+    const isAdminRequest = req.user && req.user.user_type === "admin";
+
+    const subCategories =
+      await subcategoryService.getSubCategoriesByCategorySlug(
+        slug,
+        !isAdminRequest,
+      );
+
+    if (!subCategories || subCategories.length === 0) {
+      return sendResponse(
+        res,
+        200,
+        true,
+        "Is category ke liye koi subcategories nahi mili!",
+        [],
+      );
+    }
+
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Subcategories successfully fetch ho gayi!",
+      subCategories,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const toggleSubCategoryStatus = async (req, res, next) => {
+  try {
+    const subCategory = await subcategoryService.toggleSubCategoryStatus(
+      req.params.id,
     );
     return sendResponse(
       res,
       200,
       true,
-      "Subcategories fetched for category",
+      `Subcategory ${subCategory.is_active ? "activated" : "deactivated"} successfully`,
+      subCategory,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const searchSubCategories = async (req, res, next) => {
+  try {
+    const { q } = req.query;
+    const isAdminRequest = req.user && req.user.user_type === "admin";
+    const subCategories = await subcategoryService.searchSubCategories(
+      q,
+      !isAdminRequest,
+    );
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Search results fetched",
       subCategories,
     );
   } catch (error) {

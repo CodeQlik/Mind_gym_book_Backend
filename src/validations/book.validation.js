@@ -19,8 +19,12 @@ export const bookValidation = [
     .withMessage("Stock must be a non-negative integer"),
   body("condition")
     .optional()
-    .isIn(["new", "like_new", "good", "acceptable"])
+    .isIn(["new", "fair", "good", "acceptable"])
     .withMessage("Invalid book condition"),
+  body("published_date")
+    .optional({ checkFalsy: true })
+    .isDate()
+    .withMessage("Published date must be a valid date"),
 ];
 
 export const updateBookValidation = [
@@ -52,6 +56,10 @@ export const updateBookValidation = [
     .withMessage("Stock must be a non-negative integer"),
   body("condition")
     .optional()
-    .isIn(["new", "like_new", "good", "acceptable"])
+    .isIn(["new", "fair", "good", "acceptable"])
     .withMessage("Invalid book condition"),
+  body("published_date")
+    .optional({ checkFalsy: true })
+    .isDate()
+    .withMessage("Published date must be a valid date"),
 ];

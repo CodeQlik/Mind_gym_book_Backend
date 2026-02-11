@@ -6,8 +6,14 @@ import {
   deleteSubCategory,
   getSubCategoryById,
   getSubCategoriesByCategoryId,
+  getSubCategoriesByCategorySlug,
+  toggleSubCategoryStatus,
+  searchSubCategories,
 } from "../controllers/subCategory.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import {
+  verifyJWT,
+  optionalVerifyJWT,
+} from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -18,9 +24,19 @@ import {
 const router = express.Router();
 
 // Public Routes (Website)
-router.get("/all", getSubCategories);
-router.get("/:id", getSubCategoryById);
-router.get("/category/:categoryId", getSubCategoriesByCategoryId);
+router.get("/all", optionalVerifyJWT, getSubCategories);
+router.get("/search", optionalVerifyJWT, searchSubCategories);
+router.get("/:id(\\d+)", optionalVerifyJWT, getSubCategoryById);
+router.get(
+  "/category/:categoryId",
+  optionalVerifyJWT,
+  getSubCategoriesByCategoryId,
+);
+router.get(
+  "/category/slug/:slug",
+  optionalVerifyJWT,
+  getSubCategoriesByCategorySlug,
+);
 
 // Admin Only Routes (Admin Panel)
 router.post(
@@ -41,5 +57,6 @@ router.put(
   updateSubCategory,
 );
 router.delete("/delete/:id", verifyJWT, isAdmin, deleteSubCategory);
+router.patch("/toggle-status/:id", verifyJWT, isAdmin, toggleSubCategoryStatus);
 
 export default router;
