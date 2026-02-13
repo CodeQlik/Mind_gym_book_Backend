@@ -87,6 +87,18 @@ const Book = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    isbn: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    language: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    audio_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     timestamps: true,

@@ -56,6 +56,18 @@ const User = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
+    subscription_status: {
+      type: DataTypes.ENUM("active", "inactive", "expired"),
+      defaultValue: "inactive",
+    },
+    subscription_plan: {
+      type: DataTypes.ENUM("free", "premium", "gold"),
+      defaultValue: "free",
+    },
+    subscription_end_date: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
   },
   {
     timestamps: true,

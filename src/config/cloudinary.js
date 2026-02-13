@@ -22,10 +22,6 @@ const uploadOnCloudinary = async (localFilePath, folderName = "") => {
     const uploadFolder =
       folderName || (isPdf ? "mindgymbook/pdfs" : "mindgymbook/images");
 
-    console.log(
-      `Uploading to Cloudinary: ${localFilePath} -> Folder: ${uploadFolder}`,
-    );
-
     const response = await cloudinary.uploader.upload(localFilePath, {
       resource_type: "auto",
       folder: uploadFolder,

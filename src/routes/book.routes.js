@@ -10,6 +10,8 @@ import {
   getBooksByCategory,
   getBookBySlug,
   searchBooks,
+  readBookPdf,
+  streamBookPdf,
 } from "../controllers/book.controller.js";
 import {
   bookValidation,
@@ -30,6 +32,8 @@ router.get("/search", optionalVerifyJWT, searchBooks);
 router.get("/category/:categoryId", optionalVerifyJWT, getBooksByCategory);
 router.get("/:id(\\d+)", optionalVerifyJWT, getBookById);
 router.get("/:slug", optionalVerifyJWT, getBookBySlug);
+router.get("/read-pdf/:id", verifyJWT, readBookPdf);
+router.get("/stream/:id", verifyJWT, streamBookPdf);
 
 // Admin only routes
 router.get("/admin/all", verifyJWT, isAdmin, getAdminBooks);

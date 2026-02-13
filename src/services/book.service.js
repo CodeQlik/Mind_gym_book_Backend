@@ -1,4 +1,5 @@
-import { Book, Category, SubCategory } from "../models/index.js";
+import { Book, Category, SubCategory, BookPdfChunk } from "../models/index.js";
+import fs from "fs";
 import {
   uploadOnCloudinary,
   deleteFromCloudinary,
@@ -15,7 +16,6 @@ class BookService {
   }
 
   async createBook(data, files) {
-    console.log("Files received in createBook:", Object.keys(files || {}));
     const {
       title,
       description,
@@ -29,6 +29,9 @@ class BookService {
       is_active,
       published_date,
       is_premium,
+      isbn,
+      language,
+      audio_url,
     } = data;
 
     const category = await Category.findByPk(category_id);
@@ -45,7 +48,7 @@ class BookService {
       throw new Error("Book title already exists (slug conflict)");
 
     let thumbnailData = { url: "", public_id: "" };
-    if (files?.thumbnail?.[0]) {
+    if (files && files.thumbnail && files.thumbnail.length > 0) {
       const uploadResult = await uploadOnCloudinary(
         files.thumbnail[0].path,
         "mindgymbook/books/thumbnails",
@@ -59,22 +62,13 @@ class BookService {
       };
     }
 
-    let pdfFileData = { url: "", public_id: "" };
-    if (files?.pdf_file?.[0]) {
-      const uploadResult = await uploadOnCloudinary(
-        files.pdf_file[0].path,
-        "mindgymbook/books/pdfs",
-      );
-      if (!uploadResult) {
-        throw new Error("Failed to upload PDF file to Cloudinary");
-      }
-      pdfFileData = {
-        url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
-      };
+    let pdfFileData = { url: "", public_id: "", is_chunked: false };
+    if (files && files.pdf_file && files.pdf_file.length > 0) {
+      // Store in DB chunks instead of Cloudinary
+      pdfFileData = { is_chunked: true };
     }
 
-    return await Book.create({
+    const bookData = {
       title,
       slug,
       author,
@@ -90,7 +84,23 @@ class BookService {
       is_active: is_active !== undefined ? is_active : true,
       published_date: published_date || null,
       is_premium: is_premium === "true" || is_premium === true,
-    });
+      isbn: isbn || null,
+      language: language || null,
+      audio_url: audio_url || null,
+    };
+
+    const createdBook = await Book.create(bookData);
+
+    if (
+      files &&
+      files.pdf_file &&
+      files.pdf_file.length > 0 &&
+      pdfFileData.is_chunked
+    ) {
+      await this.savePdfChunks(createdBook.id, files.pdf_file[0].path);
+    }
+
+    return createdBook;
   }
 
   async getBooks(filters = {}, page = 1, limit = 10) {
@@ -231,24 +241,33 @@ class BookService {
     }
 
     if (files?.pdf_file?.[0]) {
+      // Cleaning up old chunks if they exist
+      await BookPdfChunk.destroy({ where: { book_id: id } });
+
       if (book.pdf_file?.public_id) {
         await deleteFromCloudinary(book.pdf_file.public_id);
       }
-      const uploadResult = await uploadOnCloudinary(
-        files.pdf_file[0].path,
-        "mindgymbook/books/pdfs",
-      );
-      if (!uploadResult) {
-        throw new Error("Failed to upload updated PDF file to Cloudinary");
-      }
+
+      // Save chunks to DB
+      await this.savePdfChunks(id, files.pdf_file[0].path);
+
       data.pdf_file = {
-        url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
+        is_chunked: true,
+        url: "",
+        public_id: "",
       };
     }
 
     if (data.is_premium !== undefined) {
       data.is_premium = data.is_premium === "true" || data.is_premium === true;
+    }
+
+    if (data.isbn !== undefined) {
+      book.isbn = data.isbn;
+    }
+
+    if (data.language !== undefined) {
+      book.language = data.language;
     }
 
     await book.update(data);
@@ -267,6 +286,30 @@ class BookService {
     return true;
   }
 
+  async savePdfChunks(bookId, filePath) {
+    const CHUNK_SIZE = 64 * 1024; // 64KB chunks
+    const fileBuffer = fs.readFileSync(filePath);
+    const totalChunks = Math.ceil(fileBuffer.length / CHUNK_SIZE);
+
+    const chunks = [];
+    for (let i = 0; i < totalChunks; i++) {
+      const start = i * CHUNK_SIZE;
+      const end = Math.min(start + CHUNK_SIZE, fileBuffer.length);
+      const chunkData = fileBuffer.subarray(start, end);
+
+      chunks.push({
+        book_id: bookId,
+        chunk_index: i,
+        data: chunkData,
+      });
+    }
+
+    // Bulk insert for better performance
+    await BookPdfChunk.bulkCreate(chunks);
+
+    // Clean up temp file - optional if multer cleans up, but safe to do here if not needed
+  }
+
   async searchBooks(
     query,
     activeOnly = true,
@@ -281,6 +324,7 @@ class BookService {
         { title: { [Op.like]: `%${query}%` } },
         { author: { [Op.like]: `%${query}%` } },
         { description: { [Op.like]: `%${query}%` } },
+        { isbn: { [Op.like]: `%${query}%` } },
       ],
     };
 

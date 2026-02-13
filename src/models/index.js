@@ -5,6 +5,9 @@ import SubCategory from "./subCategory.model.js";
 import Book from "./book.model.js";
 import Cart from "./cart.model.js";
 import Wishlist from "./wishlist.model.js";
+import Payment from "./payment.model.js";
+import UserAnnotation from "./annotation.model.js";
+import BookPdfChunk from "./bookPdfChunk.model.js";
 
 // Associations
 Category.hasMany(SubCategory, {
@@ -36,4 +39,29 @@ Wishlist.belongsTo(User, { foreignKey: "user_id", as: "user" });
 Book.hasMany(Wishlist, { foreignKey: "book_id", as: "wishlisted_by" });
 Wishlist.belongsTo(Book, { foreignKey: "book_id", as: "book" });
 
-export { User, Address, Category, SubCategory, Book, Cart, Wishlist };
+// Payment Associations
+User.hasMany(Payment, { foreignKey: "user_id", as: "payments" });
+Payment.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
+// Annotation Associations
+User.hasMany(UserAnnotation, { foreignKey: "user_id", as: "annotations" });
+UserAnnotation.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
+Book.hasMany(UserAnnotation, { foreignKey: "book_id", as: "annotations" });
+UserAnnotation.belongsTo(Book, { foreignKey: "book_id", as: "book" });
+
+Book.hasMany(BookPdfChunk, { foreignKey: "book_id", as: "pdf_chunks" });
+BookPdfChunk.belongsTo(Book, { foreignKey: "book_id", as: "book" });
+
+export {
+  User,
+  Address,
+  Category,
+  SubCategory,
+  Book,
+  Cart,
+  Wishlist,
+  Payment,
+  UserAnnotation,
+  BookPdfChunk,
+};

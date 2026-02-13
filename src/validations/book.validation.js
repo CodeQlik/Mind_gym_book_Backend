@@ -30,6 +30,9 @@ export const bookValidation = [
     .toBoolean()
     .isBoolean()
     .withMessage("is_premium must be a boolean"),
+  body("isbn").optional().trim(),
+  body("language").optional().trim(),
+  body("audio_url").optional().isURL().withMessage("Invalid audio URL").trim(),
 ];
 
 export const updateBookValidation = [
@@ -72,4 +75,7 @@ export const updateBookValidation = [
     .toBoolean()
     .isBoolean()
     .withMessage("is_premium must be a boolean"),
+  body("isbn").optional().trim(),
+  body("language").optional().trim(),
+  body("audio_url").optional().isURL().withMessage("Invalid audio URL").trim(),
 ];
