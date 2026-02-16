@@ -1,197 +1,173 @@
-import { Category } from '../models/index.js';
-import { uploadOnCloudinary, deleteFromCloudinary } from '../config/cloudinary.js';
+import { Category } from "../models/index.js";
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../config/cloudinary.js";
 
 class CategoryService {
-    generateSlug(name) {
-        return name
-            .toLowerCase()
-            .trim()
-            .replace(/[^\w\s-]/g, '') // Remove special characters
-            .replace(/[\s_-]+/g, '-')  // Replace spaces/underscores with -
-            .replace(/^-+|-+$/g, '');   // Trim - from ends
+  generateSlug(name) {
+    return name
+      .toLowerCase()
+      .trim()
+      .replace(/[^\w\s-]/g, "")
+      .replace(/[\s_-]+/g, "-")
+      .replace(/^-+|-+$/g, "");
+  }
+
+  async createCategory(data, file) {
+    const { name, description } = data;
+    const slug = this.generateSlug(name);
+
+    const existingCategory = await Category.findOne({ where: { slug } });
+    if (existingCategory) {
+      throw new Error("Category with this name already exists");
     }
 
-    async createCategory(data, file) {
-        const { name, description, parent_id } = data;
-        const slug = this.generateSlug(name);
+    let imageData = { url: "", public_id: "" };
 
-        const existingCategory = await Category.findOne({ where: { slug } });
-        if (existingCategory) {
-            throw new Error("Category with this name already exists");
+    // Check if file exists and has a path (from Multer)
+    if (file && file.path) {
+      try {
+        const uploadResult = await uploadOnCloudinary(file.path);
+
+        if (uploadResult && uploadResult.secure_url) {
+          imageData = {
+            url: uploadResult.secure_url,
+            public_id: uploadResult.public_id,
+          };
+        } else {
+          console.error(
+            "Cloudinary upload failed or returned invalid response",
+          );
         }
-
-        let imageData = { url: "", public_id: "" };
-        if (file) {
-            const uploadResult = await uploadOnCloudinary(file.path, 'categories');
-            if (uploadResult) {
-                imageData = {
-                    url: uploadResult.secure_url,
-                    public_id: uploadResult.public_id
-                };
-            }
-        }
-
-        return await Category.create({
-            name,
-            description,
-            slug,
-            image: imageData,
-            parent_id: parent_id || null
-        });
+      } catch (uploadError) {
+        console.error("Error during Cloudinary process:", uploadError.message);
+      }
+    } else {
+      console.warn(
+        "No valid file path found in request. Check field name 'image'.",
+      );
     }
 
-    async updateCategory(id, data, file) {
-        const category = await Category.findByPk(id);
-        if (!category) throw new Error("Category not found");
+    return await Category.create({
+      name,
+      description,
+      slug,
+      image: imageData,
+    });
+  }
 
-        const { name, description, parent_id, is_active } = data;
-        const updateData = {};
+  async updateCategory(id, data, file) {
+    const category = await Category.findByPk(id);
+    if (!category) throw new Error("Category not found");
 
-        if (name) {
-            updateData.name = name;
-            updateData.slug = this.generateSlug(name);
-        }
-        if (description !== undefined) updateData.description = description;
-        if (parent_id !== undefined) updateData.parent_id = parent_id || null;
-        if (is_active !== undefined) updateData.is_active = is_active;
+    const { name, description, is_active } = data;
+    const updateData = {};
 
-        if (file) {
-            // Delete old image if it exists
-            if (category.image && category.image.public_id) {
-                await deleteFromCloudinary(category.image.public_id);
-            }
-            // Upload new image
-            const uploadResult = await uploadOnCloudinary(file.path, 'categories');
-            if (uploadResult) {
-                updateData.image = {
-                    url: uploadResult.secure_url,
-                    public_id: uploadResult.public_id
-                };
-            }
-        }
+    if (name) {
+      updateData.name = name;
+      updateData.slug = this.generateSlug(name);
+    }
+    if (description !== undefined) updateData.description = description;
+    if (is_active !== undefined) updateData.is_active = is_active;
 
-        await category.update(updateData);
-        return category;
+    if (file) {
+      // Delete old image if it exists
+      if (category.image && category.image.public_id) {
+        await deleteFromCloudinary(category.image.public_id);
+      }
+      // Upload new image
+      const uploadResult = await uploadOnCloudinary(file.path, "categories");
+      if (uploadResult) {
+        updateData.image = {
+          url: uploadResult.secure_url,
+          public_id: uploadResult.public_id,
+        };
+      }
     }
 
-    async deleteCategory(id) {
-        const category = await Category.findByPk(id);
-        if (!category) throw new Error("Category not found");
+    await category.update(updateData);
+    return category;
+  }
 
-        // Delete from Cloudinary
-        if (category.image && category.image.public_id) {
-            await deleteFromCloudinary(category.image.public_id);
-        }
+  async deleteCategory(id) {
+    const category = await Category.findByPk(id);
+    if (!category) throw new Error("Category not found");
 
-        await category.destroy();
-        return true;
+    // Delete from Cloudinary
+    if (category.image && category.image.public_id) {
+      await deleteFromCloudinary(category.image.public_id);
     }
 
-    async getCategories(activeOnly = true) {
-        const where = { parent_id: null };
-        if (activeOnly) where.is_active = true;
+    await category.destroy();
+    return true;
+  }
 
-        const include = [
-            {
-                model: Category,
-                as: 'children',
-                required: false,
-                include: [
-                    {
-                        model: Category,
-                        as: 'children',
-                        required: false
-                    }
-                ]
-            }
-        ];
+  async getCategories(activeOnly = true) {
+    const where = {};
+    if (activeOnly) where.is_active = true;
 
-        if (activeOnly) {
-            include[0].where = { is_active: true };
-            include[0].include[0].where = { is_active: true };
-        }
+    return await Category.findAll({
+      where,
+      order: [["createdAt", "DESC"]],
+    });
+  }
 
-        return await Category.findAll({
-            where,
-            include
-        });
-    }
+  async getCategoryById(id, activeOnly = true) {
+    const where = { id };
+    if (activeOnly) where.is_active = true;
 
-    async getCategoryById(id, activeOnly = true) {
-        const where = { id };
-        if (activeOnly) where.is_active = true;
+    const category = await Category.findOne({
+      where,
+    });
 
-        const include = [
-            {
-                model: Category,
-                as: 'children',
-                required: false
-            }
-        ];
+    if (!category)
+      throw new Error(
+        activeOnly ? "Category not found or inactive" : "Category not found",
+      );
+    return category;
+  }
 
-        if (activeOnly) {
-            include[0].where = { is_active: true };
-        }
+  async getCategoryBySlug(slug, activeOnly = true) {
+    const where = { slug };
+    if (activeOnly) where.is_active = true;
 
-        const category = await Category.findOne({
-            where,
-            include
-        });
+    const category = await Category.findOne({
+      where,
+    });
 
-        if (!category) throw new Error(activeOnly ? "Category not found or inactive" : "Category not found");
-        return category;
-    }
+    if (!category)
+      throw new Error(
+        activeOnly ? "Category not found or inactive" : "Category not found",
+      );
+    return category;
+  }
 
-    async getCategoriesByParentId(parent_id, activeOnly = true) {
-        const where = { parent_id: parent_id || null };
-        if (activeOnly) where.is_active = true;
+  async toggleCategoryStatus(id) {
+    const category = await Category.findByPk(id);
+    if (!category) throw new Error("Category not found");
 
-        return await Category.findAll({
-            where
-        });
-    }
+    category.is_active = !category.is_active;
+    await category.save();
+    return category;
+  }
 
-    async getCategoryBySlug(slug, activeOnly = true) {
-        const where = { slug };
-        if (activeOnly) where.is_active = true;
+  async searchCategories(query, activeOnly = true) {
+    const { Op } = (await import("sequelize")).default;
+    const where = {
+      [Op.or]: [
+        { name: { [Op.like]: `%${query}%` } },
+        { description: { [Op.like]: `%${query}%` } },
+      ],
+    };
 
-        const include = [
-            {
-                model: Category,
-                as: 'children',
-                required: false,
-                include: [
-                    {
-                        model: Category,
-                        as: 'children',
-                        required: false
-                    }
-                ]
-            }
-        ];
+    if (activeOnly) where.is_active = true;
 
-        if (activeOnly) {
-            include[0].where = { is_active: true };
-            include[0].include[0].where = { is_active: true };
-        }
-
-        const category = await Category.findOne({
-            where,
-            include
-        });
-
-        if (!category) throw new Error(activeOnly ? "Category not found or inactive" : "Category not found");
-        return category;
-    }
-
-    async toggleCategoryStatus(id) {
-        const category = await Category.findByPk(id);
-        if (!category) throw new Error("Category not found");
-
-        category.is_active = !category.is_active;
-        await category.save();
-        return category;
-    }
+    return await Category.findAll({
+      where,
+      order: [["createdAt", "DESC"]],
+    });
+  }
 }
 
 export default new CategoryService();
