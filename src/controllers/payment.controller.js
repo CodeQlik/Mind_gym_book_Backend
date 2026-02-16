@@ -14,9 +14,12 @@ export const createOrder = async (req, res, next) => {
 
 export const createBookOrder = async (req, res, next) => {
   try {
-    const { amount } = req.body;
+    const { amount, book_id } = req.body;
+    if (!book_id) {
+      return sendResponse(res, 400, false, "book_id is required");
+    }
     const userId = req.user.id;
-    const order = await paymentService.createBookOrder(userId, amount);
+    const order = await paymentService.createBookOrder(userId, amount, book_id);
     return sendResponse(
       res,
       201,

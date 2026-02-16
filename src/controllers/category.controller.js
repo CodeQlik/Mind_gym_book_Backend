@@ -1,20 +1,8 @@
 import categoryService from "../services/category.service.js";
 import sendResponse from "../utils/responseHandler.js";
-import { validationResult } from "express-validator";
 
 export const createCategory = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const category = await categoryService.createCategory(req.body, req.file);
     return sendResponse(
       res,
@@ -89,17 +77,6 @@ export const getCategoryById = async (req, res, next) => {
 
 export const updateCategory = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const category = await categoryService.updateCategory(
       req.params.id,
       req.body,

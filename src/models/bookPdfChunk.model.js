@@ -22,8 +22,13 @@ const BookPdfChunk = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: false,
     },
+    page_number: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      comment: "Effective page number this chunk belongs to (approximate)",
+    },
     data: {
-      type: DataTypes.BLOB("long"), // Use LONGBLOB for large chunks
+      type: DataTypes.BLOB("long"),
       allowNull: false,
     },
   },

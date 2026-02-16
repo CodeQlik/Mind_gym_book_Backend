@@ -1,25 +1,18 @@
 import bookService from "../services/book.service.js";
 import sendResponse from "../utils/responseHandler.js";
-import { validationResult } from "express-validator";
-import { User, Book, BookPdfChunk } from "../models/index.js";
-import fs from "fs";
+
+import {
+  User,
+  Book,
+  BookPdfChunk,
+  BookPage,
+  Subscription,
+  UserBook,
+} from "../models/index.js";
+import { Op } from "sequelize";
 
 export const createBook = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
-    console.log("Create Book - Content-Type:", req.headers["content-type"]);
-    console.log("Create Book - Body:", req.body);
-    console.log("Create Book - Files:", req.files);
     const book = await bookService.createBook(req.body, req.files);
     return sendResponse(res, 201, true, "Book added successfully", book);
   } catch (error) {
@@ -144,17 +137,6 @@ export const getBooksByCategory = async (req, res, next) => {
 
 export const updateBook = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const book = await bookService.updateBook(
       req.params.id,
       req.body,
@@ -224,42 +206,87 @@ export const searchBooks = async (req, res, next) => {
   }
 };
 
-// Stream PDF endpoint
-export const streamBookPdf = async (req, res, next) => {
+export const getBookPageContent = async (req, res) => {
+  try {
+    const { id, pageNumber } = req.params;
+
+    const page = await BookPage.findOne({
+      where: { book_id: id, page_number: pageNumber },
+    });
+
+    if (!page) {
+      return res
+        .status(404)
+        .json({ success: false, message: "Page not found" });
+    }
+
+    const totalPages = await BookPage.count({
+      where: { book_id: id },
+    });
+
+    res.status(200).json({
+      success: true,
+      data: page,
+      totalPages: totalPages,
+    });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
+};
+export const readBookPdf = async (req, res, next) => {
   try {
     const { id } = req.params;
+    const userId = req.user.id;
+    const userType = req.user.user_type;
 
-    // Fetch book
     const book = await Book.findByPk(id);
     if (!book) return res.status(404).send("Book not found");
 
-    // Check premium/subscription
-    if (book.is_premium) {
-      const user = await User.findByPk(req.user.id);
-      const now = new Date();
-      const isSubscriptionActive =
-        user.subscription_status === "active" &&
-        (!user.subscription_end_date || user.subscription_end_date >= now);
+    let pageLimit = null;
 
-      if (!isSubscriptionActive) {
-        return res.status(403).send("Subscription required");
+    if (userType === "admin") {
+      pageLimit = null;
+    } else if (book.is_premium) {
+      // Check individual book purchase
+      const purchase = await UserBook.findOne({
+        where: { user_id: userId, book_id: id },
+      });
+
+      if (!purchase) {
+        const now = new Date();
+        // Check if user has an active subscription (from req.user for speed)
+        const hasActiveSubscription =
+          req.user.subscription_status === "active" &&
+          req.user.subscription_end_date &&
+          new Date(req.user.subscription_end_date) >= now;
+
+        if (!hasActiveSubscription) {
+          pageLimit = 5;
+          res.setHeader("X-Subscription-Required", "true");
+        }
       }
     }
 
+    // 3. Streaming Headers
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `inline; filename="${book.slug}.pdf"`);
 
     let offset = 0;
-    const CHUNK_BATCH = 1; // Start quickly
+    const CHUNK_BATCH = 10;
 
     while (true) {
-      // Fetch chunks in order
+      let whereClause = { book_id: id };
+
+      if (pageLimit !== null) {
+        whereClause.page_number = { [Op.lte]: pageLimit };
+      }
+
       const chunks = await BookPdfChunk.findAll({
-        where: { book_id: id },
+        where: whereClause,
         order: [["chunk_index", "ASC"]],
         limit: CHUNK_BATCH,
         offset: offset,
-        raw: true, // Get plain objects, avoid Sequelize instance overhead
+        raw: true,
       });
 
       if (!chunks || chunks.length === 0) break;
@@ -282,52 +309,5 @@ export const streamBookPdf = async (req, res, next) => {
     } else {
       res.end();
     }
-  }
-};
-
-export const readBookPdf = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    const user = await User.findByPk(req.user.id);
-    const book = await Book.findByPk(id);
-
-    if (!book) {
-      return sendResponse(res, 404, false, "Book not found");
-    }
-
-    // Check if book is premium
-    if (book.is_premium) {
-      const now = new Date();
-      const isSubscriptionActive =
-        user.subscription_status === "active" &&
-        (!user.subscription_end_date || user.subscription_end_date >= now);
-
-      if (!isSubscriptionActive) {
-        return res.status(403).json({
-          success: false,
-          message: "Please buy a subscription to read this book.",
-          action: "REDIRECT_TO_PAYMENT",
-        });
-      }
-    }
-
-    // Success
-    let pdfUrl = book.pdf_file?.url || "";
-
-    // If chunked, construct local stream URL
-    if (book.pdf_file?.is_chunked) {
-      // Assuming the route will be /api/v1/books/stream/:id
-      // We can get the host from req
-      const protocol = req.protocol;
-      const host = req.get("host");
-      pdfUrl = `${protocol}://${host}/api/v1/books/stream/${book.id}`;
-    }
-
-    return sendResponse(res, 200, true, "Success", {
-      pdf_url: pdfUrl,
-      title: book.title,
-    });
-  } catch (error) {
-    next(error);
   }
 };

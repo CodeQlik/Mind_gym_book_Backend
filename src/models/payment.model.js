@@ -47,6 +47,10 @@ const Payment = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true, // only for subscriptions
     },
+    book_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true, // only for book_purchase
+    },
   },
   {
     timestamps: true,

@@ -31,6 +31,7 @@ import {
 } from "../validations/user.validation.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
+import validate from "../middlewares/validate.middleware.js";
 
 const router = express.Router();
 
@@ -38,15 +39,23 @@ const router = express.Router();
 router.post(
   "/register",
   upload.fields([{ name: "profile_image", maxCount: 1 }]),
-  registerValidation,
+  validate(registerValidation),
   registerUser,
 );
 
-router.post("/login", loginValidation, login);
-router.post("/forgot-password", forgotPasswordValidation, forgotPassword);
-router.post("/reset-password", resetPasswordValidation, resetPassword);
-router.post("/verify-email", verifyEmailValidation, verifyEmail);
-router.post("/send-otp", sendOTPValidation, sendOTP);
+router.post("/login", validate(loginValidation), login);
+router.post(
+  "/forgot-password",
+  validate(forgotPasswordValidation),
+  forgotPassword,
+);
+router.post(
+  "/reset-password",
+  validate(resetPasswordValidation),
+  resetPassword,
+);
+router.post("/verify-email", validate(verifyEmailValidation), verifyEmail);
+router.post("/send-otp", validate(sendOTPValidation), sendOTP);
 
 // Authenticated User Routes (Website & Application)
 router.post("/logout", verifyJWT, logout);
@@ -55,19 +64,19 @@ router.put(
   "/update-profile",
   verifyJWT,
   upload.fields([{ name: "profile_image", maxCount: 1 }]),
-  updateProfileValidation,
+  validate(updateProfileValidation),
   updateProfile,
 );
 router.post(
   "/change-password",
   verifyJWT,
-  changePasswordValidation,
+  validate(changePasswordValidation),
   changePassword,
 );
 router.delete(
   "/delete-account",
   verifyJWT,
-  deleteAccountValidation,
+  validate(deleteAccountValidation),
   deleteAccount,
 );
 
@@ -80,7 +89,7 @@ router.put(
   verifyJWT,
   isAdmin,
   upload.fields([{ name: "profile_image", maxCount: 1 }]),
-  updateProfileValidation,
+  validate(updateProfileValidation),
   updateUser,
 );
 router.delete("/delete/:id", verifyJWT, isAdmin, deleteUser);

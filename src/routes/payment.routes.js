@@ -10,7 +10,7 @@ const router = express.Router();
 
 router.use(verifyJWT);
 
-router.post("/create-order", createOrder); // Subscription
+router.post("/create-subscription-order", createOrder); // Subscription
 router.post("/create-book-order", createBookOrder); // Direct book purchase
 router.post("/verify-payment", verifyPayment);
 

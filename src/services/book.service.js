@@ -1,4 +1,5 @@
-import { Book, Category, SubCategory, BookPdfChunk } from "../models/index.js";
+import { Book, Category, BookPdfChunk, BookPage } from "../models/index.js";
+import { PDFParse } from "pdf-parse";
 import fs from "fs";
 import {
   uploadOnCloudinary,
@@ -25,22 +26,15 @@ class BookService {
       condition,
       stock,
       category_id,
-      subcategory_id,
       is_active,
       published_date,
       is_premium,
       isbn,
       language,
-      audio_url,
     } = data;
 
     const category = await Category.findByPk(category_id);
     if (!category) throw new Error("Invalid category ID");
-
-    if (subcategory_id) {
-      const subCategory = await SubCategory.findByPk(subcategory_id);
-      if (!subCategory) throw new Error("Invalid subcategory ID");
-    }
 
     const slug = this.generateSlug(title);
     const existingBook = await Book.findOne({ where: { slug } });
@@ -80,13 +74,11 @@ class BookService {
       thumbnail: thumbnailData,
       pdf_file: pdfFileData,
       category_id,
-      subcategory_id: subcategory_id || null,
       is_active: is_active !== undefined ? is_active : true,
       published_date: published_date || null,
       is_premium: is_premium === "true" || is_premium === true,
       isbn: isbn || null,
       language: language || null,
-      audio_url: audio_url || null,
     };
 
     const createdBook = await Book.create(bookData);
@@ -98,6 +90,7 @@ class BookService {
       pdfFileData.is_chunked
     ) {
       await this.savePdfChunks(createdBook.id, files.pdf_file[0].path);
+      await this.saveBookPages(createdBook.id, files.pdf_file[0].path);
     }
 
     return createdBook;
@@ -109,7 +102,6 @@ class BookService {
       where: filters,
       include: [
         { model: Category, as: "category", attributes: ["name", "slug"] },
-        { model: SubCategory, as: "subcategory", attributes: ["name", "slug"] },
       ],
       offset,
       limit,
@@ -138,7 +130,6 @@ class BookService {
       where,
       include: [
         { model: Category, as: "category", attributes: ["name", "slug"] },
-        { model: SubCategory, as: "subcategory", attributes: ["name", "slug"] },
       ],
       offset,
       limit,
@@ -158,11 +149,6 @@ class BookService {
       where: { slug },
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
-        {
-          model: SubCategory,
-          as: "subcategory",
-          attributes: ["id", "name", "slug"],
-        },
       ],
     });
 
@@ -179,11 +165,6 @@ class BookService {
     const book = await Book.findByPk(id, {
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
-        {
-          model: SubCategory,
-          as: "subcategory",
-          attributes: ["id", "name", "slug"],
-        },
       ],
     });
 
@@ -218,11 +199,6 @@ class BookService {
       if (!category) throw new Error("Invalid category ID");
     }
 
-    if (data.subcategory_id) {
-      const subCategory = await SubCategory.findByPk(data.subcategory_id);
-      if (!subCategory) throw new Error("Invalid subcategory ID");
-    }
-
     if (files?.thumbnail?.[0]) {
       if (book.thumbnail?.public_id) {
         await deleteFromCloudinary(book.thumbnail.public_id);
@@ -250,6 +226,10 @@ class BookService {
 
       // Save chunks to DB
       await this.savePdfChunks(id, files.pdf_file[0].path);
+
+      // Save pages to DB
+      await BookPage.destroy({ where: { book_id: id } });
+      await this.saveBookPages(id, files.pdf_file[0].path);
 
       data.pdf_file = {
         is_chunked: true,
@@ -297,17 +277,33 @@ class BookService {
       const end = Math.min(start + CHUNK_SIZE, fileBuffer.length);
       const chunkData = fileBuffer.subarray(start, end);
 
+      const pageNumber = Math.floor(i / 4) + 1;
+
       chunks.push({
         book_id: bookId,
         chunk_index: i,
+        page_number: pageNumber,
         data: chunkData,
       });
     }
 
-    // Bulk insert for better performance
     await BookPdfChunk.bulkCreate(chunks);
+  }
 
-    // Clean up temp file - optional if multer cleans up, but safe to do here if not needed
+  async saveBookPages(bookId, filePath) {
+    const dataBuffer = fs.readFileSync(filePath);
+    const parser = new PDFParse({ data: dataBuffer });
+    const textResult = await parser.getText();
+
+    if (textResult.pages && textResult.pages.length > 0) {
+      const pageRecords = textResult.pages.map((page) => ({
+        book_id: bookId,
+        page_number: page.num,
+        content: page.text || "",
+      }));
+
+      await BookPage.bulkCreate(pageRecords);
+    }
   }
 
   async searchBooks(
@@ -339,7 +335,6 @@ class BookService {
       where,
       include: [
         { model: Category, as: "category", attributes: ["name", "slug"] },
-        { model: SubCategory, as: "subcategory", attributes: ["name", "slug"] },
       ],
       offset,
       limit,

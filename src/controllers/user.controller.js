@@ -1,20 +1,8 @@
 import userService from "../services/user.service.js";
 import sendResponse from "../utils/responseHandler.js";
-import { validationResult } from "express-validator";
 
 export const registerUser = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const result = await userService.registerUser(req.body, req.files);
 
     const options = {
@@ -40,17 +28,6 @@ export const registerUser = async (req, res, next) => {
 
 export const login = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const { email, password } = req.body;
     const result = await userService.login(email, password);
 
@@ -100,17 +77,6 @@ export const getUserProfile = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const user = await userService.updateProfile(
       req.user.id,
       req.body,
@@ -124,17 +90,6 @@ export const updateProfile = async (req, res, next) => {
 
 export const changePassword = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     await userService.changePassword(req.user.id, req.body);
     return sendResponse(res, 200, true, "Password changed successfully");
   } catch (error) {
@@ -144,17 +99,6 @@ export const changePassword = async (req, res, next) => {
 
 export const forgotPassword = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const { email } = req.body;
     await userService.forgotPassword(email);
     return sendResponse(
@@ -170,17 +114,6 @@ export const forgotPassword = async (req, res, next) => {
 
 export const resetPassword = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const { token, new_password } = req.body;
     await userService.resetPassword(token, new_password);
     return sendResponse(res, 200, true, "Password has been reset successfully");
@@ -191,17 +124,6 @@ export const resetPassword = async (req, res, next) => {
 
 export const deleteAccount = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const { password } = req.body;
     await userService.deleteAccount(req.user.id, password);
 
@@ -219,17 +141,6 @@ export const deleteAccount = async (req, res, next) => {
 
 export const verifyEmail = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const { email, otp } = req.body;
     const otpToken = req.cookies?.otpToken;
     await userService.verifyEmail(email, otp, otpToken);
@@ -248,17 +159,6 @@ export const verifyEmail = async (req, res, next) => {
 
 export const sendOTP = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const { email } = req.body;
     const otpToken = await userService.sendOTP(email);
 
@@ -297,17 +197,6 @@ export const getAllUsers = async (req, res, next) => {
 
 export const updateUser = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
-
     const { id } = req.params;
     const user = await userService.updateProfile(id, req.body, req.files);
     return sendResponse(res, 200, true, "User updated successfully", user);

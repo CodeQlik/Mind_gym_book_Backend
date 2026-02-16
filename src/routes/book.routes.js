@@ -11,8 +11,12 @@ import {
   getBookBySlug,
   searchBooks,
   readBookPdf,
-  streamBookPdf,
+  getBookPageContent,
 } from "../controllers/book.controller.js";
+import {
+  toggleBookmark,
+  getBookBookmarks,
+} from "../controllers/bookmark.controller.js";
 import {
   bookValidation,
   updateBookValidation,
@@ -23,6 +27,8 @@ import {
 } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
 import upload from "../middlewares/multer.js";
+import { checkBookAccess } from "../middlewares/accessControl.js";
+import validate from "../middlewares/validate.middleware.js";
 
 const router = express.Router();
 
@@ -32,8 +38,17 @@ router.get("/search", optionalVerifyJWT, searchBooks);
 router.get("/category/:categoryId", optionalVerifyJWT, getBooksByCategory);
 router.get("/:id(\\d+)", optionalVerifyJWT, getBookById);
 router.get("/:slug", optionalVerifyJWT, getBookBySlug);
-router.get("/read-pdf/:id", verifyJWT, readBookPdf);
-router.get("/stream/:id", verifyJWT, streamBookPdf);
+router.get("/readBook/:id", verifyJWT, readBookPdf);
+router.get(
+  "/:id/page/:pageNumber",
+  verifyJWT,
+  checkBookAccess,
+  getBookPageContent,
+);
+
+// Bookmark Routes
+router.post("/bookmark/toggle", verifyJWT, toggleBookmark);
+router.get("/bookmark/:id", verifyJWT, getBookBookmarks);
 
 // Admin only routes
 router.get("/admin/all", verifyJWT, isAdmin, getAdminBooks);
@@ -45,7 +60,7 @@ router.post(
     { name: "thumbnail", maxCount: 1 },
     { name: "pdf_file", maxCount: 1 },
   ]),
-  bookValidation,
+  validate(bookValidation),
   createBook,
 );
 router.put(
@@ -56,7 +71,7 @@ router.put(
     { name: "thumbnail", maxCount: 1 },
     { name: "pdf_file", maxCount: 1 },
   ]),
-  updateBookValidation,
+  validate(updateBookValidation),
   updateBook,
 );
 router.delete("/delete/:id", verifyJWT, isAdmin, deleteBook);

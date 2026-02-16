@@ -1,68 +1,136 @@
-import { body } from 'express-validator';
+import Joi from "joi";
 
-export const registerValidation = [
-    body('name').notEmpty().withMessage('Name is required'),
-    body('email').isEmail().withMessage('Please provide a valid email'),
-    body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters long'),
-    body('phone').notEmpty().withMessage('Phone number is required'),
-    body('additional_phone').custom((value, { req }) => {
-        if (value && value === req.body.phone) {
-            throw new Error('Additional phone number must be different from the primary phone number');
-        }
-        return true;
+export const registerValidation = Joi.object({
+  name: Joi.string().required().messages({
+    "string.empty": "Name is required",
+    "any.required": "Name is required",
+  }),
+  email: Joi.string().email().required().messages({
+    "string.email": "Please provide a valid email",
+    "string.empty": "Email is required",
+    "any.required": "Email is required",
+  }),
+  password: Joi.string().min(6).required().messages({
+    "string.min": "Password must be at least 6 characters long",
+    "string.empty": "Password is required",
+    "any.required": "Password is required",
+  }),
+  phone: Joi.string().required().messages({
+    "string.empty": "Phone number is required",
+    "any.required": "Phone number is required",
+  }),
+  additional_phone: Joi.string()
+    .optional()
+    .allow(null, "")
+    .not(Joi.ref("phone"))
+    .messages({
+      "any.invalid":
+        "Additional phone number must be different from the primary phone number",
     }),
-];
+});
 
-export const loginValidation = [
-    body('email').isEmail().withMessage('Please provide a valid email'),
-    body('password').notEmpty().withMessage('Password is required'),
-];
+export const loginValidation = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Please provide a valid email",
+    "string.empty": "Email is required",
+    "any.required": "Email is required",
+  }),
+  password: Joi.string().required().messages({
+    "string.empty": "Password is required",
+    "any.required": "Password is required",
+  }),
+});
 
-export const updateProfileValidation = [
-    body('name').optional().notEmpty().withMessage('Name cannot be empty'),
-    body('email').optional().isEmail().withMessage('Please provide a valid email'),
-    body('phone').optional().notEmpty().withMessage('Phone number cannot be empty'),
-    body('additional_phone').optional().custom((value, { req }) => {
-        if (value && value === req.body.phone) {
-            throw new Error('Additional phone number must be different from the primary phone number');
-        }
-        return true;
+export const updateProfileValidation = Joi.object({
+  name: Joi.string().optional().not().empty().messages({
+    "string.empty": "Name cannot be empty",
+  }),
+  email: Joi.string().email().optional().messages({
+    "string.email": "Please provide a valid email",
+  }),
+  phone: Joi.string().optional().not().empty().messages({
+    "string.empty": "Phone number cannot be empty",
+  }),
+  additional_phone: Joi.string()
+    .optional()
+    .allow(null, "")
+    .not(Joi.ref("phone"))
+    .messages({
+      "any.invalid":
+        "Additional phone number must be different from the primary phone number",
     }),
-];
+});
 
-export const changePasswordValidation = [
-    body('old_password').notEmpty().withMessage('Old password is required'),
-    body('new_password').isLength({ min: 6 }).withMessage('New password must be at least 6 characters long'),
-    body('confirm_password').custom((value, { req }) => {
-        if (value !== req.body.new_password) {
-            throw new Error('Password confirmation does not match password');
-        }
-        return true;
+export const changePasswordValidation = Joi.object({
+  old_password: Joi.string().required().messages({
+    "string.empty": "Old password is required",
+    "any.required": "Old password is required",
+  }),
+  new_password: Joi.string().min(6).required().messages({
+    "string.min": "New password must be at least 6 characters long",
+    "string.empty": "New password is required",
+    "any.required": "New password is required",
+  }),
+  confirm_password: Joi.string()
+    .required()
+    .valid(Joi.ref("new_password"))
+    .messages({
+      "any.only": "Password confirmation does not match password",
+      "any.required": "Confirm password is required",
     }),
-];
+});
 
-export const forgotPasswordValidation = [
-    body('email').isEmail().withMessage('Please provide a valid email'),
-];
+export const forgotPasswordValidation = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Please provide a valid email",
+    "string.empty": "Email is required",
+    "any.required": "Email is required",
+  }),
+});
 
-export const resetPasswordValidation = [
-    body('token').notEmpty().withMessage('Reset token is required'),
-    body('new_password').isLength({ min: 6 }).withMessage('New password must be at least 6 characters long'),
-    body('confirm_password').custom((value, { req }) => {
-        if (value !== req.body.new_password) {
-            throw new Error('Password confirmation does not match password');
-        }
-        return true;
+export const resetPasswordValidation = Joi.object({
+  token: Joi.string().required().messages({
+    "string.empty": "Reset token is required",
+    "any.required": "Reset token is required",
+  }),
+  new_password: Joi.string().min(6).required().messages({
+    "string.min": "New password must be at least 6 characters long",
+    "string.empty": "New password is required",
+    "any.required": "New password is required",
+  }),
+  confirm_password: Joi.string()
+    .required()
+    .valid(Joi.ref("new_password"))
+    .messages({
+      "any.only": "Password confirmation does not match password",
+      "any.required": "Confirm password is required",
     }),
-]; export const deleteAccountValidation = [
-    body('password').notEmpty().withMessage('Password is required to delete account'),
-];
+});
 
-export const verifyEmailValidation = [
-    body('email').isEmail().withMessage('Please provide a valid email'),
-    body('otp').notEmpty().withMessage('OTP is required').isLength({ min: 6, max: 6 }).withMessage('OTP must be 6 digits'),
-];
+export const deleteAccountValidation = Joi.object({
+  password: Joi.string().required().messages({
+    "string.empty": "Password is required to delete account",
+    "any.required": "Password is required to delete account",
+  }),
+});
 
-export const sendOTPValidation = [
-    body('email').isEmail().withMessage('Please provide a valid email'),
-];
+export const verifyEmailValidation = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Please provide a valid email",
+    "string.empty": "Email is required",
+    "any.required": "Email is required",
+  }),
+  otp: Joi.string().length(6).required().messages({
+    "string.length": "OTP must be 6 digits",
+    "string.empty": "OTP is required",
+    "any.required": "OTP is required",
+  }),
+});
+
+export const sendOTPValidation = Joi.object({
+  email: Joi.string().email().required().messages({
+    "string.email": "Please provide a valid email",
+    "string.empty": "Email is required",
+    "any.required": "Email is required",
+  }),
+});

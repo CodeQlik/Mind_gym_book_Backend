@@ -33,7 +33,7 @@ const UserAnnotation = sequelize.define(
     },
     color: {
       type: DataTypes.STRING,
-      defaultValue: "#FFFF00", // Default yellow highlight
+      defaultValue: "#FFFF00",
     },
   },
   {

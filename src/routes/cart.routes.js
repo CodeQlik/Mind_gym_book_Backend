@@ -12,18 +12,19 @@ import {
   updateQuantityValidation,
 } from "../validations/cart.validation.js";
 import upload from "../middlewares/multer.js";
+import validate from "../middlewares/validate.middleware.js";
 
 const router = express.Router();
 
 // All cart routes require authentication
 router.use(verifyJWT);
 
-router.post("/add", upload.none(), addToCartValidation, addToCart);
+router.post("/add", upload.none(), validate(addToCartValidation), addToCart);
 router.get("/", getCart);
 router.put(
   "/update/:id",
   upload.none(),
-  updateQuantityValidation,
+  validate(updateQuantityValidation),
   updateQuantity,
 );
 router.delete("/remove/:id", removeFromCart);

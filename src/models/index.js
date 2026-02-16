@@ -1,26 +1,18 @@
 import User from "./user.model.js";
 import Address from "./address.model.js";
 import Category from "./category.model.js";
-import SubCategory from "./subCategory.model.js";
 import Book from "./book.model.js";
 import Cart from "./cart.model.js";
 import Wishlist from "./wishlist.model.js";
 import Payment from "./payment.model.js";
 import UserAnnotation from "./annotation.model.js";
 import BookPdfChunk from "./bookPdfChunk.model.js";
+import BookPage from "./bookPage.model.js";
+import Subscription from "./subscription.model.js";
+import UserBook from "./userBook.model.js";
+import Bookmark from "./bookmark.model.js";
 
 // Associations
-Category.hasMany(SubCategory, {
-  foreignKey: "category_id",
-  as: "subcategories",
-});
-SubCategory.belongsTo(Category, { foreignKey: "category_id", as: "category" });
-
-SubCategory.hasMany(Book, { foreignKey: "subcategory_id", as: "books" });
-Book.belongsTo(SubCategory, {
-  foreignKey: "subcategory_id",
-  as: "subcategory",
-});
 
 Category.hasMany(Book, { foreignKey: "category_id", as: "books" });
 Book.belongsTo(Category, { foreignKey: "category_id", as: "category" });
@@ -43,6 +35,10 @@ Wishlist.belongsTo(Book, { foreignKey: "book_id", as: "book" });
 User.hasMany(Payment, { foreignKey: "user_id", as: "payments" });
 Payment.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
+// Subscription Associations
+User.hasMany(Subscription, { foreignKey: "user_id", as: "subscriptions" });
+Subscription.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
 // Annotation Associations
 User.hasMany(UserAnnotation, { foreignKey: "user_id", as: "annotations" });
 UserAnnotation.belongsTo(User, { foreignKey: "user_id", as: "user" });
@@ -53,15 +49,35 @@ UserAnnotation.belongsTo(Book, { foreignKey: "book_id", as: "book" });
 Book.hasMany(BookPdfChunk, { foreignKey: "book_id", as: "pdf_chunks" });
 BookPdfChunk.belongsTo(Book, { foreignKey: "book_id", as: "book" });
 
+Book.hasMany(BookPage, { foreignKey: "book_id", as: "pages" });
+BookPage.belongsTo(Book, { foreignKey: "book_id", as: "book" });
+
+// UserBook Associations
+User.hasMany(UserBook, { foreignKey: "user_id", as: "purchased_books" });
+UserBook.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
+Book.hasMany(UserBook, { foreignKey: "book_id", as: "purchased_by" });
+UserBook.belongsTo(Book, { foreignKey: "book_id", as: "book" });
+
+// Bookmark Associations
+User.hasMany(Bookmark, { foreignKey: "user_id", as: "bookmarks" });
+Bookmark.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
+Book.hasMany(Bookmark, { foreignKey: "book_id", as: "bookmarks" });
+Bookmark.belongsTo(Book, { foreignKey: "book_id", as: "book" });
+
 export {
   User,
   Address,
   Category,
-  SubCategory,
   Book,
   Cart,
   Wishlist,
   Payment,
   UserAnnotation,
   BookPdfChunk,
+  BookPage,
+  Subscription,
+  UserBook,
+  Bookmark,
 };

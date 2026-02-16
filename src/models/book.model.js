@@ -57,11 +57,7 @@ const Book = sequelize.define(
       allowNull: false,
       references: { model: "categories", key: "id" },
     },
-    subcategory_id: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-      references: { model: "subcategories", key: "id" },
-    },
+
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
@@ -92,10 +88,6 @@ const Book = sequelize.define(
       allowNull: true,
     },
     language: {
-      type: DataTypes.STRING,
-      allowNull: true,
-    },
-    audio_url: {
       type: DataTypes.STRING,
       allowNull: true,
     },

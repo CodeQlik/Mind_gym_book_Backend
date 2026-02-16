@@ -109,6 +109,7 @@ class CategoryService {
 
     return await Category.findAll({
       where,
+      order: [["createdAt", "DESC"]],
     });
   }
 
@@ -164,7 +165,7 @@ class CategoryService {
 
     return await Category.findAll({
       where,
-      order: [["name", "ASC"]],
+      order: [["createdAt", "DESC"]],
     });
   }
 }

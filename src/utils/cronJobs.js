@@ -1,24 +1,42 @@
 import cron from "node-cron";
-import { User } from "../models/index.js";
+import { Subscription, User } from "../models/index.js";
 import { Op } from "sequelize";
 
 const initCronJobs = () => {
-  // हर रात 12 बजे यह स्क्रिप्ट चलेगी (Runs every night at midnight)
   cron.schedule("0 0 * * *", async () => {
     try {
+      const now = new Date();
       console.log("Running subscription expiry cron job...");
-      const [updatedCount] = await User.update(
+
+      // 1. Update Subscription records
+      const [updatedSubscriptionCount] = await Subscription.update(
+        { status: "expired" },
+        {
+          where: {
+            status: "active",
+            end_date: {
+              [Op.lt]: now,
+            },
+          },
+        },
+      );
+
+      // 2. Update User records to mirror the status
+      const [updatedUserCount] = await User.update(
         { subscription_status: "expired" },
         {
           where: {
             subscription_status: "active",
             subscription_end_date: {
-              [Op.lt]: new Date(),
+              [Op.lt]: now,
             },
           },
         },
       );
-      console.log(`Cron Job: ${updatedCount} users moved to expired.`);
+
+      console.log(
+        `Cron Job: ${updatedSubscriptionCount} subscriptions and ${updatedUserCount} users moved to expired.`,
+      );
     } catch (error) {
       console.error("Cron Job Error:", error);
     }

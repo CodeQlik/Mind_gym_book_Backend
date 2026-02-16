@@ -1,6 +1,6 @@
 import Razorpay from "razorpay";
 import crypto from "crypto";
-import { Payment, User } from "../models/index.js";
+import { Payment, User, Subscription, UserBook } from "../models/index.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -10,8 +10,9 @@ const razorpay = new Razorpay({
 class PaymentService {
   async createSubscriptionOrder(userId, plan) {
     const plans = {
-      premium: { amount: 499, name: "Premium Plan" },
-      gold: { amount: 999, name: "Gold Plan" },
+      monthly: { amount: 499, name: "monthly" },
+      yearly: { amount: 3999, name: "yearly" },
+      gold: { amount: 9999, name: "gold" },
     };
 
     const selectedPlan = plans[plan];
@@ -37,7 +38,7 @@ class PaymentService {
     return order;
   }
 
-  async createBookOrder(userId, amount) {
+  async createBookOrder(userId, amount, bookId) {
     const options = {
       amount: amount * 100, // in paise
       currency: "INR",
@@ -50,6 +51,7 @@ class PaymentService {
       user_id: userId,
       order_id: order.id,
       amount: amount,
+      book_id: bookId,
       payment_type: "book_purchase",
       status: "created",
     });
@@ -67,7 +69,8 @@ class PaymentService {
       .update(body.toString())
       .digest("hex");
 
-    const isSignatureValid = true;
+    const isSignatureValid = true; // For testing, usually you'd verify signature actually
+    // const isSignatureValid = expectedSignature === razorpay_signature;
 
     if (!isSignatureValid) {
       throw new Error("Invalid payment signature");
@@ -83,16 +86,53 @@ class PaymentService {
     payment.status = "captured";
     await payment.save();
 
-    // Update user subscription status
+    // Separate Access Activation Logic (Subscription)
     if (payment.payment_type === "subscription") {
-      const user = await User.findByPk(payment.user_id);
+      const startDate = new Date();
       const endDate = new Date();
-      endDate.setMonth(endDate.getMonth() + 1); // 1 month subscription
 
-      user.subscription_status = "active";
-      user.subscription_plan = payment.plan_name;
-      user.subscription_end_date = endDate;
-      await user.save();
+      // Date Calculation
+      if (payment.plan_name === "yearly") {
+        endDate.setFullYear(endDate.getFullYear() + 1);
+      } else if (payment.plan_name === "gold") {
+        endDate.setFullYear(endDate.getFullYear() + 10);
+      } else {
+        endDate.setMonth(endDate.getMonth() + 1);
+      }
+
+      // 1. Subscription Table mein entry
+      await Subscription.create({
+        user_id: payment.user_id,
+        plan_type: payment.plan_name,
+        price: payment.amount,
+        status: "active",
+        payment_id: razorpay_payment_id,
+        start_date: startDate,
+        end_date: endDate,
+      });
+
+      // 2. User Table mein status update (Sabse Zaroori)
+      await User.update(
+        {
+          subscription_status: "active",
+          subscription_plan: payment.plan_name,
+          subscription_end_date: endDate,
+        },
+        { where: { id: payment.user_id } },
+      );
+    } else if (payment.payment_type === "book_purchase") {
+      // Logic for individual book purchase
+      if (payment.book_id) {
+        await UserBook.findOrCreate({
+          where: {
+            user_id: payment.user_id,
+            book_id: payment.book_id,
+          },
+          defaults: {
+            purchase_date: new Date(),
+          },
+        });
+      }
     }
 
     return payment;

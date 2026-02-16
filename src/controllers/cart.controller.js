@@ -1,19 +1,8 @@
 import cartService from "../services/cart.service.js";
 import sendResponse from "../utils/responseHandler.js";
-import { validationResult } from "express-validator";
 
 export const addToCart = async (req, res, next) => {
   try {
-    const errors = validationResult(req);
-    if (!errors.isEmpty()) {
-      return sendResponse(
-        res,
-        400,
-        false,
-        errors.array()[0].msg,
-        errors.array(),
-      );
-    }
     const item = await cartService.addToCart(req.user.id, req.body);
     return sendResponse(
       res,

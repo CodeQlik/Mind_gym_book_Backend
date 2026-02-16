@@ -20,6 +20,7 @@ import {
 } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
 import upload from "../middlewares/multer.js";
+import validate from "../middlewares/validate.middleware.js";
 
 const router = express.Router();
 
@@ -36,7 +37,7 @@ router.post(
   verifyJWT,
   isAdmin,
   upload.single("image"),
-  categoryValidation,
+  validate(categoryValidation),
   createCategory,
 );
 router.put(
@@ -44,7 +45,7 @@ router.put(
   verifyJWT,
   isAdmin,
   upload.single("image"),
-  updateCategoryValidation,
+  validate(updateCategoryValidation),
   updateCategory,
 );
 router.delete("/delete/:id", verifyJWT, isAdmin, deleteCategory);
