@@ -16,6 +16,7 @@ import {
   getUserById,
   deleteUser,
   searchUsers,
+  refreshAccessToken,
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -44,6 +45,7 @@ router.post(
 );
 
 router.post("/login", validate(loginValidation), login);
+router.post("/refresh-token", refreshAccessToken);
 router.post(
   "/forgot-password",
   validate(forgotPasswordValidation),

@@ -1,7 +1,10 @@
 import { User, Address } from "../models/index.js";
 import bcrypt from "bcryptjs";
 import { uploadOnCloudinary } from "../config/cloudinary.js";
-import generateToken from "../utils/generateToken.js";
+import {
+  generateAccessToken,
+  generateRefreshToken,
+} from "../utils/generateToken.js";
 import { Op } from "sequelize";
 import jwt from "jsonwebtoken";
 import sendEmail from "../config/sendEmail.js";
@@ -119,10 +122,48 @@ class UserService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Invalid email or password");
 
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
+
+    await user.update({ refresh_token: refreshToken });
+
     return {
       ...this.formatUserResponse(user),
-      token: generateToken(user.id),
+      accessToken,
+      refreshToken,
     };
+  }
+
+  async refreshAccessToken(incomingRefreshToken) {
+    if (!incomingRefreshToken) {
+      throw new Error("Unauthorized request. Refresh token is missing.");
+    }
+
+    try {
+      const decodedToken = jwt.verify(
+        incomingRefreshToken,
+        process.env.REFRESH_TOKEN_SECRET || "refresh_secret",
+      );
+
+      const user = await User.findByPk(decodedToken.id);
+
+      if (!user) {
+        throw new Error("Invalid refresh token.");
+      }
+
+      if (incomingRefreshToken !== user.refresh_token) {
+        throw new Error("Refresh token is expired or used.");
+      }
+
+      const accessToken = generateAccessToken(user.id);
+      const newRefreshToken = generateRefreshToken(user.id);
+
+      await user.update({ refresh_token: newRefreshToken });
+
+      return { accessToken, refreshToken: newRefreshToken };
+    } catch (error) {
+      throw new Error(error?.message || "Invalid refresh token");
+    }
   }
 
   async getUserProfile(userId) {
@@ -335,6 +376,7 @@ class UserService {
     }
 
     delete userJson.password;
+    delete userJson.refresh_token;
     return userJson;
   }
 

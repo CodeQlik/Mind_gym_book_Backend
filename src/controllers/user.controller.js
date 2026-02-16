@@ -31,16 +31,30 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
     const result = await userService.login(email, password);
 
-    const options = {
+    const accessTokenOptions = {
+      expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    };
+
+    const refreshTokenOptions = {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "None",
     };
 
-    res.cookie("token", result.token, options);
+    const { accessToken, refreshToken, ...userWithoutTokens } = result;
 
-    return sendResponse(res, 200, true, "Login successful", result);
+    res.cookie("accessToken", accessToken, accessTokenOptions);
+    res.cookie("refreshToken", refreshToken, refreshTokenOptions);
+
+    return sendResponse(res, 200, true, "Login successful", {
+      user: userWithoutTokens,
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
     next(error);
   }
@@ -48,13 +62,45 @@ export const login = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    res.clearCookie("token", {
+    const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "None",
-    });
+    };
+    res.clearCookie("accessToken", options);
+    res.clearCookie("refreshToken", options);
 
     return sendResponse(res, 200, true, "Logged out successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshAccessToken = async (req, res, next) => {
+  try {
+    const incomingRefreshToken =
+      req.cookies?.refreshToken || req.body.refreshToken;
+
+    const result = await userService.refreshAccessToken(incomingRefreshToken);
+
+    const accessTokenOptions = {
+      expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    };
+
+    const refreshTokenOptions = {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    };
+
+    res.cookie("accessToken", result.accessToken, accessTokenOptions);
+    res.cookie("refreshToken", result.refreshToken, refreshTokenOptions);
+
+    return sendResponse(res, 200, true, "Access token refreshed", result);
   } catch (error) {
     next(error);
   }
