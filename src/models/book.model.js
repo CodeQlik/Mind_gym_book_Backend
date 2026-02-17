@@ -40,6 +40,44 @@ const Book = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 1,
     },
+
+    is_bestselling: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    is_trending: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    cover_image: {
+      type: DataTypes.JSON,
+      defaultValue: { url: "", public_id: "" },
+      get() {
+        const rawValue = this.getDataValue("cover_image");
+        try {
+          return typeof rawValue === "string" ? JSON.parse(rawValue) : rawValue;
+        } catch (e) {
+          return rawValue;
+        }
+      },
+    },
+    highlights: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    images: {
+      type: DataTypes.JSON,
+      defaultValue: [],
+      get() {
+        const rawValue = this.getDataValue("images");
+        try {
+          return typeof rawValue === "string" ? JSON.parse(rawValue) : rawValue;
+        } catch (e) {
+          return rawValue;
+        }
+      },
+    },
+
     thumbnail: {
       type: DataTypes.JSON,
       defaultValue: { url: "", public_id: "" },
@@ -57,7 +95,6 @@ const Book = sequelize.define(
       allowNull: false,
       references: { model: "categories", key: "id" },
     },
-
     is_active: {
       type: DataTypes.BOOLEAN,
       defaultValue: true,
@@ -89,6 +126,10 @@ const Book = sequelize.define(
     },
     language: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    otherdescription: {
+      type: DataTypes.TEXT,
       allowNull: true,
     },
   },

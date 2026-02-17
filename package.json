@@ -21,6 +21,7 @@
     "crypto-js": "^4.2.0",
     "dotenv": "^16.4.5",
     "express": "^4.19.2",
+    "firebase-admin": "^13.6.1",
     "joi": "^18.0.2",
     "jsonwebtoken": "^9.0.3",
     "migrations": "^1.7.1",
@@ -31,7 +32,8 @@
     "nodemailer": "^8.0.0",
     "pdf-parse": "^2.4.5",
     "razorpay": "^2.9.6",
-    "sequelize": "^6.37.3"
+    "sequelize": "^6.37.3",
+    "socket.io": "^4.8.3"
   },
   "devDependencies": {
     "nodemon": "^3.1.0"

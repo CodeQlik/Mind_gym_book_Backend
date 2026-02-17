@@ -14,7 +14,7 @@ router.use(verifyJWT);
 // Note Routes
 router.post("/", saveNote);
 router.get("/all", getUserNotes);
-router.patch("/:id", updateNote);
+router.put("/:id", updateNote);
 router.delete("/:id", deleteNote);
 
 export default router;

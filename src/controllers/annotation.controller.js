@@ -3,13 +3,17 @@ import sendResponse from "../utils/responseHandler.js";
 
 export const saveNote = async (req, res, next) => {
   try {
-    const { title, notes } = req.body;
+    // Naye fields destructure karein
+    const { title, notes, chapter_name, book_name } = req.body;
     const userId = req.user.id;
 
+    // Create mein naye fields add karein
     const note = await UserAnnotation.create({
       user_id: userId,
       title: title,
       notes: notes,
+      chapter_name: chapter_name,
+      book_name: book_name,
     });
 
     return sendResponse(res, 201, true, "Note saved successfully", note);
@@ -26,7 +30,8 @@ export const getUserNotes = async (req, res, next) => {
     const notes = await UserAnnotation.findAll({
       where: { user_id: userId },
       order: [
-        ["title", "ASC"],
+        ["book_name", "ASC"],
+        ["chapter_name", "ASC"],
         ["updated_at", "DESC"],
       ],
     });
@@ -41,7 +46,7 @@ export const getUserNotes = async (req, res, next) => {
 export const updateNote = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, notes } = req.body;
+    const { title, notes, chapter_name, book_name } = req.body;
     const userId = req.user.id;
 
     const note = await UserAnnotation.findOne({
@@ -52,9 +57,12 @@ export const updateNote = async (req, res, next) => {
       return sendResponse(res, 404, false, "Note not found");
     }
 
+    // Update logic mein naye fields include karein
     await note.update({
       title: title || note.title,
       notes: notes || note.notes,
+      chapter_name: chapter_name || note.chapter_name,
+      book_name: book_name || note.book_name,
     });
 
     return sendResponse(res, 200, true, "Note updated successfully", note);

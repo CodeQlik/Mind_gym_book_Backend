@@ -16,11 +16,25 @@ const UserAnnotation = sequelize.define(
     },
     title: {
       type: DataTypes.TEXT,
-      allowNull: true,
+      allowNull: false,
+      validate: {
+        notEmpty: { msg: "Title cannot be empty" },
+        notNull: { msg: "Title is required" },
+      },
     },
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+
+    chapter_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+
+    book_name: {
+      type: DataTypes.STRING,
+      allowNull: false,
     },
   },
   {

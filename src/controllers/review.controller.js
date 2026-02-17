@@ -3,18 +3,19 @@ import sendResponse from "../utils/responseHandler.js";
 
 export const addReview = async (req, res, next) => {
   try {
-    const { bookId, rating, comment } = req.body;
+    const { bookId, book_id, rating, comment } = req.body;
     const userId = req.user.id;
+    const actualBookId = bookId || book_id;
 
     // Check if book exists
-    const book = await Book.findByPk(bookId);
+    const book = await Book.findByPk(actualBookId);
     if (!book) {
       return sendResponse(res, 404, false, "Book not found");
     }
 
     // Check if user already reviewed this book (optional, but common)
     const existingReview = await Review.findOne({
-      where: { user_id: userId, book_id: bookId },
+      where: { user_id: userId, book_id: actualBookId },
     });
 
     if (existingReview) {
@@ -28,7 +29,7 @@ export const addReview = async (req, res, next) => {
 
     const review = await Review.create({
       user_id: userId,
-      book_id: bookId,
+      book_id: actualBookId,
       rating,
       comment,
     });

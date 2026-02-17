@@ -3,13 +3,14 @@ import sendResponse from "../utils/responseHandler.js";
 
 export const toggleBookmark = async (req, res, next) => {
   try {
-    const { bookId } = req.body;
+    const { bookId, book_id } = req.body;
     const userId = req.user.id;
+    const actualBookId = bookId || book_id;
 
     const existingBookmark = await Bookmark.findOne({
       where: {
         user_id: userId,
-        book_id: bookId,
+        book_id: actualBookId,
       },
     });
 
@@ -22,7 +23,7 @@ export const toggleBookmark = async (req, res, next) => {
 
     const newBookmark = await Bookmark.create({
       user_id: userId,
-      book_id: bookId,
+      book_id: actualBookId,
     });
 
     return sendResponse(res, 201, true, "Book added to bookmarks", {

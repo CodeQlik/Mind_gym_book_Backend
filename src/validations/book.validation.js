@@ -43,6 +43,14 @@ export const bookValidation = Joi.object({
     .optional(),
   isbn: Joi.string().optional().trim().allow(null, ""),
   language: Joi.string().optional().trim().allow(null, ""),
+  is_bestselling: Joi.alternatives()
+    .try(Joi.boolean(), Joi.string().valid("true", "false"))
+    .optional(),
+  is_trending: Joi.alternatives()
+    .try(Joi.boolean(), Joi.string().valid("true", "false"))
+    .optional(),
+  highlights: Joi.string().optional().trim().allow(null, ""),
+  otherdescription: Joi.string().optional().trim().allow(null, ""),
 });
 
 export const updateBookValidation = Joi.object({
@@ -81,4 +89,12 @@ export const updateBookValidation = Joi.object({
     .optional(),
   isbn: Joi.string().optional().trim().allow(null, ""),
   language: Joi.string().optional().trim().allow(null, ""),
+  is_bestselling: Joi.alternatives()
+    .try(Joi.boolean(), Joi.string().valid("true", "false"))
+    .optional(),
+  is_trending: Joi.alternatives()
+    .try(Joi.boolean(), Joi.string().valid("true", "false"))
+    .optional(),
+  highlights: Joi.string().optional().trim().allow(null, ""),
+  otherdescription: Joi.string().optional().trim().allow(null, ""),
 });
