@@ -5,11 +5,8 @@ export const saveNote = async (req, res, next) => {
   try {
     // Naye fields destructure karein
     const { title, notes, chapter_name, book_name } = req.body;
-    const userId = req.user.id;
 
-    // Create mein naye fields add karein
     const note = await UserAnnotation.create({
-      user_id: userId,
       title: title,
       notes: notes,
       chapter_name: chapter_name,
