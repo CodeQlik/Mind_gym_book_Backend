@@ -3,14 +3,19 @@ import sendResponse from "../utils/responseHandler.js";
 
 export const saveNote = async (req, res, next) => {
   try {
-    // Naye fields destructure karein
     const { title, notes, chapter_name, book_name } = req.body;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return sendResponse(res, 401, false, "Unauthorized: User not found");
+    }
 
     const note = await UserAnnotation.create({
-      title: title,
-      notes: notes,
-      chapter_name: chapter_name,
-      book_name: book_name,
+      userId: userId, // 👈 NOT user_id
+      title,
+      notes,
+      chapterName: chapter_name,
+      bookName: book_name,
     });
 
     return sendResponse(res, 201, true, "Note saved successfully", note);
@@ -22,14 +27,18 @@ export const saveNote = async (req, res, next) => {
 // Get All Notes for User
 export const getUserNotes = async (req, res, next) => {
   try {
-    const userId = req.user.id;
+    const userId = req.user?.id;
+
+    if (!userId) {
+      return sendResponse(res, 401, false, "Unauthorized: User not found");
+    }
 
     const notes = await UserAnnotation.findAll({
-      where: { user_id: userId },
+      where: { userId: userId },
       order: [
-        ["book_name", "ASC"],
-        ["chapter_name", "ASC"],
-        ["updated_at", "DESC"],
+        ["bookName", "ASC"], // Use model attribute name here
+        ["chapterName", "ASC"],
+        ["updatedAt", "DESC"],
       ],
     });
 
@@ -44,22 +53,21 @@ export const updateNote = async (req, res, next) => {
   try {
     const { id } = req.params;
     const { title, notes, chapter_name, book_name } = req.body;
-    const userId = req.user.id;
+    const userId = req.user?.id;
 
     const note = await UserAnnotation.findOne({
-      where: { id, user_id: userId },
+      where: { id, userId: userId },
     });
 
     if (!note) {
-      return sendResponse(res, 404, false, "Note not found");
+      return sendResponse(res, 404, false, "Note not found or unauthorized");
     }
 
-    // Update logic mein naye fields include karein
     await note.update({
       title: title || note.title,
       notes: notes || note.notes,
-      chapter_name: chapter_name || note.chapter_name,
-      book_name: book_name || note.book_name,
+      chapterName: chapter_name || note.chapterName,
+      bookName: book_name || note.bookName,
     });
 
     return sendResponse(res, 200, true, "Note updated successfully", note);
@@ -72,14 +80,14 @@ export const updateNote = async (req, res, next) => {
 export const deleteNote = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
+    const userId = req.user?.id;
 
     const note = await UserAnnotation.findOne({
-      where: { id, user_id: userId },
+      where: { id, userId: userId },
     });
 
     if (!note) {
-      return sendResponse(res, 404, false, "Note not found");
+      return sendResponse(res, 404, false, "Note not found or unauthorized");
     }
 
     await note.destroy();

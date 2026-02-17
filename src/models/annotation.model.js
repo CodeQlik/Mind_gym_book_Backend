@@ -6,37 +6,39 @@ const UserAnnotation = sequelize.define(
   {
     id: {
       type: DataTypes.INTEGER,
-      autoIncrement: true,
       primaryKey: true,
+      autoIncrement: true,
+    },
+
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false,
+      field: "user_id", // 🔥 DB column mapping
     },
 
     title: {
-      type: DataTypes.TEXT,
-      allowNull: false,
-      validate: {
-        notEmpty: { msg: "Title cannot be empty" },
-        notNull: { msg: "Title is required" },
-      },
+      type: DataTypes.STRING,
     },
+
     notes: {
       type: DataTypes.TEXT,
-      allowNull: true,
     },
 
-    chapter_name: {
+    chapterName: {
       type: DataTypes.STRING,
-      allowNull: true,
+      field: "chapter_name", // 🔥 mapping
     },
 
-    book_name: {
+    bookName: {
       type: DataTypes.STRING,
-      allowNull: false,
+      field: "book_name", // 🔥 mapping
     },
   },
   {
-    timestamps: true,
-    underscored: true,
     tableName: "user_annotations",
+    timestamps: true,
+    createdAt: "created_at", // 🔥 mapping
+    updatedAt: "updated_at", // 🔥 mapping
   },
 );
 
