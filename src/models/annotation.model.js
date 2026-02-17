@@ -14,26 +14,13 @@ const UserAnnotation = sequelize.define(
       allowNull: false,
       references: { model: "users", key: "id" },
     },
-    book_id: {
-      type: DataTypes.INTEGER,
-      allowNull: false,
-      references: { model: "books", key: "id" },
-    },
-    highlight_text: {
+    title: {
       type: DataTypes.TEXT,
       allowNull: true,
     },
     notes: {
       type: DataTypes.TEXT,
       allowNull: true,
-    },
-    page_number: {
-      type: DataTypes.INTEGER,
-      allowNull: true,
-    },
-    color: {
-      type: DataTypes.STRING,
-      defaultValue: "#FFFF00",
     },
   },
   {

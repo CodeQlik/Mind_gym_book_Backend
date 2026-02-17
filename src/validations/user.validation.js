@@ -27,6 +27,9 @@ export const registerValidation = Joi.object({
       "any.invalid":
         "Additional phone number must be different from the primary phone number",
     }),
+  verificationToken: Joi.string().optional().allow(null, "").messages({
+    "string.empty": "Verification token is optional",
+  }),
 });
 
 export const loginValidation = Joi.object({
@@ -59,6 +62,26 @@ export const updateProfileValidation = Joi.object({
       "any.invalid":
         "Additional phone number must be different from the primary phone number",
     }),
+});
+
+export const adminUpdateUserValidation = Joi.object({
+  name: Joi.string().optional().not().empty(),
+  email: Joi.string().email().optional(),
+  phone: Joi.string().optional().not().empty(),
+  additional_phone: Joi.string()
+    .optional()
+    .allow(null, "")
+    .not(Joi.ref("phone")),
+  user_type: Joi.string().valid("admin", "user").optional(),
+  is_active: Joi.boolean().optional(),
+  is_verified: Joi.boolean().optional(),
+  subscription_status: Joi.string()
+    .valid("active", "inactive", "expired")
+    .optional(),
+  subscription_plan: Joi.string()
+    .valid("free", "monthly", "yearly", "gold")
+    .optional(),
+  subscription_end_date: Joi.date().optional(),
 });
 
 export const changePasswordValidation = Joi.object({

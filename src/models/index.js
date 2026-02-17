@@ -6,11 +6,10 @@ import Cart from "./cart.model.js";
 import Wishlist from "./wishlist.model.js";
 import Payment from "./payment.model.js";
 import UserAnnotation from "./annotation.model.js";
-import BookPdfChunk from "./bookPdfChunk.model.js";
-import BookPage from "./bookPage.model.js";
 import Subscription from "./subscription.model.js";
 import UserBook from "./userBook.model.js";
 import Bookmark from "./bookmark.model.js";
+import EmailVerification from "./emailVerification.model.js";
 
 // Associations
 
@@ -43,15 +42,6 @@ Subscription.belongsTo(User, { foreignKey: "user_id", as: "user" });
 User.hasMany(UserAnnotation, { foreignKey: "user_id", as: "annotations" });
 UserAnnotation.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
-Book.hasMany(UserAnnotation, { foreignKey: "book_id", as: "annotations" });
-UserAnnotation.belongsTo(Book, { foreignKey: "book_id", as: "book" });
-
-Book.hasMany(BookPdfChunk, { foreignKey: "book_id", as: "pdf_chunks" });
-BookPdfChunk.belongsTo(Book, { foreignKey: "book_id", as: "book" });
-
-Book.hasMany(BookPage, { foreignKey: "book_id", as: "pages" });
-BookPage.belongsTo(Book, { foreignKey: "book_id", as: "book" });
-
 // UserBook Associations
 User.hasMany(UserBook, { foreignKey: "user_id", as: "purchased_books" });
 UserBook.belongsTo(User, { foreignKey: "user_id", as: "user" });
@@ -75,9 +65,8 @@ export {
   Wishlist,
   Payment,
   UserAnnotation,
-  BookPdfChunk,
-  BookPage,
   Subscription,
   UserBook,
   Bookmark,
+  EmailVerification,
 };

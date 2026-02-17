@@ -11,11 +11,10 @@ import {
   getBookBySlug,
   searchBooks,
   readBookPdf,
-  getBookPageContent,
 } from "../controllers/book.controller.js";
 import {
   toggleBookmark,
-  getBookBookmarks,
+  getUserBookmarks,
 } from "../controllers/bookmark.controller.js";
 import {
   bookValidation,
@@ -38,17 +37,11 @@ router.get("/search", optionalVerifyJWT, searchBooks);
 router.get("/category/:categoryId", optionalVerifyJWT, getBooksByCategory);
 router.get("/:id(\\d+)", optionalVerifyJWT, getBookById);
 router.get("/:slug", optionalVerifyJWT, getBookBySlug);
-router.get("/readBook/:id", verifyJWT, readBookPdf);
-router.get(
-  "/:id/page/:pageNumber",
-  verifyJWT,
-  checkBookAccess,
-  getBookPageContent,
-);
+router.get("/readBook/:id", optionalVerifyJWT, readBookPdf);
 
 // Bookmark Routes
 router.post("/bookmark/toggle", verifyJWT, toggleBookmark);
-router.get("/bookmark/:id", verifyJWT, getBookBookmarks);
+router.get("/bookmark/all", verifyJWT, getUserBookmarks);
 
 // Admin only routes
 router.get("/admin/all", verifyJWT, isAdmin, getAdminBooks);

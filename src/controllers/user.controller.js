@@ -1,24 +1,67 @@
 import userService from "../services/user.service.js";
 import sendResponse from "../utils/responseHandler.js";
 
-export const registerUser = async (req, res, next) => {
+export const sendRegistrationOTP = async (req, res, next) => {
   try {
-    const result = await userService.registerUser(req.body, req.files);
+    const { email } = req.body;
+    await userService.sendRegistrationOTP(email);
+    return sendResponse(res, 200, true, "Registration OTP sent successfully");
+  } catch (error) {
+    next(error);
+  }
+};
 
+export const verifyRegistrationOTP = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    const verificationToken = await userService.validateRegistrationOTP(
+      email,
+      otp,
+    );
+
+    // Set verification token as cookie
     const options = {
-      expires: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
+      expires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "None",
     };
+    res.cookie("verificationToken", verificationToken, options);
 
-    res.cookie("otpToken", result.otpToken, options);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Email verified successfully. You can now register.",
+      { verificationToken },
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const registerUser = async (req, res, next) => {
+  try {
+    const verificationToken =
+      req.cookies?.verificationToken || req.body.verificationToken;
+    const result = await userService.registerUser(
+      req.body,
+      req.files,
+      verificationToken,
+    );
+
+    // Clear verification token after successful registration
+    res.clearCookie("verificationToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    });
 
     return sendResponse(
       res,
       201,
       true,
-      "User registered successfully. Please verify your email.",
+      "User registered successfully.",
       result.user,
     );
   } catch (error) {
@@ -32,7 +75,7 @@ export const login = async (req, res, next) => {
     const result = await userService.login(email, password);
 
     const accessTokenOptions = {
-      expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "None",
@@ -84,7 +127,7 @@ export const refreshAccessToken = async (req, res, next) => {
     const result = await userService.refreshAccessToken(incomingRefreshToken);
 
     const accessTokenOptions = {
-      expires: new Date(Date.now() + 15 * 60 * 1000), // 15 minutes
+      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
       sameSite: "None",
@@ -180,44 +223,6 @@ export const deleteAccount = async (req, res, next) => {
     });
 
     return sendResponse(res, 200, true, "Account deleted successfully");
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const verifyEmail = async (req, res, next) => {
-  try {
-    const { email, otp } = req.body;
-    const otpToken = req.cookies?.otpToken;
-    await userService.verifyEmail(email, otp, otpToken);
-
-    res.clearCookie("otpToken", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-    });
-
-    return sendResponse(res, 200, true, "Email verified successfully");
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const sendOTP = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    const otpToken = await userService.sendOTP(email);
-
-    const options = {
-      expires: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-    };
-
-    res.cookie("otpToken", otpToken, options);
-
-    return sendResponse(res, 200, true, "Verification OTP sent successfully");
   } catch (error) {
     next(error);
   }

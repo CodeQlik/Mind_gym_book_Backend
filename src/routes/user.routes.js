@@ -9,14 +9,14 @@ import {
   forgotPassword,
   resetPassword,
   deleteAccount,
-  verifyEmail,
-  sendOTP,
   getAllUsers,
   updateUser,
   getUserById,
   deleteUser,
   searchUsers,
   refreshAccessToken,
+  sendRegistrationOTP,
+  verifyRegistrationOTP,
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -29,6 +29,7 @@ import {
   deleteAccountValidation,
   verifyEmailValidation,
   sendOTPValidation,
+  adminUpdateUserValidation,
 } from "../validations/user.validation.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
@@ -56,8 +57,17 @@ router.post(
   validate(resetPasswordValidation),
   resetPassword,
 );
-router.post("/verify-email", validate(verifyEmailValidation), verifyEmail);
-router.post("/send-otp", validate(sendOTPValidation), sendOTP);
+// Registration OTP Flow (Pre-registration email verification)
+router.post(
+  "/send-registration-otp",
+  validate(sendOTPValidation),
+  sendRegistrationOTP,
+);
+router.post(
+  "/verify-registration-otp",
+  validate(verifyEmailValidation),
+  verifyRegistrationOTP,
+);
 
 // Authenticated User Routes (Website & Application)
 router.post("/logout", verifyJWT, logout);
@@ -91,7 +101,7 @@ router.put(
   verifyJWT,
   isAdmin,
   upload.fields([{ name: "profile_image", maxCount: 1 }]),
-  validate(updateProfileValidation),
+  validate(adminUpdateUserValidation),
   updateUser,
 );
 router.delete("/delete/:id", verifyJWT, isAdmin, deleteUser);

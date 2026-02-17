@@ -1,6 +1,9 @@
-import { User, Address } from "../models/index.js";
+import { User, Address, EmailVerification } from "../models/index.js";
 import bcrypt from "bcryptjs";
-import { uploadOnCloudinary } from "../config/cloudinary.js";
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../config/cloudinary.js";
 import {
   generateAccessToken,
   generateRefreshToken,
@@ -58,14 +61,89 @@ class UserService {
     return await User.findOne({ where: { email } });
   }
 
-  async registerUser(data, files) {
+  async sendRegistrationOTP(email) {
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      throw new Error("Email is already registered. Please login.");
+    }
+
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Upsert OTP into email_verifications table using Sequelize
+    await EmailVerification.upsert({
+      email,
+      otp,
+    });
+
+    const message = `<h2>Registration Verification Code</h2><p>Your OTP is:</p><h1>${otp}</h1><p>This code is valid for 10 minutes.</p>`;
+    await sendEmail(email, "Verify Your Email", message);
+
+    return true;
+  }
+
+  async validateRegistrationOTP(email, otp) {
+    if (!otp) {
+      throw new Error("OTP is required.");
+    }
+
+    const record = await EmailVerification.findOne({
+      where: { email, otp },
+    });
+
+    if (!record) {
+      throw new Error("Invalid OTP");
+    }
+
+    const expiryTime = new Date(record.updatedAt).getTime() + 10 * 60 * 1000;
+    if (Date.now() > expiryTime) {
+      throw new Error("OTP has expired.");
+    }
+
+    // Generate verification token
+    const verificationToken = jwt.sign(
+      { email, type: "email_verified" },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "10m" },
+    );
+
+    return verificationToken;
+  }
+
+  async registerUser(data, files, verificationToken) {
     const { email, password, name, phone, additional_phone, user_type } = data;
 
+    // 1. Verify verification token
+    if (!verificationToken) {
+      throw new Error(
+        "Email verification required. Please verify your email first.",
+      );
+    }
+
+    let verifiedEmail;
+    try {
+      const decoded = jwt.verify(
+        verificationToken,
+        process.env.JWT_SECRET || "secret",
+      );
+      if (decoded.type !== "email_verified") {
+        throw new Error("Invalid verification token.");
+      }
+      verifiedEmail = decoded.email;
+    } catch (error) {
+      throw new Error(
+        "Invalid or expired verification token. Please verify your email again.",
+      );
+    }
+
+    // 2. Ensure the email in the token matches the email in the request
+    if (verifiedEmail !== email) {
+      throw new Error("Email mismatch. Please use the verified email address.");
+    }
+
+    // 3. Check if email exists (double check)
     const existingEmail = await User.findOne({ where: { email } });
     if (existingEmail) {
-      throw new Error(
-        "Email is already registered. Please use a different email.",
-      );
+      throw new Error("Email is already registered.");
     }
 
     if (phone) {
@@ -108,11 +186,15 @@ class UserService {
       additional_phone,
       user_type: user_type || "user",
       profile: profileData,
-      is_active: true,
+      is_active: true, // User is verified
     });
 
-    const otpToken = await this.sendVerificationEmail(user);
-    return { user: this.formatUserResponse(user), otpToken };
+    // 4. Clear OTP after success
+    await EmailVerification.destroy({
+      where: { email },
+    });
+
+    return { user: this.formatUserResponse(user) };
   }
 
   async login(email, password) {
@@ -190,8 +272,20 @@ class UserService {
     const user = await User.findByPk(userId);
     if (!user) throw new Error("User not found");
 
-    const { name, email, phone, additional_phone } = data;
+    const {
+      name,
+      email,
+      phone,
+      additional_phone,
+      user_type,
+      is_active,
+      is_verified,
+      subscription_status,
+      subscription_plan,
+      subscription_end_date,
+    } = data;
 
+    // 1. Check if email is already in use by another user
     if (email && email !== user.email) {
       const existing = await User.findOne({
         where: { id: { [Op.ne]: userId }, email },
@@ -199,7 +293,7 @@ class UserService {
       if (existing) throw new Error("Email is already in use.");
     }
 
-    // Handle profile JSON parsing
+    // 2. Handle Profile Data and Image
     let currentProfile = user.profile;
     if (typeof currentProfile === "string") {
       try {
@@ -215,10 +309,14 @@ class UserService {
       initials: currentProfile?.initials || "",
     };
 
+    // If a new profile image is uploaded
     if (files?.profile_image?.[0]) {
+      // Delete the old image from Cloudinary if it exists
       if (profileData.public_id) {
-        // Option to delete old image here
+        await deleteFromCloudinary(profileData.public_id);
       }
+
+      // Upload the new image
       const result = await uploadOnCloudinary(files.profile_image[0].path);
       if (result) {
         profileData.url = result.secure_url;
@@ -226,6 +324,7 @@ class UserService {
       }
     }
 
+    // Update initials if name changes
     if (name) {
       profileData.initials = name
         .split(" ")
@@ -234,13 +333,26 @@ class UserService {
         .toUpperCase();
     }
 
-    await user.update({
-      name: name || user.name,
-      email: email || user.email,
-      phone: phone || user.phone,
-      additional_phone: additional_phone || user.additional_phone,
-      profile: profileData,
-    });
+    // 3. Perform Update
+    const updateData = {};
+    if (name !== undefined) updateData.name = name;
+    if (email !== undefined) updateData.email = email;
+    if (phone !== undefined) updateData.phone = phone;
+    if (additional_phone !== undefined)
+      updateData.additional_phone = additional_phone;
+    if (user_type !== undefined) updateData.user_type = user_type;
+    if (is_active !== undefined) updateData.is_active = is_active;
+    if (is_verified !== undefined) updateData.is_verified = is_verified;
+    if (subscription_status !== undefined)
+      updateData.subscription_status = subscription_status;
+    if (subscription_plan !== undefined)
+      updateData.subscription_plan = subscription_plan;
+    if (subscription_end_date !== undefined)
+      updateData.subscription_end_date = subscription_end_date;
+
+    updateData.profile = profileData;
+
+    await user.update(updateData);
 
     return this.formatUserResponse(user);
   }
@@ -272,7 +384,30 @@ class UserService {
       { expiresIn: "1h" },
     );
     const resetUrl = `${process.env.FRONTEND_URL || "http://localhost:3000"}/reset-password?token=${resetToken}`;
-    const message = `<h1>Reset Your Password</h1><p>Click <a href="${resetUrl}">here</a> to reset.</p>`;
+
+    const message = `
+      <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #ffffff;">
+        <div style="text-align: center; padding-bottom: 20px;">
+          <h1 style="color: #333; margin: 0;">Mind Gym Book</h1>
+        </div>
+        <div style="padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
+          <h2 style="color: #444; margin-top: 0;">Password Reset Request</h2>
+          <p style="color: #666; font-size: 16px; line-height: 1.5;">
+            Hello, <br><br>
+            We received a request to reset your password for your Mind Gym Book account. Click the button below to set a new password:
+          </p>
+          <div style="text-align: center; margin: 30px 0;">
+            <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; display: inline-block;">Reset Password</a>
+          </div>
+          <p style="color: #888; font-size: 14px;">
+            This link will expire in 1 hour. If you didn't request this, you can safely ignore this email.
+          </p>
+        </div>
+        <div style="text-align: center; padding-top: 20px; color: #999; font-size: 12px;">
+          &copy; ${new Date().getFullYear()} Mind Gym Book. All rights reserved.
+        </div>
+      </div>
+    `;
 
     await sendEmail(user.email, "Password Reset Request", message);
     return true;
@@ -281,17 +416,31 @@ class UserService {
   async resetPassword(token, newPassword) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret");
-      if (decoded.type !== "reset") throw new Error("Invalid token");
+
+      if (!decoded || decoded.type !== "reset") {
+        throw new Error("Invalid token type");
+      }
 
       const user = await User.findOne({ where: { email: decoded.email } });
-      if (!user) throw new Error("User not found");
+      if (!user) {
+        throw new Error("User associated with this token not found");
+      }
 
       const salt = await bcrypt.genSalt(10);
-      user.password = await bcrypt.hash(newPassword, salt);
-      await user.save();
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+      await user.update({ password: hashedPassword });
+
       return true;
-    } catch (e) {
-      throw new Error("Invalid or expired reset token");
+    } catch (error) {
+      console.error("Reset Password Error:", error.message);
+      if (error.name === "TokenExpiredError") {
+        throw new Error("Reset token has expired. Please request a new one.");
+      }
+      if (error.name === "JsonWebTokenError") {
+        throw new Error("Invalid reset token.");
+      }
+      throw error;
     }
   }
 
@@ -304,40 +453,6 @@ class UserService {
 
     await user.destroy();
     return true;
-  }
-
-  async sendOTPForVerification(email) {
-    const otp = Math.floor(100000 + Math.random() * 900000).toString();
-    const otpToken = jwt.sign(
-      { email, otp, type: "verify" },
-      process.env.JWT_SECRET || "secret",
-      { expiresIn: "5m" },
-    );
-    const message = `<h2>Verification OTP</h2><h1>${otp}</h1>`;
-    await sendEmail(email, "Your Verification OTP", message);
-    return otpToken;
-  }
-
-  async sendVerificationEmail(user) {
-    return await this.sendOTPForVerification(user.email);
-  }
-
-  async verifyEmail(email, otp, otpToken) {
-    try {
-      const decoded = jwt.verify(otpToken, process.env.JWT_SECRET || "secret");
-      if (
-        decoded.type !== "verify" ||
-        decoded.email !== email ||
-        decoded.otp !== otp
-      ) {
-        throw new Error("Invalid verification details.");
-      }
-      const user = await User.findOne({ where: { email } });
-      if (user) await user.update({ is_verified: true });
-      return true;
-    } catch (e) {
-      throw new Error(e.message || "Verification failed");
-    }
   }
 
   async getAllUsers(page = 1, limit = 10) {

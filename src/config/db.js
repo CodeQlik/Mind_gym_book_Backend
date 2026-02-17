@@ -28,6 +28,7 @@ const connectDB = async () => {
     );
   } catch (error) {
     console.error("Unable to connect to the database:", error.message);
+    throw error; // Rethrow to stop server start
   }
 };
 
