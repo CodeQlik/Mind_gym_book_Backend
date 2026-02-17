@@ -15,8 +15,7 @@ const startServer = async () => {
     await connectDB();
 
     // 2. Sync models (Create/Alter tables)
-    // await sequelize.sync({ alter: true });
-    await sequelize.sync();
+    await sequelize.sync({ alter: true });
     console.log("Database models synced successfully");
 
     // 3. Seed admin user

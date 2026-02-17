@@ -23,10 +23,10 @@ class UserService {
       public_id: "",
       initials: name
         ? name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
         : "",
     };
 
@@ -82,10 +82,10 @@ class UserService {
       public_id: "",
       initials: name
         ? name
-            .split(" ")
-            .map((n) => n[0])
-            .join("")
-            .toUpperCase()
+          .split(" ")
+          .map((n) => n[0])
+          .join("")
+          .toUpperCase()
         : "",
     };
 
@@ -106,10 +106,10 @@ class UserService {
       user_type: user_type || "user",
       profile: profileData,
       is_active: true,
+      is_verified: true,
     });
 
-    const otpToken = await this.sendVerificationEmail(user);
-    return { user: this.formatUserResponse(user), otpToken };
+    return { user: this.formatUserResponse(user) };
   }
 
   async login(email, password) {

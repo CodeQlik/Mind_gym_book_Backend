@@ -27,7 +27,8 @@ export const registerValidation = Joi.object({
       "any.invalid":
         "Additional phone number must be different from the primary phone number",
     }),
-});
+  profile_image: Joi.any().optional(),
+}).unknown();
 
 export const loginValidation = Joi.object({
   email: Joi.string().email().required().messages({
@@ -59,7 +60,8 @@ export const updateProfileValidation = Joi.object({
       "any.invalid":
         "Additional phone number must be different from the primary phone number",
     }),
-});
+  profile_image: Joi.any().optional(),
+}).unknown();
 
 export const changePasswordValidation = Joi.object({
   old_password: Joi.string().required().messages({

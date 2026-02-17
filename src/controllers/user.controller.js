@@ -5,20 +5,11 @@ export const registerUser = async (req, res, next) => {
   try {
     const result = await userService.registerUser(req.body, req.files);
 
-    const options = {
-      expires: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-    };
-
-    res.cookie("otpToken", result.otpToken, options);
-
     return sendResponse(
       res,
       201,
       true,
-      "User registered successfully. Please verify your email.",
+      "User registered successfully.",
       result.user,
     );
   } catch (error) {
@@ -160,7 +151,7 @@ export const verifyEmail = async (req, res, next) => {
 export const sendOTP = async (req, res, next) => {
   try {
     const { email } = req.body;
-    const otpToken = await userService.sendOTP(email);
+    const otpToken = await userService.sendOTPForVerification(email);
 
     const options = {
       expires: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes

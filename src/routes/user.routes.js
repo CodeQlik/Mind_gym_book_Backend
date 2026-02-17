@@ -35,6 +35,10 @@ import validate from "../middlewares/validate.middleware.js";
 
 const router = express.Router();
 
+// OTP & Verification (Prioritized for reliability)
+router.post("/send-registration-otp", validate(sendOTPValidation), sendOTP);
+router.post("/verify-registration-otp", validate(verifyEmailValidation), verifyEmail);
+
 // Public Routes (Website & Application)
 router.post(
   "/register",
@@ -54,8 +58,6 @@ router.post(
   validate(resetPasswordValidation),
   resetPassword,
 );
-router.post("/verify-email", validate(verifyEmailValidation), verifyEmail);
-router.post("/send-otp", validate(sendOTPValidation), sendOTP);
 
 // Authenticated User Routes (Website & Application)
 router.post("/logout", verifyJWT, logout);
