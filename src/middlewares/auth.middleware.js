@@ -5,7 +5,8 @@ import sendResponse from "../utils/responseHandler.js";
 export const verifyJWT = async (req, res, next) => {
   try {
     const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace("Bearer ", "");
 
     if (!token) {
       return sendResponse(
@@ -16,7 +17,10 @@ export const verifyJWT = async (req, res, next) => {
       );
     }
 
-    const decodedToken = jwt.verify(token, process.env.JWT_SECRET || "secret");
+    const decodedToken = jwt.verify(
+      token,
+      process.env.ACCESS_TOKEN_SECRET || "access_secret",
+    );
 
     const user = await User.findByPk(decodedToken.id, {
       attributes: { exclude: ["password"] },
@@ -41,12 +45,13 @@ export const verifyJWT = async (req, res, next) => {
 export const optionalVerifyJWT = async (req, res, next) => {
   try {
     const token =
-      req.cookies?.token || req.header("Authorization")?.replace("Bearer ", "");
+      req.cookies?.accessToken ||
+      req.header("Authorization")?.replace("Bearer ", "");
 
     if (token) {
       const decodedToken = jwt.verify(
         token,
-        process.env.JWT_SECRET || "secret",
+        process.env.ACCESS_TOKEN_SECRET || "access_secret",
       );
       const user = await User.findByPk(decodedToken.id, {
         attributes: { exclude: ["password"] },

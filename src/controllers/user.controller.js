@@ -1,9 +1,61 @@
 import userService from "../services/user.service.js";
 import sendResponse from "../utils/responseHandler.js";
 
+export const sendRegistrationOTP = async (req, res, next) => {
+  try {
+    const { email } = req.body;
+    await userService.sendRegistrationOTP(email);
+    return sendResponse(res, 200, true, "Registration OTP sent successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyRegistrationOTP = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    const verificationToken = await userService.validateRegistrationOTP(
+      email,
+      otp,
+    );
+
+    // Set verification token as cookie
+    const options = {
+      expires: new Date(Date.now() + 10 * 60 * 1000), // 10 minutes
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    };
+    res.cookie("verificationToken", verificationToken, options);
+
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Email verified successfully. You can now register.",
+      { verificationToken },
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const registerUser = async (req, res, next) => {
   try {
-    const result = await userService.registerUser(req.body, req.files);
+    const verificationToken =
+      req.cookies?.verificationToken || req.body.verificationToken;
+    const result = await userService.registerUser(
+      req.body,
+      req.files,
+      verificationToken,
+    );
+
+    // Clear verification token after successful registration
+    res.clearCookie("verificationToken", {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    });
 
     return sendResponse(
       res,
@@ -22,16 +74,30 @@ export const login = async (req, res, next) => {
     const { email, password } = req.body;
     const result = await userService.login(email, password);
 
-    const options = {
+    const accessTokenOptions = {
+      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    };
+
+    const refreshTokenOptions = {
       expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     };
 
-    res.cookie("token", result.token, options);
+    const { accessToken, refreshToken, ...userWithoutTokens } = result;
 
-    return sendResponse(res, 200, true, "Login successful", result);
+    res.cookie("accessToken", accessToken, accessTokenOptions);
+    res.cookie("refreshToken", refreshToken, refreshTokenOptions);
+
+    return sendResponse(res, 200, true, "Login successful", {
+      user: userWithoutTokens,
+      accessToken,
+      refreshToken,
+    });
   } catch (error) {
     next(error);
   }
@@ -39,13 +105,45 @@ export const login = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
-    res.clearCookie("token", {
+    const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-    });
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    };
+    res.clearCookie("accessToken", options);
+    res.clearCookie("refreshToken", options);
 
     return sendResponse(res, 200, true, "Logged out successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const refreshAccessToken = async (req, res, next) => {
+  try {
+    const incomingRefreshToken =
+      req.cookies?.refreshToken || req.body.refreshToken;
+
+    const result = await userService.refreshAccessToken(incomingRefreshToken);
+
+    const accessTokenOptions = {
+      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    };
+
+    const refreshTokenOptions = {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
+    };
+
+    res.cookie("accessToken", result.accessToken, accessTokenOptions);
+    res.cookie("refreshToken", result.refreshToken, refreshTokenOptions);
+
+    return sendResponse(res, 200, true, "Access token refreshed", result);
   } catch (error) {
     next(error);
   }
@@ -121,48 +219,11 @@ export const deleteAccount = async (req, res, next) => {
     res.clearCookie("token", {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
+      secure: process.env.NODE_ENV === "production",
+      sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
 
     return sendResponse(res, 200, true, "Account deleted successfully");
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const verifyEmail = async (req, res, next) => {
-  try {
-    const { email, otp } = req.body;
-    const otpToken = req.cookies?.otpToken;
-    await userService.verifyEmail(email, otp, otpToken);
-
-    res.clearCookie("otpToken", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-    });
-
-    return sendResponse(res, 200, true, "Email verified successfully");
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const sendOTP = async (req, res, next) => {
-  try {
-    const { email } = req.body;
-    const otpToken = await userService.sendOTPForVerification(email);
-
-    const options = {
-      expires: new Date(Date.now() + 2 * 60 * 1000), // 2 minutes
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-    };
-
-    res.cookie("otpToken", otpToken, options);
-
-    return sendResponse(res, 200, true, "Verification OTP sent successfully");
   } catch (error) {
     next(error);
   }

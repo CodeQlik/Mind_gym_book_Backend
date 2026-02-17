@@ -4,10 +4,9 @@ import sendResponse from "../utils/responseHandler.js";
 import {
   User,
   Book,
-  BookPdfChunk,
-  BookPage,
   Subscription,
   UserBook,
+  Bookmark,
 } from "../models/index.js";
 import { Op } from "sequelize";
 
@@ -83,7 +82,19 @@ export const getBookById = async (req, res, next) => {
     // Publicly we only show active books
     const isAdminRequest = req.user && req.user.user_type === "admin";
     const book = await bookService.getBookById(req.params.id, !isAdminRequest);
-    return sendResponse(res, 200, true, "Book fetched successfully", book);
+
+    let isBookmarked = false;
+    if (req.user) {
+      const bookmark = await Bookmark.findOne({
+        where: { user_id: req.user.id, book_id: book.id },
+      });
+      isBookmarked = !!bookmark;
+    }
+
+    return sendResponse(res, 200, true, "Book fetched successfully", {
+      ...book.toJSON(),
+      isBookmarked,
+    });
   } catch (error) {
     next(error);
   }
@@ -96,7 +107,19 @@ export const getBookBySlug = async (req, res, next) => {
       req.params.slug,
       !isAdminRequest,
     );
-    return sendResponse(res, 200, true, "Book fetched successfully", book);
+
+    let isBookmarked = false;
+    if (req.user) {
+      const bookmark = await Bookmark.findOne({
+        where: { user_id: req.user.id, book_id: book.id },
+      });
+      isBookmarked = !!bookmark;
+    }
+
+    return sendResponse(res, 200, true, "Book fetched successfully", {
+      ...book.toJSON(),
+      isBookmarked,
+    });
   } catch (error) {
     next(error);
   }
@@ -206,108 +229,73 @@ export const searchBooks = async (req, res, next) => {
   }
 };
 
-export const getBookPageContent = async (req, res) => {
-  try {
-    const { id, pageNumber } = req.params;
-
-    const page = await BookPage.findOne({
-      where: { book_id: id, page_number: pageNumber },
-    });
-
-    if (!page) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Page not found" });
-    }
-
-    const totalPages = await BookPage.count({
-      where: { book_id: id },
-    });
-
-    res.status(200).json({
-      success: true,
-      data: page,
-      totalPages: totalPages,
-    });
-  } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
-  }
-};
 export const readBookPdf = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const userId = req.user.id;
-    const userType = req.user.user_type;
+    const user = req.user;
+    const userId = user?.id;
+    const userType = user?.user_type;
 
     const book = await Book.findByPk(id);
-    if (!book) return res.status(404).send("Book not found");
+    if (!book)
+      return res
+        .status(404)
+        .json({ success: false, message: "Book not found" });
 
-    let pageLimit = null;
+    if (!book.pdf_file || !book.pdf_file.url) {
+      return res
+        .status(404)
+        .json({ success: false, message: "PDF file not found for this book" });
+    }
 
-    if (userType === "admin") {
-      pageLimit = null;
-    } else if (book.is_premium) {
-      // Check individual book purchase
-      const purchase = await UserBook.findOne({
-        where: { user_id: userId, book_id: id },
-      });
+    let pdfUrl = book.pdf_file.url;
+    let isRestricted = false;
 
-      if (!purchase) {
-        const now = new Date();
-        // Check if user has an active subscription (from req.user for speed)
-        const hasActiveSubscription =
-          req.user.subscription_status === "active" &&
-          req.user.subscription_end_date &&
-          new Date(req.user.subscription_end_date) >= now;
+    // Admin has full access
+    if (userType !== "admin") {
+      if (book.is_premium) {
+        let hasAccess = false;
 
-        if (!hasActiveSubscription) {
-          pageLimit = 5;
-          res.setHeader("X-Subscription-Required", "true");
+        if (userId) {
+          // Check individual book purchase
+          const purchase = await UserBook.findOne({
+            where: { user_id: userId, book_id: id },
+          });
+
+          if (purchase) {
+            hasAccess = true;
+          } else {
+            // Check active subscription
+            const now = new Date();
+            const hasActiveSubscription =
+              user.subscription_status === "active" &&
+              user.subscription_end_date &&
+              new Date(user.subscription_end_date) >= now;
+
+            if (hasActiveSubscription) {
+              hasAccess = true;
+            }
+          }
+        }
+
+        if (!hasAccess) {
+          isRestricted = true;
         }
       }
     }
 
-    // 3. Streaming Headers
-    res.setHeader("Content-Type", "application/pdf");
-    res.setHeader("Content-Disposition", `inline; filename="${book.slug}.pdf"`);
-
-    let offset = 0;
-    const CHUNK_BATCH = 10;
-
-    while (true) {
-      let whereClause = { book_id: id };
-
-      if (pageLimit !== null) {
-        whereClause.page_number = { [Op.lte]: pageLimit };
+    if (isRestricted) {
+      // Cloudinary transformation for first 5 pages
+      if (pdfUrl.includes("/upload/")) {
+        pdfUrl = pdfUrl.replace("/upload/", "/upload/pg_1-5/");
       }
-
-      const chunks = await BookPdfChunk.findAll({
-        where: whereClause,
-        order: [["chunk_index", "ASC"]],
-        limit: CHUNK_BATCH,
-        offset: offset,
-        raw: true,
-      });
-
-      if (!chunks || chunks.length === 0) break;
-
-      for (const chunk of chunks) {
-        if (chunk.data) {
-          res.write(chunk.data);
-        }
-      }
-
-      offset += chunks.length;
-      if (chunks.length < CHUNK_BATCH) break;
+      res.setHeader("X-Subscription-Required", "true");
     }
 
-    res.end();
+    // Redirect to the (possibly restricted) Cloudinary URL
+    return res.redirect(pdfUrl);
   } catch (error) {
-    console.error("Error streaming PDF:", error);
-    if (!res.headersSent) {
-      res.status(500).send("Error streaming PDF");
-    } else {
-      res.end();
-    }
+    console.error("Error redirecting to PDF:", error);
+    next(error);
   }
 };

@@ -1,30 +1,29 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
 
-const Bookmark = sequelize.define(
-  "Bookmark",
+const EmailVerification = sequelize.define(
+  "EmailVerification",
   {
     id: {
       type: DataTypes.INTEGER,
       autoIncrement: true,
       primaryKey: true,
     },
-    user_id: {
-      type: DataTypes.INTEGER,
+    email: {
+      type: DataTypes.STRING,
       allowNull: false,
-      references: { model: "users", key: "id" },
+      unique: true,
     },
-    book_id: {
-      type: DataTypes.INTEGER,
+    otp: {
+      type: DataTypes.STRING(6),
       allowNull: false,
-      references: { model: "books", key: "id" },
     },
   },
   {
     timestamps: true,
     underscored: true,
-    tableName: "bookmarks",
+    tableName: "email_verifications",
   },
 );
 
-export default Bookmark;
+export default EmailVerification;

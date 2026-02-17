@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
 
-const BookPdfChunk = sequelize.define(
-  "BookPdfChunk",
+const Review = sequelize.define(
+  "Review",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -16,33 +16,33 @@ const BookPdfChunk = sequelize.define(
         model: "books",
         key: "id",
       },
-      onDelete: "CASCADE",
     },
-    chunk_index: {
+    user_id: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      references: {
+        model: "users",
+        key: "id",
+      },
     },
-    page_number: {
+    rating: {
       type: DataTypes.INTEGER,
-      allowNull: true,
-      comment: "Effective page number this chunk belongs to (approximate)",
+      allowNull: false,
+      validate: {
+        min: 1,
+        max: 5,
+      },
     },
-    data: {
-      type: DataTypes.BLOB("long"),
+    comment: {
+      type: DataTypes.TEXT,
       allowNull: false,
     },
   },
   {
     timestamps: true,
     underscored: true,
-    tableName: "book_pdf_chunks",
-    indexes: [
-      {
-        unique: true,
-        fields: ["book_id", "chunk_index"],
-      },
-    ],
+    tableName: "reviews",
   },
 );
 
-export default BookPdfChunk;
+export default Review;

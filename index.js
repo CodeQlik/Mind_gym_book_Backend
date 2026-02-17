@@ -15,7 +15,9 @@ const startServer = async () => {
     await connectDB();
 
     // 2. Sync models (Create/Alter tables)
-    await sequelize.sync({ alter: true });
+    // Disabled alter:true to prevent "Too many keys specified" error.
+    // Use migrations for schema changes in production.
+    await sequelize.sync({ alter: false });
     console.log("Database models synced successfully");
 
     // 3. Seed admin user

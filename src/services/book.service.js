@@ -1,5 +1,4 @@
-import { Book, Category, BookPdfChunk, BookPage } from "../models/index.js";
-import { PDFParse } from "pdf-parse";
+import { Book, Category } from "../models/index.js";
 import fs from "fs";
 import {
   uploadOnCloudinary,
@@ -56,10 +55,19 @@ class BookService {
       };
     }
 
-    let pdfFileData = { url: "", public_id: "", is_chunked: false };
+    let pdfFileData = { url: "", public_id: "" };
     if (files && files.pdf_file && files.pdf_file.length > 0) {
-      // Store in DB chunks instead of Cloudinary
-      pdfFileData = { is_chunked: true };
+      const uploadResult = await uploadOnCloudinary(
+        files.pdf_file[0].path,
+        "mindgymbook/books/pdfs",
+      );
+      if (!uploadResult) {
+        throw new Error("Failed to upload PDF to Cloudinary");
+      }
+      pdfFileData = {
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id,
+      };
     }
 
     const bookData = {
@@ -82,16 +90,6 @@ class BookService {
     };
 
     const createdBook = await Book.create(bookData);
-
-    if (
-      files &&
-      files.pdf_file &&
-      files.pdf_file.length > 0 &&
-      pdfFileData.is_chunked
-    ) {
-      await this.savePdfChunks(createdBook.id, files.pdf_file[0].path);
-      await this.saveBookPages(createdBook.id, files.pdf_file[0].path);
-    }
 
     return createdBook;
   }
@@ -217,24 +215,21 @@ class BookService {
     }
 
     if (files?.pdf_file?.[0]) {
-      // Cleaning up old chunks if they exist
-      await BookPdfChunk.destroy({ where: { book_id: id } });
-
       if (book.pdf_file?.public_id) {
         await deleteFromCloudinary(book.pdf_file.public_id);
       }
 
-      // Save chunks to DB
-      await this.savePdfChunks(id, files.pdf_file[0].path);
-
-      // Save pages to DB
-      await BookPage.destroy({ where: { book_id: id } });
-      await this.saveBookPages(id, files.pdf_file[0].path);
+      const uploadResult = await uploadOnCloudinary(
+        files.pdf_file[0].path,
+        "mindgymbook/books/pdfs",
+      );
+      if (!uploadResult) {
+        throw new Error("Failed to upload updated PDF to Cloudinary");
+      }
 
       data.pdf_file = {
-        is_chunked: true,
-        url: "",
-        public_id: "",
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id,
       };
     }
 
@@ -264,46 +259,6 @@ class BookService {
 
     await book.destroy();
     return true;
-  }
-
-  async savePdfChunks(bookId, filePath) {
-    const CHUNK_SIZE = 64 * 1024; // 64KB chunks
-    const fileBuffer = fs.readFileSync(filePath);
-    const totalChunks = Math.ceil(fileBuffer.length / CHUNK_SIZE);
-
-    const chunks = [];
-    for (let i = 0; i < totalChunks; i++) {
-      const start = i * CHUNK_SIZE;
-      const end = Math.min(start + CHUNK_SIZE, fileBuffer.length);
-      const chunkData = fileBuffer.subarray(start, end);
-
-      const pageNumber = Math.floor(i / 4) + 1;
-
-      chunks.push({
-        book_id: bookId,
-        chunk_index: i,
-        page_number: pageNumber,
-        data: chunkData,
-      });
-    }
-
-    await BookPdfChunk.bulkCreate(chunks);
-  }
-
-  async saveBookPages(bookId, filePath) {
-    const dataBuffer = fs.readFileSync(filePath);
-    const parser = new PDFParse({ data: dataBuffer });
-    const textResult = await parser.getText();
-
-    if (textResult.pages && textResult.pages.length > 0) {
-      const pageRecords = textResult.pages.map((page) => ({
-        book_id: bookId,
-        page_number: page.num,
-        content: page.text || "",
-      }));
-
-      await BookPage.bulkCreate(pageRecords);
-    }
   }
 
   async searchBooks(
