@@ -37,8 +37,7 @@ const UserAnnotation = sequelize.define(
   {
     tableName: "user_annotations",
     timestamps: true,
-    createdAt: "created_at", // 🔥 mapping
-    updatedAt: "updated_at", // 🔥 mapping
+    underscored: true,
   },
 );
 
