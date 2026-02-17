@@ -37,7 +37,7 @@ router.get("/search", optionalVerifyJWT, searchBooks);
 router.get("/category/:categoryId", optionalVerifyJWT, getBooksByCategory);
 router.get("/:id(\\d+)", optionalVerifyJWT, getBookById);
 router.get("/:slug", optionalVerifyJWT, getBookBySlug);
-router.get("/readBook/:id", optionalVerifyJWT, readBookPdf);
+router.get("/readBook/:id", readBookPdf);
 
 // Bookmark Routes
 router.post("/bookmark/toggle", verifyJWT, toggleBookmark);

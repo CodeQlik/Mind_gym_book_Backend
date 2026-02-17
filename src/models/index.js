@@ -10,6 +10,7 @@ import Subscription from "./subscription.model.js";
 import UserBook from "./userBook.model.js";
 import Bookmark from "./bookmark.model.js";
 import EmailVerification from "./emailVerification.model.js";
+import Review from "./review.model.js";
 
 // Associations
 
@@ -56,6 +57,13 @@ Bookmark.belongsTo(User, { foreignKey: "user_id", as: "user" });
 Book.hasMany(Bookmark, { foreignKey: "book_id", as: "bookmarks" });
 Bookmark.belongsTo(Book, { foreignKey: "book_id", as: "book" });
 
+// Review Associations
+User.hasMany(Review, { foreignKey: "user_id", as: "reviews" });
+Review.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
+Book.hasMany(Review, { foreignKey: "book_id", as: "reviews" });
+Review.belongsTo(Book, { foreignKey: "book_id", as: "book" });
+
 export {
   User,
   Address,
@@ -69,4 +77,5 @@ export {
   UserBook,
   Bookmark,
   EmailVerification,
+  Review,
 };

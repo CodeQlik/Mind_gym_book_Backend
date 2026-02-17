@@ -10,6 +10,8 @@ import cartRoutes from "./routes/cart.routes.js";
 import wishlistRoutes from "./routes/wishlist.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
 import annotationRoutes from "./routes/annotation.routes.js";
+import reviewRoutes from "./routes/review.routes.js";
+
 import errorMiddleware from "./middlewares/error.middleware.js";
 
 const app = express();
@@ -28,6 +30,7 @@ app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/payment", paymentRoutes);
 app.use("/api/v1/annotation", annotationRoutes);
+app.use("/api/v1/review", reviewRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Mind Gym Book API (Restructured Edition)");
