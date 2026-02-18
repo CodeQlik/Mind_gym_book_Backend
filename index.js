@@ -4,7 +4,6 @@ import { app } from "./src/app.js";
 import "./src/models/index.js";
 import seedAdmin from "./src/seeders/admin.seeder.js";
 import initCronJobs from "./src/utils/cronJobs.js";
-
 dotenv.config();
 
 const PORT = process.env.PORT || 5000;

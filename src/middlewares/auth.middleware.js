@@ -58,11 +58,12 @@ export const optionalVerifyJWT = async (req, res, next) => {
       });
       if (user) {
         req.user = user;
+        console.log(`[AUTH] User verified: ${user.email} (${user.user_type})`);
       }
     }
     next();
   } catch (error) {
-    // If token is invalid, we just proceed as guest
+    console.log("[AUTH] Optional token verification failed:", error.message);
     next();
   }
 };

@@ -5,7 +5,7 @@ import Book from "./book.model.js";
 import Cart from "./cart.model.js";
 import Wishlist from "./wishlist.model.js";
 import Payment from "./payment.model.js";
-import UserAnnotation from "./annotation.model.js";
+import UserNote from "./note.model.js";
 import Subscription from "./subscription.model.js";
 import UserBook from "./userBook.model.js";
 import Bookmark from "./bookmark.model.js";
@@ -39,9 +39,9 @@ Payment.belongsTo(User, { foreignKey: "user_id", as: "user" });
 User.hasMany(Subscription, { foreignKey: "user_id", as: "subscriptions" });
 Subscription.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
-// Annotation Associations
-User.hasMany(UserAnnotation, { foreignKey: "user_id", as: "annotations" });
-UserAnnotation.belongsTo(User, { foreignKey: "user_id", as: "user" });
+// Note Associations
+User.hasMany(UserNote, { foreignKey: "user_id", as: "notes" });
+UserNote.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
 // UserBook Associations
 User.hasMany(UserBook, { foreignKey: "user_id", as: "purchased_books" });
@@ -72,7 +72,7 @@ export {
   Cart,
   Wishlist,
   Payment,
-  UserAnnotation,
+  UserNote,
   Subscription,
   UserBook,
   Bookmark,

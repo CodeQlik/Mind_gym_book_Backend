@@ -1,4 +1,5 @@
 import { Book, Category } from "../models/index.js";
+import { Op } from "sequelize";
 import fs from "fs";
 import {
   uploadOnCloudinary,
@@ -28,8 +29,12 @@ class BookService {
       is_active,
       published_date,
       is_premium,
+      is_bestselling,
+      is_trending,
+      highlights,
       isbn,
       language,
+      otherdescription,
     } = data;
 
     const category = await Category.findByPk(category_id);
@@ -55,6 +60,21 @@ class BookService {
       };
     }
 
+    let coverImageData = { url: "", public_id: "" };
+    if (files && files.cover_image && files.cover_image.length > 0) {
+      const uploadResult = await uploadOnCloudinary(
+        files.cover_image[0].path,
+        "mindgymbook/books/covers",
+      );
+      if (!uploadResult) {
+        throw new Error("Failed to upload cover image to Cloudinary");
+      }
+      coverImageData = {
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id,
+      };
+    }
+
     let pdfFileData = { url: "", public_id: "" };
     if (files && files.pdf_file && files.pdf_file.length > 0) {
       const uploadResult = await uploadOnCloudinary(
@@ -70,6 +90,22 @@ class BookService {
       };
     }
 
+    let extraImages = [];
+    if (files && files.images && files.images.length > 0) {
+      for (const file of files.images) {
+        const uploadResult = await uploadOnCloudinary(
+          file.path,
+          "mindgymbook/books/gallery",
+        );
+        if (uploadResult) {
+          extraImages.push({
+            url: uploadResult.secure_url,
+            public_id: uploadResult.public_id,
+          });
+        }
+      }
+    }
+
     const bookData = {
       title,
       slug,
@@ -80,11 +116,17 @@ class BookService {
       condition: condition || "good",
       stock: stock || 1,
       thumbnail: thumbnailData,
+      cover_image: coverImageData,
       pdf_file: pdfFileData,
+      images: extraImages,
       category_id,
       is_active: is_active !== undefined ? is_active : true,
       published_date: published_date || null,
       is_premium: is_premium === "true" || is_premium === true,
+      is_bestselling: is_bestselling === "true" || is_bestselling === true,
+      is_trending: is_trending === "true" || is_trending === true,
+      highlights: highlights || null,
+      otherdescription: otherdescription || null,
       isbn: isbn || null,
       language: language || null,
     };
@@ -188,8 +230,19 @@ class BookService {
     const book = await Book.findByPk(id);
     if (!book) throw new Error("Book not found");
 
-    if (data.title) {
-      data.slug = this.generateSlug(data.title);
+    if (data.title && data.title !== book.title) {
+      const newSlug = this.generateSlug(data.title);
+      // Check if another book already has this slug
+      const existingBook = await Book.findOne({
+        where: {
+          slug: newSlug,
+          id: { [Op.ne]: id }, // Op should be imported from sequelize
+        },
+      });
+      if (existingBook) {
+        throw new Error("Another book already exists with this title");
+      }
+      data.slug = newSlug;
     }
 
     if (data.category_id) {
@@ -198,6 +251,7 @@ class BookService {
     }
 
     if (files?.thumbnail?.[0]) {
+      console.log(`[BOOK UPDATE] Updating thumbnail for book ${id}`);
       if (book.thumbnail?.public_id) {
         await deleteFromCloudinary(book.thumbnail.public_id);
       }
@@ -206,7 +260,7 @@ class BookService {
         "mindgymbook/books/thumbnails",
       );
       if (!uploadResult) {
-        throw new Error("Failed to upload updated thumbnail to Cloudinary");
+        throw new Error("Failed to upload updated thumbnail");
       }
       data.thumbnail = {
         url: uploadResult.secure_url,
@@ -214,7 +268,26 @@ class BookService {
       };
     }
 
+    if (files?.cover_image?.[0]) {
+      console.log(`[BOOK UPDATE] Updating cover image for book ${id}`);
+      if (book.cover_image?.public_id) {
+        await deleteFromCloudinary(book.cover_image.public_id);
+      }
+      const uploadResult = await uploadOnCloudinary(
+        files.cover_image[0].path,
+        "mindgymbook/books/covers",
+      );
+      if (!uploadResult) {
+        throw new Error("Failed to upload updated cover image");
+      }
+      data.cover_image = {
+        url: uploadResult.secure_url,
+        public_id: uploadResult.public_id,
+      };
+    }
+
     if (files?.pdf_file?.[0]) {
+      console.log(`[BOOK UPDATE] Updating PDF file for book ${id}`);
       if (book.pdf_file?.public_id) {
         await deleteFromCloudinary(book.pdf_file.public_id);
       }
@@ -224,7 +297,7 @@ class BookService {
         "mindgymbook/books/pdfs",
       );
       if (!uploadResult) {
-        throw new Error("Failed to upload updated PDF to Cloudinary");
+        throw new Error("Failed to upload updated PDF");
       }
 
       data.pdf_file = {
@@ -233,16 +306,39 @@ class BookService {
       };
     }
 
+    if (files?.images && files.images.length > 0) {
+      console.log(`[BOOK UPDATE] Replacing gallery for book ${id}`);
+      if (book.images && book.images.length > 0) {
+        for (const img of book.images) {
+          if (img.public_id) await deleteFromCloudinary(img.public_id);
+        }
+      }
+
+      let extraImages = [];
+      for (const file of files.images) {
+        const uploadResult = await uploadOnCloudinary(
+          file.path,
+          "mindgymbook/books/gallery",
+        );
+        if (uploadResult) {
+          extraImages.push({
+            url: uploadResult.secure_url,
+            public_id: uploadResult.public_id,
+          });
+        }
+      }
+      data.images = extraImages;
+    }
+
+    // Cast strings from FormData to booleans properly
     if (data.is_premium !== undefined) {
-      data.is_premium = data.is_premium === "true" || data.is_premium === true;
+      data.is_premium = String(data.is_premium) === "true";
     }
-
-    if (data.isbn !== undefined) {
-      book.isbn = data.isbn;
+    if (data.is_bestselling !== undefined) {
+      data.is_bestselling = String(data.is_bestselling) === "true";
     }
-
-    if (data.language !== undefined) {
-      book.language = data.language;
+    if (data.is_trending !== undefined) {
+      data.is_trending = String(data.is_trending) === "true";
     }
 
     await book.update(data);
@@ -275,6 +371,7 @@ class BookService {
         { title: { [Op.like]: `%${query}%` } },
         { author: { [Op.like]: `%${query}%` } },
         { description: { [Op.like]: `%${query}%` } },
+        { otherdescription: { [Op.like]: `%${query}%` } },
         { isbn: { [Op.like]: `%${query}%` } },
       ],
     };

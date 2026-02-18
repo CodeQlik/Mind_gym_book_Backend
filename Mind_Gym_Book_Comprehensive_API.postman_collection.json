@@ -1,0 +1,118 @@
+{
+	"info": {
+		"_postman_id": "8d3f1a2b-4e6c-482d-8f9a-c1234567890a",
+		"name": "Mind Gym Book - FULL API",
+		"description": "Comprehensive API collection covering all routes for the Mind Gym Book project.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Auth & Users",
+			"item": [
+				{ "name": "Send Registration OTP", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"user@example.com\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/users/send-registration-otp", "host": ["{{baseUrl}}"], "path": ["users", "send-registration-otp"] } } },
+				{ "name": "Verify Registration OTP", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"user@example.com\", \"otp\": \"123456\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/users/verify-registration-otp", "host": ["{{baseUrl}}"], "path": ["users", "verify-registration-otp"] } } },
+				{ "name": "Register User", "request": { "method": "POST", "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "John Doe", "type": "text" }, { "key": "email", "value": "john@example.com", "type": "text" }, { "key": "password", "value": "Password@123", "type": "text" }, { "key": "phone", "value": "9876543210", "type": "text" }, { "key": "profile_image", "type": "file" }] }, "url": { "raw": "{{baseUrl}}/users/register", "host": ["{{baseUrl}}"], "path": ["users", "register"] } } },
+				{ "name": "Login", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"admin@mindgym.com\", \"password\": \"Admin@123\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/users/login", "host": ["{{baseUrl}}"], "path": ["users", "login"] } } },
+				{ "name": "Logout", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/users/logout", "host": ["{{baseUrl}}"], "path": ["users", "logout"] } } },
+				{ "name": "Get Profile", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/users/profile", "host": ["{{baseUrl}}"], "path": ["users", "profile"] } } },
+				{ "name": "Update Profile", "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "Updated Name", "type": "text" }] }, "url": { "raw": "{{baseUrl}}/users/update-profile", "host": ["{{baseUrl}}"], "path": ["users", "update-profile"] } } },
+				{ "name": "Change Password", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"oldPassword\": \"Password@123\", \"newPassword\": \"NewPass@456\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/users/change-password", "host": ["{{baseUrl}}"], "path": ["users", "change-password"] } } },
+				{ "name": "Forgot Password", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"john@example.com\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/users/forgot-password", "host": ["{{baseUrl}}"], "path": ["users", "forgot-password"] } } },
+				{ "name": "Reset Password", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"john@example.com\", \"otp\": \"123456\", \"newPassword\": \"NewReset@123\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/users/reset-password", "host": ["{{baseUrl}}"], "path": ["users", "reset-password"] } } },
+				{ "name": "Delete My Account", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"password\": \"Password@123\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/users/delete-account", "host": ["{{baseUrl}}"], "path": ["users", "delete-account"] } } },
+				{ "name": "Refresh Access Token", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"refreshToken\": \"...\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/users/refresh-token", "host": ["{{baseUrl}}"], "path": ["users", "refresh-token"] } } },
+				{
+					"name": "Admin: User Management",
+					"item": [
+						{ "name": "Get All Users", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/users/all-users", "host": ["{{baseUrl}}"], "path": ["users", "all-users"] } } },
+						{ "name": "Search Users", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/users/search?query=John", "host": ["{{baseUrl}}"], "path": ["users", "search"], "query": [{ "key": "query", "value": "John" }] } } },
+						{ "name": "Get User By ID", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/users/1", "host": ["{{baseUrl}}"], "path": ["users", "1"] } } },
+						{ "name": "Admin: Update User", "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "Updated Admin Side", "type": "text" }] }, "url": { "raw": "{{baseUrl}}/users/update/1", "host": ["{{baseUrl}}"], "path": ["users", "update", "1"] } } },
+						{ "name": "Admin: Delete User", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/users/delete/1", "host": ["{{baseUrl}}"], "path": ["users", "delete", "1"] } } }
+					]
+				}
+			]
+		},
+		{
+			"name": "Books",
+			"item": [
+				{ "name": "Get All Books (Public)", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/book/all?page=1&limit=10", "host": ["{{baseUrl}}"], "path": ["book", "all"] } } },
+				{ "name": "Search Books", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/book/search?query=gym", "host": ["{{baseUrl}}"], "path": ["book", "search"] } } },
+				{ "name": "Get Book by ID", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/book/36", "host": ["{{baseUrl}}"], "path": ["book", "36"] } } },
+				{ "name": "Get Book by Slug", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/book/the-mind-gym", "host": ["{{baseUrl}}"], "path": ["book", "the-mind-gym"] } } },
+				{ "name": "Get Books by Category", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/book/category/1", "host": ["{{baseUrl}}"], "path": ["book", "category", "1"] } } },
+				{ "name": "Read Book PDF (Redirect)", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}", "disabled": false }], "url": { "raw": "{{baseUrl}}/book/readBook/36", "host": ["{{baseUrl}}"], "path": ["book", "readBook", "36"] } } },
+				{ "name": "Toggle Bookmark", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"bookId\": 36}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/book/bookmark/toggle", "host": ["{{baseUrl}}"], "path": ["book", "bookmark", "toggle"] } } },
+				{ "name": "Get My Bookmarks", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/book/bookmark/all", "host": ["{{baseUrl}}"], "path": ["book", "bookmark", "all"] } } },
+				{
+					"name": "Admin: Book Panel",
+					"item": [
+						{ "name": "Admin: Get All Books", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/book/admin/all", "host": ["{{baseUrl}}"], "path": ["book", "admin", "all"] } } },
+						{ "name": "Admin: Add Book", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "formdata", "formdata": [{ "key": "title", "value": "Book Title", "type": "text" }, { "key": "author", "value": "Author Name", "type": "text" }, { "key": "description", "value": "Description", "type": "text" }, { "key": "price", "value": "499", "type": "text" }, { "key": "category_id", "value": "1", "type": "text" }, { "key": "thumbnail", "type": "file" }, { "key": "pdf_file", "type": "file" }] }, "url": { "raw": "{{baseUrl}}/book/add", "host": ["{{baseUrl}}"], "path": ["book", "add"] } } },
+						{ "name": "Admin: Update Book", "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "formdata", "formdata": [{ "key": "title", "value": "Updated Title", "type": "text" }] }, "url": { "raw": "{{baseUrl}}/book/update/36", "host": ["{{baseUrl}}"], "path": ["book", "update", "36"] } } },
+						{ "name": "Admin: Delete Book", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/book/delete/36", "host": ["{{baseUrl}}"], "path": ["book", "delete", "36"] } } },
+						{ "name": "Admin: Toggle Status", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/book/toggle-status/36", "host": ["{{baseUrl}}"], "path": ["book", "toggle-status", "36"] } } }
+					]
+				}
+			]
+		},
+		{
+			"name": "Categories",
+			"item": [
+				{ "name": "Get All Categories", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/category/all", "host": ["{{baseUrl}}"], "path": ["category", "all"] } } },
+				{ "name": "Search Categories", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/category/search?q=gym", "host": ["{{baseUrl}}"], "path": ["category", "search"], "query": [{ "key": "q", "value": "gym" }] } } },
+				{ "name": "Get Category by ID", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/category/1", "host": ["{{baseUrl}}"], "path": ["category", "1"] } } },
+				{ "name": "Get Category by Slug", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/category/fitness", "host": ["{{baseUrl}}"], "path": ["category", "fitness"] } } },
+				{
+					"name": "Admin: Category Panel",
+					"item": [
+						{ "name": "Admin: Get All Categories", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/category/admin/all", "host": ["{{baseUrl}}"], "path": ["category", "admin", "all"] } } },
+						{ "name": "Admin: Add Category", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "Category Name", "type": "text" }, { "key": "image", "type": "file" }] }, "url": { "raw": "{{baseUrl}}/category/add", "host": ["{{baseUrl}}"], "path": ["category", "add"] } } },
+						{ "name": "Admin: Update Category", "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "Updated Category", "type": "text" }] }, "url": { "raw": "{{baseUrl}}/category/update/1", "host": ["{{baseUrl}}"], "path": ["category", "update", "1"] } } },
+						{ "name": "Admin: Delete Category", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/category/delete/1", "host": ["{{baseUrl}}"], "path": ["category", "delete", "1"] } } },
+						{ "name": "Admin: Toggle Status", "request": { "method": "PATCH", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/category/toggle-status/1", "host": ["{{baseUrl}}"], "path": ["category", "toggle-status", "1"] } } }
+					]
+				}
+			]
+		},
+		{
+			"name": "Addresses",
+			"item": [
+				{ "name": "Get My Addresses", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/user/addresses/my-addresses", "host": ["{{baseUrl}}"], "path": ["user", "addresses", "my-addresses"] } } },
+				{ "name": "Add Address", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"address_line1\": \"123 Street\", \"city\": \"New York\", \"state\": \"NY\", \"pincode\": \"10001\", \"type\": \"home\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/user/addresses/add", "host": ["{{baseUrl}}"], "path": ["user", "addresses", "add"] } } }
+			]
+		},
+		{
+			"name": "Cart & Wishlist",
+			"item": [
+				{ "name": "Get Cart", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/cart", "host": ["{{baseUrl}}"], "path": ["cart"] } } },
+				{ "name": "Add to Cart", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"book_id\": 36, \"quantity\": 1}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/cart/add", "host": ["{{baseUrl}}"], "path": ["cart", "add"] } } },
+				{ "name": "Update Cart Quantity", "request": { "method": "PUT", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"quantity\": 2}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/cart/update/1", "host": ["{{baseUrl}}"], "path": ["cart", "update", "1"] } } },
+				{ "name": "Remove from Cart", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/cart/remove/1", "host": ["{{baseUrl}}"], "path": ["cart", "remove", "1"] } } },
+				{ "name": "Clear Cart", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/cart/clear", "host": ["{{baseUrl}}"], "path": ["cart", "clear"] } } },
+				{ "name": "Toggle Wishlist", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"book_id\": 36}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/wishlist/toggle", "host": ["{{baseUrl}}"], "path": ["wishlist", "toggle"] } } }
+			]
+		},
+		{
+			"name": "Payments & Subscriptions",
+			"item": [
+				{ "name": "Create Subscription Order", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"planType\": \"monthly\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/payment/create-subscription-order", "host": ["{{baseUrl}}"], "path": ["payment", "create-subscription-order"] } } },
+				{ "name": "Verify Payment", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"razorpay_order_id\": \"order_...\", \"razorpay_payment_id\": \"pay_...\", \"razorpay_signature\": \"...\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/payment/verify-payment", "host": ["{{baseUrl}}"], "path": ["payment", "verify-payment"] } } }
+			]
+		},
+		{
+			"name": "Notes & Reviews",
+			"item": [
+				{ "name": "Save Note", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"title\": \"My Chapter Note\", \"notes\": \"This is a great chapter.\", \"book_name\": \"Mind Gym\", \"chapter_name\": \"Introduction\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/note", "host": ["{{baseUrl}}"], "path": ["note"] } } },
+				{ "name": "Get My Notes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/note/all", "host": ["{{baseUrl}}"], "path": ["note", "all"] } } },
+				{ "name": "Add Review", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"book_id\": 36, \"rating\": 5, \"comment\": \"Excellent read!\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/review/add", "host": ["{{baseUrl}}"], "path": ["review", "add"] } } },
+				{ "name": "Get Book Reviews", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/review/book/36", "host": ["{{baseUrl}}"], "path": ["review", "book", "36"] } } },
+				{ "name": "Delete Review", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/review/delete/1", "host": ["{{baseUrl}}"], "path": ["review", "delete", "1"] } } }
+			]
+		}
+	],
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:5000/api/v1", "type": "string" },
+		{ "key": "accessToken", "value": "your_jwt_here", "type": "string" }
+	]
+}
