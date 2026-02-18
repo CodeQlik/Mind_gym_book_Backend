@@ -5,7 +5,7 @@ export const registerValidation = Joi.object({
     "string.empty": "Name is required",
     "any.required": "Name is required",
   }),
-  email: Joi.string().email().required().messages({
+  email: Joi.string().email().lowercase().trim().required().messages({
     "string.email": "Please provide a valid email",
     "string.empty": "Email is required",
     "any.required": "Email is required",
@@ -15,15 +15,22 @@ export const registerValidation = Joi.object({
     "string.empty": "Password is required",
     "any.required": "Password is required",
   }),
-  phone: Joi.string().required().messages({
-    "string.empty": "Phone number is required",
-    "any.required": "Phone number is required",
-  }),
+  phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
+    .required()
+    .messages({
+      "string.pattern.base": "Phone number must be exactly 10 digits",
+      "string.empty": "Phone number is required",
+      "any.required": "Phone number is required",
+    }),
   additional_phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
     .optional()
     .allow(null, "")
     .not(Joi.ref("phone"))
     .messages({
+      "string.pattern.base":
+        "Additional phone number must be exactly 10 digits",
       "any.invalid":
         "Additional phone number must be different from the primary phone number",
     }),
@@ -33,7 +40,7 @@ export const registerValidation = Joi.object({
 });
 
 export const loginValidation = Joi.object({
-  email: Joi.string().email().required().messages({
+  email: Joi.string().email().lowercase().trim().required().messages({
     "string.email": "Please provide a valid email",
     "string.empty": "Email is required",
     "any.required": "Email is required",
@@ -48,17 +55,24 @@ export const updateProfileValidation = Joi.object({
   name: Joi.string().optional().not().empty().messages({
     "string.empty": "Name cannot be empty",
   }),
-  email: Joi.string().email().optional().messages({
+  email: Joi.string().email().lowercase().trim().optional().messages({
     "string.email": "Please provide a valid email",
   }),
-  phone: Joi.string().optional().not().empty().messages({
-    "string.empty": "Phone number cannot be empty",
-  }),
+  phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
+    .optional()
+    .messages({
+      "string.pattern.base": "Phone number must be exactly 10 digits",
+      "string.empty": "Phone number cannot be empty",
+    }),
   additional_phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
     .optional()
     .allow(null, "")
     .not(Joi.ref("phone"))
     .messages({
+      "string.pattern.base":
+        "Additional phone number must be exactly 10 digits",
       "any.invalid":
         "Additional phone number must be different from the primary phone number",
     }),
@@ -66,9 +80,12 @@ export const updateProfileValidation = Joi.object({
 
 export const adminUpdateUserValidation = Joi.object({
   name: Joi.string().optional().not().empty(),
-  email: Joi.string().email().optional(),
-  phone: Joi.string().optional().not().empty(),
+  email: Joi.string().email().lowercase().trim().optional(),
+  phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
+    .optional(),
   additional_phone: Joi.string()
+    .pattern(/^[0-9]{10}$/)
     .optional()
     .allow(null, "")
     .not(Joi.ref("phone")),
@@ -104,7 +121,7 @@ export const changePasswordValidation = Joi.object({
 });
 
 export const forgotPasswordValidation = Joi.object({
-  email: Joi.string().email().required().messages({
+  email: Joi.string().email().lowercase().trim().required().messages({
     "string.email": "Please provide a valid email",
     "string.empty": "Email is required",
     "any.required": "Email is required",
