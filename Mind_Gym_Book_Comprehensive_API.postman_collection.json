@@ -101,10 +101,10 @@
 			]
 		},
 		{
-			"name": "Annotations & Reviews",
+			"name": "Notes & Reviews",
 			"item": [
-				{ "name": "Save Note", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"title\": \"My Chapter Note\", \"notes\": \"This is a great chapter.\", \"book_name\": \"Mind Gym\", \"chapter_name\": \"Introduction\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/annotation", "host": ["{{baseUrl}}"], "path": ["annotation"] } } },
-				{ "name": "Get My Notes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/annotation/all", "host": ["{{baseUrl}}"], "path": ["annotation", "all"] } } },
+				{ "name": "Save Note", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"title\": \"My Chapter Note\", \"notes\": \"This is a great chapter.\", \"book_name\": \"Mind Gym\", \"chapter_name\": \"Introduction\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/note", "host": ["{{baseUrl}}"], "path": ["note"] } } },
+				{ "name": "Get My Notes", "request": { "method": "GET", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/note/all", "host": ["{{baseUrl}}"], "path": ["note", "all"] } } },
 				{ "name": "Add Review", "request": { "method": "POST", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "body": { "mode": "raw", "raw": "{\"book_id\": 36, \"rating\": 5, \"comment\": \"Excellent read!\"}", "options": { "raw": { "language": "json" } } }, "url": { "raw": "{{baseUrl}}/review/add", "host": ["{{baseUrl}}"], "path": ["review", "add"] } } },
 				{ "name": "Get Book Reviews", "request": { "method": "GET", "url": { "raw": "{{baseUrl}}/review/book/36", "host": ["{{baseUrl}}"], "path": ["review", "book", "36"] } } },
 				{ "name": "Delete Review", "request": { "method": "DELETE", "header": [{ "key": "Authorization", "value": "Bearer {{accessToken}}" }], "url": { "raw": "{{baseUrl}}/review/delete/1", "host": ["{{baseUrl}}"], "path": ["review", "delete", "1"] } } }

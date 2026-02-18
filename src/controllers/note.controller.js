@@ -1,4 +1,4 @@
-import { UserAnnotation } from "../models/index.js";
+import { UserNote } from "../models/index.js";
 import sendResponse from "../utils/responseHandler.js";
 
 export const saveNote = async (req, res, next) => {
@@ -10,7 +10,7 @@ export const saveNote = async (req, res, next) => {
       return sendResponse(res, 401, false, "Unauthorized: User not found");
     }
 
-    const note = await UserAnnotation.create({
+    const note = await UserNote.create({
       userId: userId, // 👈 NOT user_id
       title,
       notes,
@@ -33,7 +33,7 @@ export const getUserNotes = async (req, res, next) => {
       return sendResponse(res, 401, false, "Unauthorized: User not found");
     }
 
-    const notes = await UserAnnotation.findAll({
+    const notes = await UserNote.findAll({
       where: { userId: userId },
       order: [
         ["bookName", "ASC"], // Use model attribute name here
@@ -55,7 +55,7 @@ export const updateNote = async (req, res, next) => {
     const { title, notes, chapter_name, book_name } = req.body;
     const userId = req.user?.id;
 
-    const note = await UserAnnotation.findOne({
+    const note = await UserNote.findOne({
       where: { id, userId: userId },
     });
 
@@ -82,7 +82,7 @@ export const deleteNote = async (req, res, next) => {
     const { id } = req.params;
     const userId = req.user?.id;
 
-    const note = await UserAnnotation.findOne({
+    const note = await UserNote.findOne({
       where: { id, userId: userId },
     });
 

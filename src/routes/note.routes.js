@@ -4,7 +4,7 @@ import {
   getUserNotes,
   updateNote,
   deleteNote,
-} from "../controllers/annotation.controller.js";
+} from "../controllers/note.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 const router = express.Router();
@@ -12,9 +12,9 @@ const router = express.Router();
 router.use(verifyJWT);
 
 // Note Routes
-router.post("/", saveNote);
-router.get("/all", getUserNotes);
-router.put("/:id", updateNote);
-router.delete("/:id", deleteNote);
+router.post("/saveNote", saveNote);
+router.get("/getAllNotes", getUserNotes);
+router.put("/updateNote/:id", updateNote);
+router.delete("/deleteNote/:id", deleteNote);
 
 export default router;

@@ -9,7 +9,7 @@ import bookRoutes from "./routes/book.routes.js";
 import cartRoutes from "./routes/cart.routes.js";
 import wishlistRoutes from "./routes/wishlist.routes.js";
 import paymentRoutes from "./routes/payment.routes.js";
-import annotationRoutes from "./routes/annotation.routes.js";
+import noteRoutes from "./routes/note.routes.js";
 import reviewRoutes from "./routes/review.routes.js";
 
 import errorMiddleware from "./middlewares/error.middleware.js";
@@ -29,7 +29,7 @@ app.use("/api/v1/book", bookRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/wishlist", wishlistRoutes);
 app.use("/api/v1/payment", paymentRoutes);
-app.use("/api/v1/annotation", annotationRoutes);
+app.use("/api/v1/note", noteRoutes);
 app.use("/api/v1/review", reviewRoutes);
 
 app.get("/", (req, res) => {

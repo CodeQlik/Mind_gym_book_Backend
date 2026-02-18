@@ -1,8 +1,8 @@
 import { DataTypes } from "sequelize";
 import sequelize from "../config/db.js";
 
-const UserAnnotation = sequelize.define(
-  "UserAnnotation",
+const UserNote = sequelize.define(
+  "UserNote",
   {
     id: {
       type: DataTypes.INTEGER,
@@ -35,10 +35,10 @@ const UserAnnotation = sequelize.define(
     },
   },
   {
-    tableName: "user_annotations",
+    tableName: "user_notes",
     timestamps: true,
     underscored: true,
   },
 );
 
-export default UserAnnotation;
+export default UserNote;
