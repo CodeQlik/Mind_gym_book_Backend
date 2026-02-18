@@ -17,6 +17,7 @@ import {
   refreshAccessToken,
   sendRegistrationOTP,
   verifyRegistrationOTP,
+  googleLogin,
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -46,6 +47,7 @@ router.post(
 );
 
 router.post("/login", validate(loginValidation), login);
+router.post("/google-login", googleLogin);
 router.post("/refresh-token", refreshAccessToken);
 router.post(
   "/forgot-password",

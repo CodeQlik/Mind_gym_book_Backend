@@ -103,6 +103,44 @@ export const login = async (req, res, next) => {
   }
 };
 
+export const googleLogin = async (req, res, next) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return sendResponse(res, 400, false, "Google ID Token is required");
+    }
+
+    const result = await userService.googleLogin(idToken);
+
+    const accessTokenOptions = {
+      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    };
+
+    const refreshTokenOptions = {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    };
+
+    const { accessToken, refreshToken, ...userWithoutTokens } = result;
+
+    res.cookie("accessToken", accessToken, accessTokenOptions);
+    res.cookie("refreshToken", refreshToken, refreshTokenOptions);
+
+    return sendResponse(res, 200, true, "Google Login successful", {
+      user: userWithoutTokens,
+      accessToken,
+      refreshToken,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const logout = async (req, res, next) => {
   try {
     const options = {

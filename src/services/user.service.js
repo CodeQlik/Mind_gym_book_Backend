@@ -1,4 +1,5 @@
 import { User, Address, EmailVerification } from "../models/index.js";
+import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 import {
   uploadOnCloudinary,
@@ -203,6 +204,53 @@ class UserService {
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Invalid email or password");
+
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
+
+    await user.update({ refresh_token: refreshToken });
+
+    return {
+      ...this.formatUserResponse(user),
+      accessToken,
+      refreshToken,
+    };
+  }
+
+  async googleLogin(idToken) {
+    const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+    const ticket = await client.verifyIdToken({
+      idToken,
+      audience: process.env.GOOGLE_CLIENT_ID,
+    });
+
+    const payload = ticket.getPayload();
+    const { email, name, picture, sub: googleId } = payload;
+
+    let user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      // Create new user if doesn't exist
+      user = await User.create({
+        name,
+        email,
+        password: await bcrypt.hash(Math.random().toString(36).slice(-8), 10), // Random password
+        user_type: "user",
+        profile: {
+          url: picture,
+          public_id: "",
+          initials: name
+            ? name
+                .split(" ")
+                .map((n) => n[0])
+                .join("")
+                .toUpperCase()
+            : "",
+        },
+        is_active: true,
+        is_verified: true,
+      });
+    }
 
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
