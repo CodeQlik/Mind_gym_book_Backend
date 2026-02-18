@@ -195,7 +195,17 @@ class UserService {
       where: { email },
     });
 
-    return { user: this.formatUserResponse(user) };
+    const accessToken = generateAccessToken(user.id);
+    const refreshToken = generateRefreshToken(user.id);
+
+    await user.update({ refresh_token: refreshToken });
+
+    return {
+      user_id: user.id,
+      user_type: user.user_type,
+      accessToken,
+      refreshToken,
+    };
   }
 
   async login(email, password) {
@@ -211,7 +221,8 @@ class UserService {
     await user.update({ refresh_token: refreshToken });
 
     return {
-      ...this.formatUserResponse(user),
+      user_id: user.id,
+      user_type: user.user_type,
       accessToken,
       refreshToken,
     };
@@ -258,7 +269,8 @@ class UserService {
     await user.update({ refresh_token: refreshToken });
 
     return {
-      ...this.formatUserResponse(user),
+      user_id: user.id,
+      user_type: user.user_type,
       accessToken,
       refreshToken,
     };
@@ -272,6 +284,7 @@ class UserService {
     try {
       const decodedToken = jwt.verify(
         incomingRefreshToken,
+
         process.env.REFRESH_TOKEN_SECRET || "refresh_secret",
       );
 
