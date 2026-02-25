@@ -79,7 +79,7 @@ class NotificationService {
   // DB: Save a notification record
   async saveNotification(userId, type, title, message, metadata = null) {
     return await Notification.create({
-      user_id: userId,
+      userId: userId,
       type,
       title,
       message,
@@ -92,7 +92,7 @@ class NotificationService {
   async notifyNewBookRelease(book, categoryName) {
     try {
       const favorites = await UserFavoriteCategory.findAll({
-        where: { category_id: book.category_id },
+        where: { categoryId: book.category_id },
         include: [
           {
             model: User,
@@ -212,7 +212,7 @@ class NotificationService {
   // Admin: Send notification by Category Interest
   async sendToCategory(categoryId, type, title, message, metadata = null) {
     const favorites = await UserFavoriteCategory.findAll({
-      where: { category_id: categoryId },
+      where: { categoryId: categoryId },
       include: [
         {
           model: User,
@@ -258,7 +258,7 @@ class NotificationService {
     const offset = (page - 1) * limit;
 
     const { count, rows } = await Notification.findAndCountAll({
-      where: { user_id: userId },
+      where: { userId: userId },
       order: [["created_at", "DESC"]],
       limit,
       offset,
@@ -275,14 +275,14 @@ class NotificationService {
   // Get unread count for a user
   async getUnreadCount(userId) {
     return await Notification.count({
-      where: { user_id: userId, is_read: false },
+      where: { userId: userId, is_read: false },
     });
   }
 
   // Mark a single notification as read
   async markAsRead(notificationId, userId) {
     const notification = await Notification.findOne({
-      where: { id: notificationId, user_id: userId },
+      where: { id: notificationId, userId: userId },
     });
     if (!notification) return null;
 
@@ -295,7 +295,7 @@ class NotificationService {
   async markAllAsRead(userId) {
     await Notification.update(
       { is_read: true },
-      { where: { user_id: userId, is_read: false } },
+      { where: { userId: userId, is_read: false } },
     );
     return true;
   }
@@ -303,7 +303,7 @@ class NotificationService {
   // Delete a single notification
   async deleteNotification(notificationId, userId) {
     const notification = await Notification.findOne({
-      where: { id: notificationId, user_id: userId },
+      where: { id: notificationId, userId: userId },
     });
     if (!notification) return false;
 
@@ -324,7 +324,7 @@ class NotificationService {
   // Favorite Categories
   async getFavoriteCategories(userId) {
     const favorites = await UserFavoriteCategory.findAll({
-      where: { user_id: userId },
+      where: { userId: userId },
       include: [
         {
           model: Category,
@@ -341,7 +341,7 @@ class NotificationService {
     if (!category) throw new Error("Category not found");
 
     const [fav, created] = await UserFavoriteCategory.findOrCreate({
-      where: { user_id: userId, category_id: categoryId },
+      where: { userId: userId, categoryId: categoryId },
     });
 
     if (!created) throw new Error("Category already in favorites");
@@ -350,7 +350,7 @@ class NotificationService {
 
   async removeFavoriteCategory(userId, categoryId) {
     const fav = await UserFavoriteCategory.findOne({
-      where: { user_id: userId, category_id: categoryId },
+      where: { userId: userId, categoryId: categoryId },
     });
     if (!fav) throw new Error("Category not in favorites");
 
@@ -360,12 +360,12 @@ class NotificationService {
 
   async syncFavoriteCategories(userId, categoryIds) {
     // Replace all favorites with the new list
-    await UserFavoriteCategory.destroy({ where: { user_id: userId } });
+    await UserFavoriteCategory.destroy({ where: { userId: userId } });
 
     if (categoryIds && categoryIds.length > 0) {
       const records = categoryIds.map((category_id) => ({
-        user_id: userId,
-        category_id,
+        userId: userId,
+        categoryId: category_id,
       }));
       await UserFavoriteCategory.bulkCreate(records, {
         ignoreDuplicates: true,

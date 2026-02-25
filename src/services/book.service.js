@@ -501,64 +501,66 @@ class BookService {
     let publicId = book.pdf_file.public_id;
 
     // Extract version and type from URL
-    const versionMatch = originalUrl.match(/\/v(\d+)\//);
-    const version = versionMatch ? versionMatch[1] : undefined;
+    const isRaw = originalUrl.includes("/raw/");
+    const isPrivate = originalUrl.includes("/private/");
     const isAuth = originalUrl.includes("/authenticated/");
 
-    // 🛠️ 3. Fix: Consistent standard for PDFs
-    // NOTE: Adding a dummy transformation [{ quality: "auto" }] often fixes the SDK double-slash bug
-    const options = {
-      resource_type: "image",
-      type: isAuth ? "authenticated" : "upload",
-      secure: true,
-      sign_url: isAuth,
-      version: version,
-      format: "pdf",
-      transformation: [{ quality: "auto" }], // 👈 Fixes the // bug in signed URLs
-    };
+    const versionMatch = originalUrl.match(/\/v(\d+)\//);
+    const version = versionMatch ? versionMatch[1] : undefined;
 
-    // Public ID se .pdf extension hatana zaroori hai aur leading slash check karna hai
-    const cleanPublicId = publicId.replace(/\.pdf$/i, "").replace(/^\//, "");
+    // 🛠️ 3. Fix: Consistent standard for PDFs
+    const isRestricted = isPrivate || isAuth || isRaw;
+    const cleanPublicId = isRaw
+      ? publicId
+      : publicId.replace(/\.pdf$/i, "").replace(/^\//, "");
+
     let finalUrl;
 
-    const result = await cloudinary.api.resource(cleanPublicId, {
-      resource_type: "raw",
-      type: "private",
-    });
-
-    const url = cloudinary.utils.private_download_url(
-      publicId,
-      "pdf", // file format
-      {
-        resource_type: "raw",
-        type: "private",
-        expires_at: Math.floor(Date.now() / 1000) + 60 * 5, // 5 minutes
-      },
-    );
-
-    if (hasAccess) {
-      // Full PDF Access
-      finalUrl = cloudinary.url(cleanPublicId, options);
-    } else {
-      // Preview Logic (1-5 pages)
-      const previewOptions = {
-        ...options,
-        transformation: [{ page: "1-5" }],
-      };
-      finalUrl = cloudinary.url(cleanPublicId, previewOptions);
-    }
-
-    // 🔥 GLOBAL DOUBLE SLASH & VERSION FIX
-    // 1. Double slash fix (e.g., s--...--//v... -> s--...--/v...)
-    finalUrl = finalUrl.replace(/([^:])\/\//g, "$1/");
-
-    // 2. Ensure version is correct in the final URL
-    if (version && version !== "1" && !finalUrl.includes(`/v${version}/`)) {
-      finalUrl = finalUrl.replace(/\/v\d+\//, `/v${version}/`);
+    try {
+      if (hasAccess) {
+        // Full PDF Access - Use private_download_url for all restricted resources
+        if (isRestricted) {
+          finalUrl = cloudinary.utils.private_download_url(
+            cleanPublicId,
+            isRaw ? "" : "pdf",
+            {
+              resource_type: isRaw ? "raw" : "image",
+              type: isPrivate ? "private" : isAuth ? "authenticated" : "upload",
+              expires_at: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
+            },
+          );
+        } else {
+          // Public upload
+          finalUrl = cloudinary.url(cleanPublicId, {
+            resource_type: "image",
+            type: "upload",
+            secure: true,
+            format: "pdf",
+          });
+        }
+      } else {
+        // Preview Logic (1-5 pages) - Only works if NOT raw
+        if (isRaw) {
+          finalUrl = originalUrl;
+        } else {
+          // Re-attempting signed URL for previews, but with very basic options
+          finalUrl = cloudinary.url(cleanPublicId, {
+            resource_type: "image",
+            type: isPrivate ? "private" : isAuth ? "authenticated" : "upload",
+            secure: true,
+            sign_url: true,
+            format: "pdf",
+            transformation: [{ page: "1-5" }],
+          });
+        }
+      }
+    } catch (err) {
+      console.error("[BOOK SERVICE] URL Generation Error:", err.message);
+      finalUrl = originalUrl;
     }
 
     return {
-      pdf_url: finalUrl,
+      pdf_url: finalUrl || originalUrl,
       isPreview: !hasAccess,
     };
   }

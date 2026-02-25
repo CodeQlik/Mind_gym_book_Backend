@@ -9,15 +9,17 @@ const UserFavoriteCategory = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    user_id: {
+    userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: "users", key: "id" },
+      field: "user_id",
     },
-    category_id: {
+    categoryId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: "categories", key: "id" },
+      field: "category_id",
     },
   },
   {

@@ -9,10 +9,11 @@ const Notification = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    user_id: {
+    userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
       references: { model: "users", key: "id" },
+      field: "user_id",
     },
     type: {
       type: DataTypes.ENUM(

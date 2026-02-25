@@ -22,8 +22,8 @@ const uploadOnCloudinary = async (localFilePath, folderName = "") => {
       folderName || (isPdf ? "mindgymbook/pdfs" : "mindgymbook/images");
 
     const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: isPdf ? "raw" : "image", // 🔥 FIXED
-      type: isPdf ? "private" : "upload", // 🔥 private only for PDF
+      resource_type: isPdf ? "raw" : "image",
+      type: isPdf ? "private" : "upload",
       folder: uploadFolder,
       use_filename: true,
       unique_filename: true,
