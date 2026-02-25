@@ -18,10 +18,26 @@ const Subscription = sequelize.define(
       },
       onDelete: "CASCADE",
     },
-    plan_type: {
-      type: DataTypes.ENUM("monthly", "yearly", "gold"),
-      allowNull: false,
+    plan_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: {
+        model: "plans",
+        key: "id",
+      },
+      onDelete: "SET NULL",
     },
+    plan_type: {
+      type: DataTypes.ENUM("one_month", "three_month", "one_year", "free"),
+      allowNull: false,
+      defaultValue: "free",
+    },
+    amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+      defaultValue: 0.0,
+    },
+
     payment_id: {
       type: DataTypes.STRING,
       allowNull: true,

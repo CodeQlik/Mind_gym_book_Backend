@@ -4,9 +4,16 @@ import sendResponse from "../utils/responseHandler.js";
 
 export const verifyJWT = async (req, res, next) => {
   try {
-    const token =
-      req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer ", "");
+    let token;
+    const authHeader = req.header("Authorization");
+
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      token = authHeader.substring(7);
+    } else if (req.cookies?.accessToken) {
+      token = req.cookies.accessToken;
+    }
+
+    token = token?.trim();
 
     if (!token) {
       return sendResponse(
@@ -17,10 +24,9 @@ export const verifyJWT = async (req, res, next) => {
       );
     }
 
-    const decodedToken = jwt.verify(
-      token,
-      process.env.ACCESS_TOKEN_SECRET || "access_secret",
-    );
+    const secret = process.env.ACCESS_TOKEN_SECRET || "access_secret";
+
+    const decodedToken = jwt.verify(token, secret);
 
     const user = await User.findByPk(decodedToken.id, {
       attributes: { exclude: ["password"] },
@@ -44,26 +50,24 @@ export const verifyJWT = async (req, res, next) => {
 
 export const optionalVerifyJWT = async (req, res, next) => {
   try {
-    const token =
-      req.cookies?.accessToken ||
-      req.header("Authorization")?.replace("Bearer ", "");
+    const authHeader = req.header("Authorization");
+    const token = (
+      authHeader?.replace("Bearer ", "") || req.cookies?.accessToken
+    )?.trim();
 
     if (token) {
-      const decodedToken = jwt.verify(
-        token,
-        process.env.ACCESS_TOKEN_SECRET || "access_secret",
-      );
+      const secret = process.env.ACCESS_TOKEN_SECRET || "access_secret";
+
+      const decodedToken = jwt.verify(token, secret);
       const user = await User.findByPk(decodedToken.id, {
         attributes: { exclude: ["password"] },
       });
       if (user) {
         req.user = user;
-        console.log(`[AUTH] User verified: ${user.email} (${user.user_type})`);
       }
     }
     next();
   } catch (error) {
-    console.log("[AUTH] Optional token verification failed:", error.message);
     next();
   }
 };

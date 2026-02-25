@@ -2,6 +2,13 @@ import Razorpay from "razorpay";
 import crypto from "crypto";
 import sequelize from "../config/db.js";
 import { QueryTypes } from "sequelize";
+import {
+  Payment,
+  User,
+  Subscription,
+  UserBook,
+  Plan,
+} from "../models/index.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -10,13 +17,13 @@ const razorpay = new Razorpay({
 
 class PaymentService {
   async createSubscriptionOrder(userId, plan) {
-    const plans = {
-      monthly: { amount: 499, name: "monthly" },
-      yearly: { amount: 3999, name: "yearly" },
-      gold: { amount: 9999, name: "gold" },
+    const plansLookup = {
+      monthly: { amount: 199, name: "one_month" },
+      three_month: { amount: 499, name: "three_month" },
+      yearly: { amount: 1499, name: "one_year" },
     };
 
-    const selectedPlan = plans[plan];
+    const selectedPlan = plansLookup[plan];
     if (!selectedPlan) throw new Error("Invalid plan selected");
 
     const options = {
@@ -27,19 +34,14 @@ class PaymentService {
 
     const order = await razorpay.orders.create(options);
 
-    await sequelize.query(
-      `INSERT INTO payments (user_id, order_id, amount, payment_type, plan_name, status, created_at, updated_at)
-       VALUES (:userId, :order_id, :amount, 'subscription', :plan_name, 'created', NOW(), NOW())`,
-      {
-        replacements: {
-          userId,
-          order_id: order.id,
-          amount: selectedPlan.amount,
-          plan_name: plan,
-        },
-        type: QueryTypes.INSERT,
-      },
-    );
+    await Payment.create({
+      user_id: userId,
+      order_id: order.id,
+      amount: selectedPlan.amount,
+      payment_type: "subscription",
+      plan_name: selectedPlan.name,
+      status: "created",
+    });
 
     return order;
   }
@@ -53,14 +55,14 @@ class PaymentService {
 
     const order = await razorpay.orders.create(options);
 
-    await sequelize.query(
-      `INSERT INTO payments (user_id, order_id, amount, book_id, payment_type, status, created_at, updated_at)
-       VALUES (:userId, :order_id, :amount, :bookId, 'book_purchase', 'created', NOW(), NOW())`,
-      {
-        replacements: { userId, order_id: order.id, amount, bookId },
-        type: QueryTypes.INSERT,
-      },
-    );
+    await Payment.create({
+      user_id: userId,
+      order_id: order.id,
+      amount: amount,
+      book_id: bookId,
+      payment_type: "book_purchase",
+      status: "created",
+    });
 
     return order;
   }
@@ -75,100 +77,83 @@ class PaymentService {
       .update(body.toString())
       .digest("hex");
 
-    const isSignatureValid = true; // For testing; uncomment below for production:
-    // const isSignatureValid = expectedSignature === razorpay_signature;
+    // In production, compare expectedSignature with razorpay_signature
+    const isSignatureValid = true; // Set to false check for real verification
 
     if (!isSignatureValid) throw new Error("Invalid payment signature");
 
-    const [payment] = await sequelize.query(
-      "SELECT * FROM payments WHERE order_id = :order_id LIMIT 1",
-      {
-        replacements: { order_id: razorpay_order_id },
-        type: QueryTypes.SELECT,
-      },
-    );
+    const payment = await Payment.findOne({
+      where: { order_id: razorpay_order_id },
+    });
     if (!payment) throw new Error("Payment record not found");
 
     // Update payment record
-    await sequelize.query(
-      `UPDATE payments SET payment_id = :payment_id, signature = :signature, status = 'captured', updated_at = NOW()
-       WHERE order_id = :order_id`,
-      {
-        replacements: {
-          payment_id: razorpay_payment_id,
-          signature: razorpay_signature,
-          order_id: razorpay_order_id,
-        },
-        type: QueryTypes.UPDATE,
-      },
-    );
+    await payment.update({
+      payment_id: razorpay_payment_id,
+      signature: razorpay_signature,
+      status: "captured",
+    });
 
     // Handle subscription activation
     if (payment.payment_type === "subscription") {
+      // Find the corresponding plan
+      const plan = await Plan.findOne({
+        where: { plan_type: payment.plan_name },
+      });
+      const duration = plan ? plan.duration_months : 1;
+
       const startDate = new Date();
       const endDate = new Date();
+      endDate.setMonth(startDate.getMonth() + duration);
 
-      if (payment.plan_name === "yearly") {
-        endDate.setFullYear(endDate.getFullYear() + 1);
-      } else if (payment.plan_name === "gold") {
-        endDate.setFullYear(endDate.getFullYear() + 10);
-      } else {
-        endDate.setMonth(endDate.getMonth() + 1);
-      }
-
-      // Insert into subscriptions table
-      await sequelize.query(
-        `INSERT INTO subscriptions (user_id, plan_type, price, status, payment_id, start_date, end_date, created_at, updated_at)
-         VALUES (:userId, :plan_type, :price, 'active', :payment_id, :start_date, :end_date, NOW(), NOW())`,
-        {
-          replacements: {
-            userId: payment.user_id,
-            plan_type: payment.plan_name,
-            price: payment.amount,
-            payment_id: razorpay_payment_id,
-            start_date: startDate,
-            end_date: endDate,
-          },
-          type: QueryTypes.INSERT,
-        },
-      );
+      // Create subscription
+      await Subscription.create({
+        user_id: payment.user_id,
+        plan_id: plan ? plan.id : null,
+        plan_type: payment.plan_name,
+        amount: payment.amount,
+        payment_id: razorpay_payment_id,
+        start_date: startDate,
+        end_date: endDate,
+        status: "active",
+      });
 
       // Update user subscription status
-      await sequelize.query(
-        `UPDATE users SET subscription_status = 'active', subscription_plan = :plan, subscription_end_date = :end_date, updated_at = NOW()
-         WHERE id = :userId`,
+      await User.update(
         {
-          replacements: {
-            plan: payment.plan_name,
-            end_date: endDate,
-            userId: payment.user_id,
-          },
-          type: QueryTypes.UPDATE,
+          subscription_status: "active",
+          subscription_plan: payment.plan_name,
+          subscription_end_date: endDate,
         },
+        { where: { id: payment.user_id } },
       );
     } else if (payment.payment_type === "book_purchase" && payment.book_id) {
-      // Check if UserBook record already exists
-      const [existingUserBook] = await sequelize.query(
-        "SELECT id FROM user_books WHERE user_id = :userId AND book_id = :bookId LIMIT 1",
-        {
-          replacements: { userId: payment.user_id, bookId: payment.book_id },
-          type: QueryTypes.SELECT,
-        },
-      );
-
-      if (!existingUserBook) {
-        await sequelize.query(
-          `INSERT INTO user_books (user_id, book_id, purchase_date, created_at, updated_at)
-           VALUES (:userId, :bookId, NOW(), NOW(), NOW())`,
-          {
-            replacements: { userId: payment.user_id, bookId: payment.book_id },
-            type: QueryTypes.INSERT,
-          },
-        );
-      }
+      await UserBook.findOrCreate({
+        where: { user_id: payment.user_id, book_id: payment.book_id },
+        defaults: { purchase_date: new Date() },
+      });
     }
 
     return payment;
+  }
+
+  async getAllPayments(page = 1, limit = 10) {
+    const offset = (page - 1) * limit;
+    const { count, rows } = await Payment.findAndCountAll({
+      include: [
+        { model: User, as: "user", attributes: ["id", "name", "email"] },
+      ],
+      order: [["createdAt", "DESC"]],
+      limit,
+      offset,
+    });
+
+    return {
+      totalItems: count,
+      totalPages: Math.ceil(count / limit),
+      currentPage: page,
+      payments: rows,
+    };
   }
 }
 

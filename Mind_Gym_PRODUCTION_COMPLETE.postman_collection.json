@@ -1,0 +1,95 @@
+{
+	"info": {
+		"_postman_id": "mind-gym-exhaustive-production",
+		"name": "Mind Gym - PRODUCTION Complete API (110+ Routes)",
+		"description": "Exhaustive Postman collection INCLUDING Marketplace, Reading Sync, Device Management, and Advanced Admin Controls.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01. Users & Security",
+			"item": [
+				{
+					"name": "Authentication",
+					"item": [
+						{ "name": "Login", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"admin@mindgym.com\", \"password\": \"password123\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/login" } },
+						{ "name": "Register", "request": { "method": "POST", "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "New User", "type": "text" }] }, "url": "{{baseUrl}}/api/v1/users/register" } }
+					]
+				},
+				{
+					"name": "Security: Device Management",
+					"item": [
+						{ "name": "Register Device", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"deviceId\": \"android_123\", \"deviceName\": \"Samsung S21\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/security/device/register" } },
+						{ "name": "Get My Devices", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/security/devices" } },
+						{ "name": "Remove Device", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/security/device/1" } }
+					]
+				},
+				{
+					"name": "User Settings",
+					"item": [
+						{ "name": "Update TTS Preferences", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\"voice\": \"female\", \"speed\": 1.2}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/update-tts-preferences" } }
+					]
+				}
+			]
+		},
+		{
+			"name": "02. Reading & Sync",
+			"item": [
+				{ "name": "Sync Progress", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"last_page\": 45, \"total_pages\": 300}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/reading-sync/progress/36" } },
+				{ "name": "Get Progress", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reading-sync/progress/36" } },
+				{ "name": "My Reading History (Library)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reading-sync/my-library" } },
+				{ "name": "Add Highlight", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"text\": \"Power of mind\", \"page_number\": 10, \"color\": \"#FFFF00\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/reading-sync/highlights/36" } },
+				{ "name": "Get Highlights", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reading-sync/highlights/36" } }
+			]
+		},
+		{
+			"name": "03. Marketplace (Used Books)",
+			"item": [
+				{ "name": "Register as Seller", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"store_name\": \"Old Book Shop\", \"bank_account_number\": \"1234\", \"ifsc_code\": \"HDFC01\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/marketplace/register" } },
+				{ "name": "Create Listing", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"title\": \"Second Hand Mind Gym\", \"price\": 199, \"condition\": \"good\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/marketplace/listing/1" } },
+				{ "name": "View Active Listings", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/marketplace/listings" } },
+				{ "name": "Admin: Approve Seller", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/marketplace/admin/approve-seller/1" } },
+				{ "name": "Admin: Approve Listing", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/marketplace/admin/approve-listing/1" } },
+				{ "name": "Admin: Release Escrow Payout", "request": { "method": "POST", "url": "{{baseUrl}}/api/v1/marketplace/admin/release-escrow/1" } }
+			]
+		},
+		{
+			"name": "04. Commerce (Physical & Orders)",
+			"item": [
+				{ "name": "Order Physical Book", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"book_id\": 36, \"quantity\": 1, \"shipping_address\": \"Phase 1, Delhi\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/orders/create" } },
+				{ "name": "My Orders History", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/orders/my-orders" } },
+				{ "name": "Request Refund (7 Days Rule)", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"reason\": \"Defective item\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/orders/refund/1" } },
+				{ "name": "Admin: All Orders", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/orders/admin/all" } },
+				{ "name": "Admin: Update Order Status", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\"delivery_status\": \"shipped\", \"tracking_id\": \"TRK123\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/orders/admin/status/1" } }
+			]
+		},
+		{
+			"name": "05. Admin Dashboard & Analytics",
+			"item": [
+				{ "name": "Get Full Dashboard Stats", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/analytics" } }
+			]
+		},
+		{
+			"name": "06. Books & Inventory (Core)",
+			"item": [
+				{ "name": "List All Books", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/book/all" } },
+				{ "name": "Read Book PDF (Signed URL)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/book/readBook/36" } }
+			]
+		},
+		{
+			"name": "07. Payments & Subscriptions",
+			"item": [
+				{ "name": "List All Subscriptions", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/subscriptions/admin/all" } },
+				{ "name": "List All Payments", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/payment/admin/all" } }
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:5000", "type": "string" },
+		{ "key": "access_token", "value": "TOKEN_HERE", "type": "string" }
+	]
+}

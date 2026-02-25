@@ -57,11 +57,17 @@ const User = sequelize.define(
       defaultValue: false,
     },
     subscription_status: {
-      type: DataTypes.ENUM("active", "inactive", "expired"),
+      type: DataTypes.ENUM(
+        "pending",
+        "active",
+        "expired",
+        "failed",
+        "inactive",
+      ),
       defaultValue: "inactive",
     },
     subscription_plan: {
-      type: DataTypes.ENUM("free", "monthly", "yearly", "gold"),
+      type: DataTypes.ENUM("one_month", "three_month", "one_year", "free"),
       defaultValue: "free",
     },
     subscription_end_date: {
@@ -71,6 +77,17 @@ const User = sequelize.define(
     refresh_token: {
       type: DataTypes.TEXT,
       allowNull: true,
+    },
+    fcm_token: {
+      type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    tts_preferences: {
+      type: DataTypes.JSON,
+      defaultValue: {
+        voice: "male",
+        speed: 1.0,
+      },
     },
   },
   {

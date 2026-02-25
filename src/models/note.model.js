@@ -20,18 +20,13 @@ const UserNote = sequelize.define(
       type: DataTypes.STRING,
     },
 
-    notes: {
+    content: {
       type: DataTypes.TEXT,
     },
 
     chapterName: {
       type: DataTypes.STRING,
       field: "chapter_name", // 🔥 mapping
-    },
-
-    bookName: {
-      type: DataTypes.STRING,
-      field: "book_name", // 🔥 mapping
     },
   },
   {

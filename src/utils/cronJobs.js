@@ -6,7 +6,6 @@ const initCronJobs = () => {
   cron.schedule("0 0 * * *", async () => {
     try {
       const now = new Date();
-      console.log("Running subscription expiry cron job...");
 
       // 1. Update Subscription records
       const [updatedSubscriptionCount] = await Subscription.update(
@@ -33,16 +32,8 @@ const initCronJobs = () => {
           },
         },
       );
-
-      console.log(
-        `Cron Job: ${updatedSubscriptionCount} subscriptions and ${updatedUserCount} users moved to expired.`,
-      );
-    } catch (error) {
-      console.error("Cron Job Error:", error);
-    }
+    } catch (error) {}
   });
-
-  console.log("Subscription expiry cron job scheduled.");
 };
 
 export default initCronJobs;

@@ -25,16 +25,22 @@ const storage = multer.diskStorage({
 const upload = multer({
   storage: storage,
   fileFilter: function (req, file, cb) {
-    // Accept images or pdf only
-    if (
-      !file.originalname.match(
-        /\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF|svg|SVG|webp|WEBP|pdf|PDF)$/,
-      )
-    ) {
+    // 🔍 Robust Check: Extension and MimeType dono check karein
+    const allowedExtensions = /\.(jpg|jpeg|png|gif|svg|webp|avif|heic|pdf)$/i;
+    const allowedMimeTypes =
+      /^(image\/(jpeg|png|gif|svg\+xml|webp|avif|heic)|application\/pdf)$/;
+
+    const isExtensionValid = allowedExtensions.test(
+      path.extname(file.originalname),
+    );
+    const isMimeTypeValid = allowedMimeTypes.test(file.mimetype);
+
+    if (isExtensionValid || isMimeTypeValid) {
+      cb(null, true);
+    } else {
       req.fileValidationError = "Only image or pdf files are allowed!";
       return cb(new Error("Only image or pdf files are allowed!"), false);
     }
-    cb(null, true);
   },
 });
 

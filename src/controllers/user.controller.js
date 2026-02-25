@@ -348,3 +348,18 @@ export const deleteUser = async (req, res, next) => {
     next(error);
   }
 };
+
+export const updateTTSPreferences = async (req, res, next) => {
+  try {
+    const user = await userService.updateTTSPreferences(req.user.id, req.body);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "TTS preferences updated",
+      user.tts_preferences,
+    );
+  } catch (error) {
+    next(error);
+  }
+};

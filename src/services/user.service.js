@@ -251,7 +251,7 @@ class UserService {
 
     return {
       user_id: userId,
-      user_type: user_type || "user",
+      user_type: data.user_type || "user",
       accessToken,
       refreshToken,
     };
@@ -695,6 +695,22 @@ class UserService {
       type: QueryTypes.DELETE,
     });
     return true;
+  }
+
+  async updateTTSPreferences(userId, prefs) {
+    await sequelize.query(
+      "UPDATE users SET tts_preferences = :prefs WHERE id = :userId",
+      {
+        replacements: { prefs: JSON.stringify(prefs), userId },
+        type: QueryTypes.UPDATE,
+      },
+    );
+
+    const [updated] = await sequelize.query(
+      "SELECT tts_preferences FROM users WHERE id = :userId LIMIT 1",
+      { replacements: { userId }, type: QueryTypes.SELECT },
+    );
+    return updated;
   }
 
   // ─── Search Users (Admin) ────────────────────────────────────────────────────

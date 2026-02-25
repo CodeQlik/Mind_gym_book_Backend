@@ -13,7 +13,6 @@ cloudinary.config({
 const uploadOnCloudinary = async (localFilePath, folderName = "") => {
   try {
     if (!localFilePath || !fs.existsSync(localFilePath)) {
-      console.error("Upload Error: File not found at path:", localFilePath);
       return null;
     }
 
@@ -23,25 +22,35 @@ const uploadOnCloudinary = async (localFilePath, folderName = "") => {
       folderName || (isPdf ? "mindgymbook/pdfs" : "mindgymbook/images");
 
     const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: isPdf ? "image" : "auto",
+      resource_type: isPdf ? "raw" : "image", // 🔥 FIXED
+      type: isPdf ? "private" : "upload", // 🔥 private only for PDF
       folder: uploadFolder,
       use_filename: true,
       unique_filename: true,
-      access_mode: "public",
     });
 
-    // Clean up local file
+    // Delete local file after successful upload
     if (fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
 
     return response;
   } catch (error) {
-    console.error("Cloudinary Upload Error detail:", error);
-    // Ensure cleanup on failure
-    if (localFilePath && fs.existsSync(localFilePath)) {
+    // Delete local file even if upload fails
+    if (fs.existsSync(localFilePath)) {
       fs.unlinkSync(localFilePath);
     }
+
+    // Extract meaningful error message
+    const errorMsg =
+      error.message ||
+      (error.error && error.error.message) ||
+      JSON.stringify(error);
+
+    fs.appendFileSync(
+      "cloudinary_error.log",
+      `${new Date().toISOString()} - ${errorMsg}\n`,
+    );
     return null;
   }
 };
@@ -51,9 +60,8 @@ const deleteFromCloudinary = async (public_id) => {
     await cloudinary.uploader.destroy(public_id);
     return true;
   } catch (error) {
-    console.log(error);
     return false;
   }
 };
 
-export { uploadOnCloudinary, deleteFromCloudinary };
+export { cloudinary, uploadOnCloudinary, deleteFromCloudinary };

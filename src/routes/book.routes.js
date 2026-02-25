@@ -11,6 +11,7 @@ import {
   getBookBySlug,
   searchBooks,
   readBookPdf,
+  pdfLimiter,
 } from "../controllers/book.controller.js";
 import {
   toggleBookmark,
@@ -28,6 +29,7 @@ import { isAdmin } from "../middlewares/admin.middleware.js";
 import upload from "../middlewares/multer.js";
 import { checkBookAccess } from "../middlewares/accessControl.js";
 import validate from "../middlewares/validate.middleware.js";
+import { checkSub } from "../middlewares/subscription.middleware.js";
 
 const router = express.Router();
 

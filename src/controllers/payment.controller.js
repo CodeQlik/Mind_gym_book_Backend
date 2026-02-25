@@ -46,3 +46,20 @@ export const verifyPayment = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getAllPayments = async (req, res, next) => {
+  try {
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const result = await paymentService.getAllPayments(page, limit);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "All payments fetched successfully",
+      result,
+    );
+  } catch (error) {
+    next(error);
+  }
+};

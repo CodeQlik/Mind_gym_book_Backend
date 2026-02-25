@@ -31,7 +31,7 @@ const Wishlist = sequelize.define(
   {
     timestamps: true,
     underscored: true,
-    tableName: "wishlist",
+    tableName: "wishlists",
     indexes: [
       {
         unique: true,

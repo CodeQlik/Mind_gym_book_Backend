@@ -45,15 +45,7 @@ export const getUserBookmarks = async (req, res, next) => {
         {
           model: Book,
           as: "book",
-          attributes: [
-            "id",
-            "title",
-            "author",
-            "slug",
-            "thumbnail",
-            "price",
-            "is_premium",
-          ],
+          attributes: ["id", "title", "author", "slug", "thumbnail", "price"],
         },
       ],
       order: [["createdAt", "DESC"]],

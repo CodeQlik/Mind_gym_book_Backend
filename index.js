@@ -1,10 +1,9 @@
-import dotenv from "dotenv";
+import "dotenv/config";
 import sequelize, { connectDB } from "./src/config/db.js";
 import { app } from "./src/app.js";
 import "./src/models/index.js";
 import seedAdmin from "./src/seeders/admin.seeder.js";
 import initCronJobs from "./src/utils/cronJobs.js";
-dotenv.config();
 
 const PORT = process.env.PORT || 5000;
 
@@ -16,7 +15,6 @@ const startServer = async () => {
     // 2. Sync models (Create/Alter tables)
     // await sequelize.sync({ alter: true });
     await sequelize.sync();
-    console.log("Database models synced successfully");
 
     // 3. Seed admin user
     await seedAdmin();
@@ -25,9 +23,7 @@ const startServer = async () => {
     initCronJobs();
 
     // 5. Start listening
-    app.listen(PORT, () => {
-      console.log(`Server running on port ${PORT}`);
-    });
+    app.listen(PORT, () => {});
   } catch (error) {
     console.error("Failed to start server:", error);
     process.exit(1);

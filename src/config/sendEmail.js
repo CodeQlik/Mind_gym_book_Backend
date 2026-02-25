@@ -7,8 +7,6 @@ const sendEmail = async (recipientEmail, subject, message, company) => {
   let email = process.env.EMAIL_ID;
   let appPass = process.env.APP_PASS;
 
-  console.log("email company:", company ? company.name : "No company provided");
-
   let userEmail;
   let userAppPass;
 
@@ -34,14 +32,10 @@ const sendEmail = async (recipientEmail, subject, message, company) => {
 
     try {
       await testTransport.verify();
-      console.log("User-provided email and app password verified.");
+
       email = userEmail;
       appPass = userAppPass;
-    } catch (error) {
-      console.log(
-        "Invalid user credentials, falling back to .env credentials.",
-      );
-    }
+    } catch (error) {}
   }
 
   const transport = nodemailer.createTransport({
@@ -56,17 +50,15 @@ const sendEmail = async (recipientEmail, subject, message, company) => {
   });
 
   try {
-    console.log("Sending email to:", recipientEmail);
     const info = await transport.sendMail({
       from: `"${company ? company.name : "Mind Gym Book"}" <${email}>`,
       to: recipientEmail,
       subject: subject,
       html: message,
     });
-    console.log("Message sent: ", info.messageId);
+
     return true;
   } catch (error) {
-    console.log("Error sending email:", error);
     return false;
   }
 };

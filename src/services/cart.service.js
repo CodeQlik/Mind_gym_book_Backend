@@ -3,7 +3,10 @@ import { QueryTypes } from "sequelize";
 
 class CartService {
   async addToCart(userId, data) {
-    const { book_id, quantity = 1 } = data;
+    const book_id = data.book_id || data.bookId;
+    const quantity = data.quantity || 1;
+
+    if (!book_id) throw new Error("Book ID is required");
 
     // Check if book exists and is active
     const [book] = await sequelize.query(
