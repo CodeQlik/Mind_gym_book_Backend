@@ -462,36 +462,63 @@ class BookService {
       books: rows,
     };
   }
-
   async getReadPdfUrl(bookId, user) {
     const userId = user?.id;
     const userType = user?.user_type;
 
     const book = await Book.findByPk(bookId);
+
     if (!book) throw new Error("Book not found");
-    if (!book.pdf_file?.public_id || !book.pdf_file?.url)
-      throw new Error("PDF not found");
+    if (!book.pdf_file || !book.pdf_file.url) throw new Error("PDF not found");
 
-    // -----------------------------
-    // 1️⃣ CHECK ACCESS
-    // -----------------------------
+    // 🔄 SELF-HEALING: If page_count is 0, sync it from Cloudinary now
+    if (!book.page_count || book.page_count === 0) {
+      try {
+        const tempUrl = book.pdf_file.url;
+        const tempIsRaw = tempUrl.includes("/raw/");
+        const tempCleanId = tempIsRaw
+          ? book.pdf_file.public_id
+          : book.pdf_file.public_id.replace(/\.pdf$/i, "").replace(/^\//, "");
+
+        console.log(
+          `[BOOK SERVICE] Syncing page_count for Book ${bookId} using ID: ${tempCleanId}...`,
+        );
+
+        const details = await cloudinary.api.resource(tempCleanId, {
+          resource_type: tempIsRaw ? "raw" : "image",
+          pages: true,
+        });
+
+        if (details && details.pages) {
+          book.page_count = details.pages;
+          await book.save();
+          console.log(
+            `[BOOK SERVICE] Successfully synced page_count DB updated to: ${details.pages}`,
+          );
+        }
+      } catch (err) {
+        console.warn(
+          "[BOOK SERVICE] Could not auto-sync pages for old book:",
+          err.message,
+        );
+      }
+    }
+
+    // 🔐 1. Access Control Logic
     let hasAccess = false;
-
     if (userType === "admin") {
       hasAccess = true;
-    } else if (!book.is_premium) {
+    } else if (book.is_premium === false) {
       hasAccess = true;
     } else if (userId) {
       const purchase = await UserBook.findOne({
         where: { user_id: userId, book_id: bookId },
       });
-
       if (purchase) {
         hasAccess = true;
       } else {
         const dbUser = await User.findByPk(userId);
         const now = new Date();
-
         if (
           dbUser?.subscription_status === "active" &&
           new Date(dbUser.subscription_end_date) >= now
@@ -502,50 +529,78 @@ class BookService {
     }
 
     console.log(
-      `[BOOK SERVICE] User: ${userId || "Guest"} | Premium: ${book.is_premium} | Access: ${hasAccess}`,
+      `[BOOK SERVICE] Auth: ${userId || "Guest"}, Premium: ${book.is_premium}, Access: ${hasAccess}`,
     );
 
-    // -----------------------------
-    // 2️⃣ CLEAN PUBLIC ID
-    // -----------------------------
-    const cleanPublicId = book.pdf_file.public_id
-      .replace(/\.pdf$/i, "")
-      .replace(/^\//, "");
+    // 📄 2. Cloudinary Variables
+    const originalUrl = book.pdf_file.url;
+    let publicId = book.pdf_file.public_id;
 
-    // -----------------------------
-    // 3️⃣ EXTRACT CORRECT VERSION
-    // -----------------------------
-    const versionMatch = book.pdf_file.url.match(/\/v(\d+)\//);
+    // Extract version and type from URL
+    const isRaw = originalUrl.includes("/raw/");
+    const isPrivate = originalUrl.includes("/private/");
+    const isAuth = originalUrl.includes("/authenticated/");
+
+    const versionMatch = originalUrl.match(/\/v(\d+)\//);
     const version = versionMatch ? versionMatch[1] : undefined;
+
+    // 🛠️ 3. Fix: Consistent standard for PDFs
+    const isRestricted = isPrivate || isAuth || isRaw;
+    const cleanPublicId = isRaw
+      ? publicId
+      : publicId.replace(/\.pdf$/i, "").replace(/^\//, "");
 
     let finalUrl;
 
-    // -----------------------------
-    // 4️⃣ GENERATE URL
-    // -----------------------------
-    if (hasAccess) {
-      // 🔐 FULL ACCESS (SIGNED)
-      finalUrl = cloudinary.utils.private_download_url(cleanPublicId, "pdf", {
-        resource_type: "image",
-        expires_at: Math.floor(Date.now() / 1000) + 3600,
-        attachment: false,
-      });
-    } else {
-      // 👀 PREVIEW (ONLY 1–5 PAGES)
-      finalUrl = cloudinary.url(cleanPublicId, {
-        resource_type: "image",
-        type: "upload",
-        secure: true,
-        version: version, // ✅ CRITICAL FIX
-        transformation: [{ page: "1-5" }],
-        format: "pdf",
-      });
+    try {
+      const deliveryType = isPrivate
+        ? "private"
+        : isAuth
+          ? "authenticated"
+          : "upload";
+
+      if (hasAccess) {
+        // ✅ 1. FULL ACCESS: Stable signed URL for download/view
+        finalUrl = cloudinary.utils.private_download_url(cleanPublicId, "pdf", {
+          resource_type: isRaw ? "raw" : "image",
+          type: deliveryType,
+          expires_at: Math.floor(Date.now() / 1000) + 3600,
+          attachment: false,
+        });
+      } else {
+        // 🔒 2. PREVIEW ACCESS: Restricted to 1-5 pages
+        // Using a highly specific signature format that Cloudinary expects for restricted transformations
+        finalUrl = cloudinary.url(cleanPublicId, {
+          resource_type: "image",
+          type: deliveryType,
+          secure: true,
+          sign_url: true,
+          version: version,
+          format: "pdf",
+          transformation: [{ page: "1-5" }],
+        });
+
+        // Final fallback: If signature still picky, we remove version from signature calculation
+        if (!finalUrl.includes("s--")) {
+          finalUrl = cloudinary.url(cleanPublicId, {
+            resource_type: "image",
+            type: deliveryType,
+            secure: true,
+            sign_url: true,
+            transformation: [{ page: "1-5" }],
+            format: "pdf",
+          });
+        }
+      }
+
+      console.log(`[BOOK SERVICE] Result URL: ${finalUrl}`);
+    } catch (err) {
+      console.error("[BOOK SERVICE] URL Generation Error:", err.message);
+      finalUrl = originalUrl;
     }
 
-    console.log("[BOOK SERVICE] Final URL:", finalUrl);
-
     return {
-      pdf_url: finalUrl,
+      pdf_url: finalUrl || originalUrl,
       isPreview: !hasAccess,
       total_pages: book.page_count || 0,
     };
