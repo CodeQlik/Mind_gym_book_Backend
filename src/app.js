@@ -36,6 +36,7 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use("/api/v1/users", userRoutes);
+app.use("/api/v1/user", userRoutes); // Postman alias
 app.use("/api/v1/user/addresses", addressRoutes);
 app.use("/api/v1/category", categoryRoutes);
 
@@ -47,11 +48,14 @@ app.use("/api/v1/note", noteRoutes);
 app.use("/api/v1/review", reviewRoutes);
 app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/plans", planRoutes);
+app.use("/api/v1/plan", planRoutes); // Postman alias
 app.use("/api/v1/subscriptions", subscriptionRoutes);
+app.use("/api/v1/subscription", subscriptionRoutes); // Postman alias
 app.use("/api/v1/analytics", analyticsRoutes);
 app.use("/api/v1/marketplace", marketplaceRoutes);
 app.use("/api/v1/reading-sync", readingSyncRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/order", orderRoutes); // Postman alias
 
 app.get("/", (req, res) => {
   res.send("Welcome to Mind Gym Book API (Restructured Edition)");

@@ -38,7 +38,7 @@ const Order = sequelize.define(
     },
     escrow_status: {
       type: DataTypes.ENUM("held", "released", "disputed", "refunded"),
-      allowNull: true, // Only for marketplace
+      allowNull: true,
     },
     shipping_address: {
       type: DataTypes.TEXT,

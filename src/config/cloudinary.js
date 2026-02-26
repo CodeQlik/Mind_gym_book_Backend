@@ -22,11 +22,16 @@ const uploadOnCloudinary = async (localFilePath, folderName = "") => {
       folderName || (isPdf ? "mindgymbook/pdfs" : "mindgymbook/images");
 
     const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: isPdf ? "raw" : "image",
-      type: isPdf ? "private" : "upload",
+      resource_type: isPdf ? "image" : "image",
+      type: isPdf ? "authenticated" : "upload",
       folder: uploadFolder,
       use_filename: true,
       unique_filename: true,
+      pages: isPdf ? true : false,
+      image_metadata: isPdf ? true : false,
+      // 🚀 PROFESSIONAL FIX: Cloudinary will pre-generate the 5-page preview
+      eager: isPdf ? [{ page: "1-5", format: "pdf" }] : [],
+      eager_async: false, // Wait for it so we can use it immediately
     });
 
     // Delete local file after successful upload

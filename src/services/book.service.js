@@ -143,6 +143,7 @@ class BookService {
       highlights: highlights || null,
       isbn: isbn || null,
       language: language || null,
+      page_count: pdfFileRes?.pages || 0,
       otherdescription: otherdescription || null,
     });
 
@@ -339,6 +340,7 @@ class BookService {
         url: uploadResult.secure_url,
         public_id: uploadResult.public_id,
       };
+      book.page_count = uploadResult.pages || 0;
     }
 
     // Handle gallery images
@@ -466,102 +468,86 @@ class BookService {
     const userType = user?.user_type;
 
     const book = await Book.findByPk(bookId);
-
     if (!book) throw new Error("Book not found");
-    if (!book.pdf_file || !book.pdf_file.url) throw new Error("PDF not found");
+    if (!book.pdf_file?.public_id || !book.pdf_file?.url)
+      throw new Error("PDF not found");
 
-    // 🔐 1. Access Control Logic
+    // -----------------------------
+    // 1️⃣ CHECK ACCESS
+    // -----------------------------
     let hasAccess = false;
-    if (userType === "admin" || book.is_premium === false) {
+
+    if (userType === "admin") {
       hasAccess = true;
-    } else {
-      if (!userId) {
-        hasAccess = false; // Guest can't access premium without purchase/sub
+    } else if (!book.is_premium) {
+      hasAccess = true;
+    } else if (userId) {
+      const purchase = await UserBook.findOne({
+        where: { user_id: userId, book_id: bookId },
+      });
+
+      if (purchase) {
+        hasAccess = true;
       } else {
-        const purchase = await UserBook.findOne({
-          where: { user_id: userId, book_id: bookId },
-        });
-        if (purchase) {
+        const dbUser = await User.findByPk(userId);
+        const now = new Date();
+
+        if (
+          dbUser?.subscription_status === "active" &&
+          new Date(dbUser.subscription_end_date) >= now
+        ) {
           hasAccess = true;
-        } else {
-          const dbUser = await User.findByPk(userId);
-          const now = new Date();
-          if (
-            dbUser?.subscription_status === "active" &&
-            new Date(dbUser.subscription_end_date) >= now
-          ) {
-            hasAccess = true;
-          }
         }
       }
     }
 
-    // 📄 2. Cloudinary Variables
-    const originalUrl = book.pdf_file.url;
-    let publicId = book.pdf_file.public_id;
+    console.log(
+      `[BOOK SERVICE] User: ${userId || "Guest"} | Premium: ${book.is_premium} | Access: ${hasAccess}`,
+    );
 
-    // Extract version and type from URL
-    const isRaw = originalUrl.includes("/raw/");
-    const isPrivate = originalUrl.includes("/private/");
-    const isAuth = originalUrl.includes("/authenticated/");
+    // -----------------------------
+    // 2️⃣ CLEAN PUBLIC ID
+    // -----------------------------
+    const cleanPublicId = book.pdf_file.public_id
+      .replace(/\.pdf$/i, "")
+      .replace(/^\//, "");
 
-    const versionMatch = originalUrl.match(/\/v(\d+)\//);
+    // -----------------------------
+    // 3️⃣ EXTRACT CORRECT VERSION
+    // -----------------------------
+    const versionMatch = book.pdf_file.url.match(/\/v(\d+)\//);
     const version = versionMatch ? versionMatch[1] : undefined;
-
-    // 🛠️ 3. Fix: Consistent standard for PDFs
-    const isRestricted = isPrivate || isAuth || isRaw;
-    const cleanPublicId = isRaw
-      ? publicId
-      : publicId.replace(/\.pdf$/i, "").replace(/^\//, "");
 
     let finalUrl;
 
-    try {
-      if (hasAccess) {
-        // Full PDF Access - Use private_download_url for all restricted resources
-        if (isRestricted) {
-          finalUrl = cloudinary.utils.private_download_url(
-            cleanPublicId,
-            isRaw ? "" : "pdf",
-            {
-              resource_type: isRaw ? "raw" : "image",
-              type: isPrivate ? "private" : isAuth ? "authenticated" : "upload",
-              expires_at: Math.floor(Date.now() / 1000) + 60 * 60, // 1 hour
-            },
-          );
-        } else {
-          // Public upload
-          finalUrl = cloudinary.url(cleanPublicId, {
-            resource_type: "image",
-            type: "upload",
-            secure: true,
-            format: "pdf",
-          });
-        }
-      } else {
-        // Preview Logic (1-5 pages) - Only works if NOT raw
-        if (isRaw) {
-          finalUrl = originalUrl;
-        } else {
-          // Re-attempting signed URL for previews, but with very basic options
-          finalUrl = cloudinary.url(cleanPublicId, {
-            resource_type: "image",
-            type: isPrivate ? "private" : isAuth ? "authenticated" : "upload",
-            secure: true,
-            sign_url: true,
-            format: "pdf",
-            transformation: [{ page: "1-5" }],
-          });
-        }
-      }
-    } catch (err) {
-      console.error("[BOOK SERVICE] URL Generation Error:", err.message);
-      finalUrl = originalUrl;
+    // -----------------------------
+    // 4️⃣ GENERATE URL
+    // -----------------------------
+    if (hasAccess) {
+      // 🔐 FULL ACCESS (SIGNED)
+      finalUrl = cloudinary.utils.private_download_url(cleanPublicId, "pdf", {
+        resource_type: "image",
+        expires_at: Math.floor(Date.now() / 1000) + 3600,
+        attachment: false,
+      });
+    } else {
+      // 👀 PREVIEW (ONLY 1–5 PAGES)
+      finalUrl = cloudinary.url(cleanPublicId, {
+        resource_type: "image",
+        type: "upload",
+        secure: true,
+        version: version, // ✅ CRITICAL FIX
+        transformation: [{ page: "1-5" }],
+        format: "pdf",
+      });
     }
 
+    console.log("[BOOK SERVICE] Final URL:", finalUrl);
+
     return {
-      pdf_url: finalUrl || originalUrl,
+      pdf_url: finalUrl,
       isPreview: !hasAccess,
+      total_pages: book.page_count || 0,
     };
   }
 }

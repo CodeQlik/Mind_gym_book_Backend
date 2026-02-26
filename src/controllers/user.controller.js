@@ -314,7 +314,7 @@ export const getUserById = async (req, res, next) => {
 
 export const searchUsers = async (req, res, next) => {
   try {
-    const { q } = req.query;
+    const q = req.query.q || req.query.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 

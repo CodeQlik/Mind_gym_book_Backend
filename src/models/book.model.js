@@ -128,6 +128,11 @@ const Book = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    page_count: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+    },
     otherdescription: {
       type: DataTypes.TEXT,
       allowNull: true,

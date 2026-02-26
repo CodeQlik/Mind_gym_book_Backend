@@ -12,6 +12,7 @@ import {
 } from "../utils/generateToken.js";
 import jwt from "jsonwebtoken";
 import sendEmail from "../config/sendEmail.js";
+import notificationService from "./notification.service.js";
 
 class UserService {
   // ─── Helper: Format user response ───────────────────────────────────────────
@@ -249,6 +250,18 @@ class UserService {
       { replacements: { refreshToken, id: userId }, type: QueryTypes.UPDATE },
     );
 
+    // 🏆 Send Welcome Notification
+    try {
+      await notificationService.sendToUser(
+        userId,
+        "WELCOME",
+        "Welcome to Mind Gym Book! 📚",
+        "Hello {user_name}, we are thrilled to have you here! Start exploring our massive collection of books and start your reading journey today.",
+      );
+    } catch (notifErr) {
+      console.error("[WELCOME NOTIFICATION ERROR]:", notifErr.message);
+    }
+
     return {
       user_id: userId,
       user_type: data.user_type || "user",
@@ -300,7 +313,9 @@ class UserService {
       { replacements: { email }, type: QueryTypes.SELECT },
     );
 
+    let isNewUser = false;
     if (!user) {
+      isNewUser = true;
       const randomPassword = await bcrypt.hash(
         Math.random().toString(36).slice(-8),
         10,
@@ -339,6 +354,20 @@ class UserService {
       "UPDATE users SET refresh_token = :refreshToken WHERE id = :id",
       { replacements: { refreshToken, id: user.id }, type: QueryTypes.UPDATE },
     );
+
+    // 🏆 Send Welcome Notification for NEW Google Users
+    if (isNewUser) {
+      try {
+        await notificationService.sendToUser(
+          user.id,
+          "WELCOME",
+          "Welcome to Mind Gym Book! 📚",
+          "Hello {user_name}, we are thrilled to have you here! Start exploring our massive collection of books and start your reading journey today.",
+        );
+      } catch (notifErr) {
+        console.error("[WELCOME NOTIFICATION ERROR]:", notifErr.message);
+      }
+    }
 
     return {
       user_id: user.id,

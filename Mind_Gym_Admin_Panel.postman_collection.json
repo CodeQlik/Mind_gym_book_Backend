@@ -1,0 +1,278 @@
+{
+	"info": {
+		"_postman_id": "admin-panel-collection",
+		"name": "Mind Gym Admin Panel API",
+		"description": "Comprehensive list of all Admin Side routes for Mind Gym Book project.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Analytics & Dashboard",
+			"item": [
+				{
+					"name": "Get Dashboard Stats",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/analytics/dashboard",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "analytics", "dashboard"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "User Management",
+			"item": [
+				{
+					"name": "Get All Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/user/all-users?page=1&limit=10",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "user", "all-users"],
+							"query": [
+								{ "key": "page", "value": "1" },
+								{ "key": "limit", "value": "10" }
+							]
+						}
+					}
+				},
+				{
+					"name": "Search Users",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/user/search?query=name_or_email",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "user", "search"],
+							"query": [{ "key": "query", "value": "name_or_email" }]
+						}
+					}
+				},
+				{
+					"name": "Update User",
+					"request": {
+						"method": "PUT",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "Updated Name", "type": "text" },
+								{ "key": "is_active", "value": "1", "type": "text" },
+								{ "key": "profile_image", "type": "file", "src": [] }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/user/update/{{user_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "user", "update", "{{user_id}}"]
+						}
+					}
+				},
+				{
+					"name": "Delete User",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/user/delete/{{user_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "user", "delete", "{{user_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Book Management",
+			"item": [
+				{
+					"name": "Get Admin Books",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/book/admin/all",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book", "admin", "all"]
+						}
+					}
+				},
+				{
+					"name": "Add New Book",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "title", "value": "New Book Title", "type": "text" },
+								{ "key": "author", "value": "Author Name", "type": "text" },
+								{ "key": "price", "value": "299", "type": "text" },
+								{ "key": "category_id", "value": "1", "type": "text" },
+								{ "key": "thumbnail", "type": "file", "src": [] },
+								{ "key": "pdf_file", "type": "file", "src": [] }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/book/add",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book", "add"]
+						}
+					}
+				},
+				{
+					"name": "Toggle Book Status",
+					"request": {
+						"method": "PATCH",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/book/toggle-status/{{book_id}}",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "book", "toggle-status", "{{book_id}}"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Category Management",
+			"item": [
+				{
+					"name": "Get Admin Categories",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/category/admin/all",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "category", "admin", "all"]
+						}
+					}
+				},
+				{
+					"name": "Add Category",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{ "key": "name", "value": "History", "type": "text" },
+								{ "key": "image", "type": "file", "src": [] }
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/category/add",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "category", "add"]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Subscription & Plans",
+			"item": [
+				{
+					"name": "Get All Subscriptions",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/subscription/admin/all",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "subscription", "admin", "all"]
+						}
+					}
+				},
+				{
+					"name": "Create Plan",
+					"request": {
+						"method": "POST",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Yearly Plan\",\n    \"price\": 1999,\n    \"plan_type\": \"one_year\",\n    \"duration_months\": 12,\n    \"description\": \"Full access for one year\"\n}",
+							"options": { "raw": { "language": "json" } }
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/plan/",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "plan", ""]
+						}
+					}
+				}
+			]
+		},
+		{
+			"name": "Payments & Orders",
+			"item": [
+				{
+					"name": "Get All Payments",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/payment/admin/all",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "payment", "admin", "all"]
+						}
+					}
+				},
+				{
+					"name": "Get All Orders",
+					"request": {
+						"method": "GET",
+						"header": [
+							{ "key": "Authorization", "value": "Bearer {{admin_token}}" }
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/order/admin/all",
+							"host": ["{{base_url}}"],
+							"path": ["api", "v1", "order", "admin", "all"]
+						}
+					}
+				}
+			]
+		}
+	],
+	"variable": [
+		{ "key": "base_url", "value": "http://localhost:5000" },
+		{ "key": "admin_token", "value": "your_token_here" },
+		{ "key": "user_id", "value": "1" },
+		{ "key": "book_id", "value": "1" }
+	]
+}

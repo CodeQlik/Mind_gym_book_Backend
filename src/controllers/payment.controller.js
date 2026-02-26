@@ -3,9 +3,15 @@ import sendResponse from "../utils/responseHandler.js";
 
 export const createOrder = async (req, res, next) => {
   try {
-    const { plan } = req.body;
+    const { plan_type } = req.body;
+    if (!plan_type) {
+      return sendResponse(res, 400, false, "plan_type is required");
+    }
     const userId = req.user.id;
-    const order = await paymentService.createSubscriptionOrder(userId, plan);
+    const order = await paymentService.createSubscriptionOrder(
+      userId,
+      plan_type,
+    );
     return sendResponse(res, 201, true, "Order created successfully", order);
   } catch (error) {
     next(error);
@@ -14,12 +20,12 @@ export const createOrder = async (req, res, next) => {
 
 export const createBookOrder = async (req, res, next) => {
   try {
-    const { amount, book_id } = req.body;
+    const { book_id } = req.body;
     if (!book_id) {
       return sendResponse(res, 400, false, "book_id is required");
     }
     const userId = req.user.id;
-    const order = await paymentService.createBookOrder(userId, amount, book_id);
+    const order = await paymentService.createBookOrder(userId, book_id);
     return sendResponse(
       res,
       201,

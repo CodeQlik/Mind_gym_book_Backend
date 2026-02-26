@@ -62,6 +62,10 @@ const Subscription = sequelize.define(
       type: DataTypes.DATE,
       allowNull: false,
     },
+    razorpay_order_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
   },
   {
     timestamps: true,

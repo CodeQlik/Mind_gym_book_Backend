@@ -23,6 +23,8 @@ const Notification = sequelize.define(
         "PRICE_DROP",
         "NEW_RELEASE",
         "SALE",
+        "WELCOME",
+        "SYSTEM",
       ),
       allowNull: false,
     },
