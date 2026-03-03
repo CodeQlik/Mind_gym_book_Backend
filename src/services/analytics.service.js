@@ -44,30 +44,35 @@ class AnalyticsService {
     });
 
     // Popular books based on captured book purchases
-    const popularBooks = await Payment.findAll({
+    // We fetch Book directly and use a subquery for sales_count to avoid GROUP BY issues in strict SQL modes
+    const books = await Book.findAll({
       attributes: [
-        "book_id",
+        "id",
+        "title",
+        "author",
+        "thumbnail",
+        "slug",
         [
-          sequelize.fn("COUNT", sequelize.col("Payment.book_id")),
+          sequelize.literal(`(
+            SELECT COUNT(*)
+            FROM payments AS p
+            WHERE p.book_id = Book.id
+            AND p.payment_type = 'book_purchase'
+            AND p.status = 'captured'
+          )`),
           "sales_count",
         ],
       ],
-      where: {
-        payment_type: "book_purchase",
-        status: "captured",
-        book_id: { [Op.ne]: null },
-      },
-      include: [
-        {
-          model: Book,
-          as: "book", // alias MUST match
-          attributes: ["title", "author", "thumbnail", "slug"],
-        },
-      ],
-      group: [sequelize.col("Payment.book_id"), sequelize.col("book.id")], // Explicit col mapping to preserve lowercase alias
       order: [[sequelize.literal("sales_count"), "DESC"]],
       limit: 5,
     });
+
+    // Transform to match the expected format: { book_id, sales_count, book: { ... } }
+    const popularBooks = books.map((book) => ({
+      book_id: book.id,
+      sales_count: parseInt(book.getDataValue("sales_count")) || 0,
+      book: book,
+    }));
 
     // Mocked top audiobooks (if you implement later)
     const topAudiobooks = [];
