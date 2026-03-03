@@ -55,7 +55,7 @@ class AnalyticsService {
       include: [
         {
           model: Book,
-          as: "book",
+          as: "book", // alias MUST match
           attributes: ["title", "author", "thumbnail", "slug"],
         },
       ],
