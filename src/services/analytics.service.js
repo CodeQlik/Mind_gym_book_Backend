@@ -47,7 +47,10 @@ class AnalyticsService {
     const popularBooks = await Payment.findAll({
       attributes: [
         "book_id",
-        [sequelize.fn("COUNT", sequelize.col("book_id")), "sales_count"],
+        [
+          sequelize.fn("COUNT", sequelize.col("Payment.book_id")),
+          "sales_count",
+        ],
       ],
       where: {
         payment_type: "book_purchase",
@@ -61,7 +64,7 @@ class AnalyticsService {
           attributes: ["title", "author", "thumbnail", "slug"],
         },
       ],
-      group: ["Payment.book_id", "book.id"], // lowercase 'book.id' fixes live error
+      group: [sequelize.col("Payment.book_id"), sequelize.col("book.id")], // Explicit col mapping to preserve lowercase alias
       order: [[sequelize.literal("sales_count"), "DESC"]],
       limit: 5,
     });
