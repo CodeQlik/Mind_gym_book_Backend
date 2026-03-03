@@ -42,7 +42,6 @@ class AnalyticsService {
       where: { is_active: true },
     });
 
-    // Popular books based on successful purchases
     const popularBooks = await Payment.findAll({
       attributes: [
         "book_id",
@@ -60,7 +59,7 @@ class AnalyticsService {
           attributes: ["title", "author", "thumbnail", "slug"],
         },
       ],
-      group: ["Payment.book_id", "book.id"], // Using correct alias name 'book' and model 'Payment'
+      group: [sequelize.col("Payment.book_id"), sequelize.col("book.id")],
       order: [[sequelize.literal("sales_count"), "DESC"]],
       limit: 5,
     });
