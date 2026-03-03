@@ -44,35 +44,39 @@ class AnalyticsService {
     });
 
     // Popular books based on captured book purchases
-    // We fetch Book directly and use a subquery for sales_count to avoid GROUP BY issues in strict SQL modes
-    const books = await Book.findAll({
+    // Using explicit group by for all selected columns to satisfy ONLY_FULL_GROUP_BY on production servers
+    const popularBooks = await Payment.findAll({
       attributes: [
-        "id",
-        "title",
-        "author",
-        "thumbnail",
-        "slug",
+        "book_id",
         [
-          sequelize.literal(`(
-            SELECT COUNT(*)
-            FROM payments AS p
-            WHERE p.book_id = Book.id
-            AND p.payment_type = 'book_purchase'
-            AND p.status = 'captured'
-          )`),
+          sequelize.fn("COUNT", sequelize.col("Payment.book_id")),
           "sales_count",
         ],
       ],
+      where: {
+        payment_type: "book_purchase",
+        status: "captured",
+        book_id: { [Op.ne]: null },
+      },
+      include: [
+        {
+          model: Book,
+          as: "book",
+          attributes: ["id", "title", "author", "thumbnail", "slug"],
+        },
+      ],
+      group: [
+        "Payment.book_id",
+        "book.id",
+        "book.title",
+        "book.author",
+        "book.thumbnail",
+        "book.slug",
+      ],
       order: [[sequelize.literal("sales_count"), "DESC"]],
       limit: 5,
+      subQuery: false, // Important for production environments when using limit with joins
     });
-
-    // Transform to match the expected format: { book_id, sales_count, book: { ... } }
-    const popularBooks = books.map((book) => ({
-      book_id: book.id,
-      sales_count: parseInt(book.getDataValue("sales_count")) || 0,
-      book: book,
-    }));
 
     // Mocked top audiobooks (if you implement later)
     const topAudiobooks = [];
