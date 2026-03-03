@@ -59,7 +59,7 @@ class AnalyticsService {
           attributes: ["title", "author", "thumbnail", "slug"],
         },
       ],
-      group: [sequelize.col("Payment.book_id"), sequelize.col("book.id")],
+      group: ["Payment.book_id", "book.id"],
       order: [[sequelize.literal("sales_count"), "DESC"]],
       limit: 5,
     });
