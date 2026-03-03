@@ -44,39 +44,42 @@ class AnalyticsService {
     });
 
     // Popular books based on captured book purchases
-    // Using explicit group by for all selected columns to satisfy ONLY_FULL_GROUP_BY on production servers
-    const popularBooks = await Payment.findAll({
+    // Refactored to a 2-step process to be 100% robust against strict SQL modes on production
+    const topPaymentStats = await Payment.findAll({
       attributes: [
         "book_id",
-        [
-          sequelize.fn("COUNT", sequelize.col("Payment.book_id")),
-          "sales_count",
-        ],
+        [sequelize.fn("COUNT", sequelize.col("book_id")), "sales_count"],
       ],
       where: {
         payment_type: "book_purchase",
         status: "captured",
         book_id: { [Op.ne]: null },
       },
-      include: [
-        {
-          model: Book,
-          as: "book",
-          attributes: ["id", "title", "author", "thumbnail", "slug"],
-        },
-      ],
-      group: [
-        "Payment.book_id",
-        "book.id",
-        "book.title",
-        "book.author",
-        "book.thumbnail",
-        "book.slug",
-      ],
+      group: ["book_id"],
       order: [[sequelize.literal("sales_count"), "DESC"]],
       limit: 5,
-      subQuery: false, // Important for production environments when using limit with joins
+      raw: true,
     });
+
+    const bookIds = topPaymentStats.map((s) => s.book_id);
+
+    // Fetch book details for these IDs
+    const booksDetails = await Book.findAll({
+      where: { id: bookIds },
+      attributes: ["id", "title", "author", "thumbnail", "slug"],
+    });
+
+    // Map details back to stats
+    const popularBooks = topPaymentStats
+      .map((stat) => {
+        const bookDetail = booksDetails.find((b) => b.id === stat.book_id);
+        return {
+          book_id: stat.book_id,
+          sales_count: parseInt(stat.sales_count) || 0,
+          book: bookDetail || null,
+        };
+      })
+      .filter((item) => item.book !== null); // Only return if book info exists
 
     // Mocked top audiobooks (if you implement later)
     const topAudiobooks = [];
