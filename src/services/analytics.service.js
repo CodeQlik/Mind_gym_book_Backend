@@ -38,10 +38,12 @@ class AnalyticsService {
   }
 
   async getEngagementStats() {
+    // Active users count
     const activeUsers = await User.count({
       where: { is_active: true },
     });
 
+    // Popular books based on captured book purchases
     const popularBooks = await Payment.findAll({
       attributes: [
         "book_id",
@@ -59,12 +61,12 @@ class AnalyticsService {
           attributes: ["title", "author", "thumbnail", "slug"],
         },
       ],
-      group: ["Payment.book_id", "book.id"],
+      group: ["Payment.book_id", "book.id"], // lowercase 'book.id' fixes live error
       order: [[sequelize.literal("sales_count"), "DESC"]],
       limit: 5,
     });
 
-    // Mocked audiobook stats for now
+    // Mocked top audiobooks (if you implement later)
     const topAudiobooks = [];
 
     return {
