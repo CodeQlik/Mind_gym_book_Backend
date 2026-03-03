@@ -29,6 +29,10 @@ const Plan = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    features: {
+      type: DataTypes.JSON,
+      allowNull: true,
+    },
     status: {
       type: DataTypes.ENUM("active", "inactive"),
       defaultValue: "active",

@@ -1,10 +1,9 @@
-import fs from "fs";
-import path from "path";
 import multer from "multer";
+import path from "path";
+import fs from "fs";
 
-const uploadDir = path.join(process.cwd(), "temp");
+const uploadDir = "temp";
 
-// Ensure the directory exists
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -24,8 +23,10 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB
+  },
   fileFilter: function (req, file, cb) {
-    // 🔍 Robust Check: Extension and MimeType dono check karein
     const allowedExtensions = /\.(jpg|jpeg|png|gif|svg|webp|avif|heic|pdf)$/i;
     const allowedMimeTypes =
       /^(image\/(jpeg|png|gif|svg\+xml|webp|avif|heic)|application\/pdf)$/;
@@ -38,8 +39,8 @@ const upload = multer({
     if (isExtensionValid || isMimeTypeValid) {
       cb(null, true);
     } else {
-      req.fileValidationError = "Only image or pdf files are allowed!";
-      return cb(new Error("Only image or pdf files are allowed!"), false);
+      req.fileValidationError = "Only images or PDF files are allowed!";
+      return cb(new Error("Only images or PDF files are allowed!"), false);
     }
   },
 });

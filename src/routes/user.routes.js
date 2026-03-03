@@ -19,6 +19,7 @@ import {
   verifyRegistrationOTP,
   googleLogin,
   updateTTSPreferences,
+  toggleUserStatus,
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -109,5 +110,6 @@ router.put(
   updateUser,
 );
 router.delete("/delete/:id", verifyJWT, isAdmin, deleteUser);
+router.patch("/toggle-status/:id", verifyJWT, isAdmin, toggleUserStatus);
 
 export default router;

@@ -1,70 +1,63 @@
 import paymentService from "../services/payment.service.js";
 import sendResponse from "../utils/responseHandler.js";
 
-export const createOrder = async (req, res, next) => {
+//  APP: Subscription Payment
+export const createSubscriptionOrder = async (req, res, next) => {
   try {
     const { plan_type } = req.body;
     if (!plan_type) {
       return sendResponse(res, 400, false, "plan_type is required");
     }
-    const userId = req.user.id;
-    const order = await paymentService.createSubscriptionOrder(
-      userId,
+    const result = await paymentService.createSubscriptionOrder(
+      req.user.id,
       plan_type,
     );
-    return sendResponse(res, 201, true, "Order created successfully", order);
+    return sendResponse(res, 201, true, "Subscription order created", result);
   } catch (error) {
     next(error);
   }
 };
 
-export const createBookOrder = async (req, res, next) => {
+//  WEBSITE: Physical Book Payment
+export const createPhysicalBookPayment = async (req, res, next) => {
   try {
-    const { book_id } = req.body;
-    if (!book_id) {
-      return sendResponse(res, 400, false, "book_id is required");
+    const { order_id } = req.body;
+    if (!order_id) {
+      return sendResponse(res, 400, false, "order_id is required");
     }
-    const userId = req.user.id;
-    const order = await paymentService.createBookOrder(userId, book_id);
-    return sendResponse(
-      res,
-      201,
-      true,
-      "Book order created successfully",
-      order,
+    const result = await paymentService.createPhysicalBookPaymentOrder(
+      req.user.id,
+      order_id,
     );
+    return sendResponse(res, 201, true, "Payment order created", result);
   } catch (error) {
     next(error);
   }
 };
 
+//  SHARED: Verify Payment
 export const verifyPayment = async (req, res, next) => {
   try {
-    const payment = await paymentService.verifyPayment(req.body);
+    const result = await paymentService.verifyPayment(req.body);
     return sendResponse(
       res,
       200,
       true,
-      "Payment verified and subscription activated",
-      payment,
+      result.message || "Payment verified",
+      result,
     );
   } catch (error) {
     next(error);
   }
 };
 
+//  ADMIN
 export const getAllPayments = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
     const result = await paymentService.getAllPayments(page, limit);
-    return sendResponse(
-      res,
-      200,
-      true,
-      "All payments fetched successfully",
-      result,
-    );
+    return sendResponse(res, 200, true, "All payments fetched", result);
   } catch (error) {
     next(error);
   }

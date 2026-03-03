@@ -24,7 +24,7 @@ const seedAdmin = async () => {
       email: adminEmail,
       password: hashedPassword,
       user_type: "admin",
-      phone: "9999999999",
+      phone: "9636366250",
       is_active: true,
       kyc_status: "approved",
       profile: {

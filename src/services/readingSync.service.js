@@ -4,10 +4,19 @@ class ReadingSyncService {
   // --- Reading Progress ---
 
   async syncProgress(userId, bookId, progressData) {
-    const { last_page, total_pages } = progressData;
+    const last_page = progressData.last_page || progressData.current_page;
+    const total_pages = progressData.total_pages;
+    let percentage =
+      progressData.percentage !== undefined
+        ? progressData.percentage
+        : progressData.percentage_complete;
 
-    let percentage = 0;
-    if (total_pages && total_pages > 0) {
+    if (
+      percentage === undefined &&
+      total_pages &&
+      total_pages > 0 &&
+      last_page
+    ) {
       percentage = (last_page / total_pages) * 100;
       if (percentage > 100) percentage = 100;
     }
@@ -15,18 +24,19 @@ class ReadingSyncService {
     const [progress, created] = await ReadingProgress.findOrCreate({
       where: { user_id: userId, book_id: bookId },
       defaults: {
-        last_page,
+        last_page: last_page || 1,
         total_pages,
-        percentage_complete: percentage,
+        percentage_complete: percentage || 0,
         last_read_at: new Date(),
       },
     });
 
     if (!created) {
       await progress.update({
-        last_page,
+        last_page: last_page || progress.last_page,
         total_pages: total_pages || progress.total_pages,
-        percentage_complete: percentage || progress.percentage_complete,
+        percentage_complete:
+          percentage !== undefined ? percentage : progress.percentage_complete,
         last_read_at: new Date(),
       });
     }
@@ -57,10 +67,27 @@ class ReadingSyncService {
   // --- Highlights ---
 
   async addHighlight(userId, bookId, highlightData) {
+    const {
+      text,
+      color,
+      page,
+      page_number,
+      rect_x,
+      rect_y,
+      rect_width,
+      rect_height,
+    } = highlightData;
+
     return await Highlight.create({
       user_id: userId,
       book_id: bookId,
-      ...highlightData,
+      text,
+      color,
+      page_number: page_number || page,
+      rect_x,
+      rect_y,
+      rect_width,
+      rect_height,
     });
   }
 
@@ -88,7 +115,35 @@ class ReadingSyncService {
       where: { id: highlightId, user_id: userId },
     });
     if (!highlight) throw new Error("Highlight not found");
-    return await highlight.update(updateData);
+
+    const {
+      text,
+      color,
+      page,
+      page_number,
+      rect_x,
+      rect_y,
+      rect_width,
+      rect_height,
+    } = updateData;
+
+    const finalUpdate = {
+      text: text !== undefined ? text : highlight.text,
+      color: color !== undefined ? color : highlight.color,
+      page_number:
+        page_number !== undefined
+          ? page_number
+          : page !== undefined
+            ? page
+            : highlight.page_number,
+      rect_x: rect_x !== undefined ? rect_x : highlight.rect_x,
+      rect_y: rect_y !== undefined ? rect_y : highlight.rect_y,
+      rect_width: rect_width !== undefined ? rect_width : highlight.rect_width,
+      rect_height:
+        rect_height !== undefined ? rect_height : highlight.rect_height,
+    };
+
+    return await highlight.update(finalUpdate);
   }
 }
 

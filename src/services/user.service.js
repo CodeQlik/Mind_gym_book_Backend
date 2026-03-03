@@ -15,7 +15,7 @@ import sendEmail from "../config/sendEmail.js";
 import notificationService from "./notification.service.js";
 
 class UserService {
-  // ─── Helper: Format user response ───────────────────────────────────────────
+  //  Helper: Format user response
   formatUserResponse(user) {
     if (!user) return null;
 
@@ -39,7 +39,7 @@ class UserService {
     return user;
   }
 
-  // ─── Helper: Build initials from name ───────────────────────────────────────
+  // ─── Helper: Build initials from name
   buildInitials(name) {
     return name
       ? name
@@ -50,7 +50,7 @@ class UserService {
       : "";
   }
 
-  // ─── Register Admin ──────────────────────────────────────────────────────────
+  // ─── Register Admin
   async registerAdmin(data, files) {
     const { email, password, name, is_active, phone } = data;
 
@@ -103,7 +103,7 @@ class UserService {
     return this.formatUserResponse(admin);
   }
 
-  // ─── Find User By Email ──────────────────────────────────────────────────────
+  // ─── Find User By Email
   async findUserByEmail(email) {
     const [user] = await sequelize.query(
       "SELECT * FROM users WHERE email = :email LIMIT 1",
@@ -112,7 +112,7 @@ class UserService {
     return user || null;
   }
 
-  // ─── Send Registration OTP ───────────────────────────────────────────────────
+  // ─── Send Registration OTP
   async sendRegistrationOTP(email) {
     const [existing] = await sequelize.query(
       "SELECT id FROM users WHERE email = :email LIMIT 1",
@@ -135,7 +135,7 @@ class UserService {
     return true;
   }
 
-  // ─── Validate Registration OTP ───────────────────────────────────────────────
+  //  Validate Registration OTP
   async validateRegistrationOTP(email, otp) {
     if (!otp) throw new Error("OTP is required.");
 
@@ -156,7 +156,7 @@ class UserService {
     return verificationToken;
   }
 
-  // ─── Register User ───────────────────────────────────────────────────────────
+  //  Register User
   async registerUser(data, files, verificationToken) {
     const { email, password, name, phone, additional_phone, user_type } = data;
 
@@ -270,13 +270,15 @@ class UserService {
     };
   }
 
-  // ─── Login ───────────────────────────────────────────────────────────────────
+  // ─── Login
   async login(email, password) {
     const [user] = await sequelize.query(
       "SELECT * FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
     );
     if (!user) throw new Error("Invalid email or password");
+    if (!user.is_active)
+      throw new Error("Your account is deactivated. Please contact support.");
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Invalid email or password");
@@ -297,7 +299,7 @@ class UserService {
     };
   }
 
-  // ─── Google Login ────────────────────────────────────────────────────────────
+  // ─── Google Login
   async googleLogin(idToken) {
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
     const ticket = await client.verifyIdToken({
@@ -347,6 +349,9 @@ class UserService {
       user = newUser;
     }
 
+    if (!user.is_active)
+      throw new Error("Your account is deactivated. Please contact support.");
+
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
@@ -377,7 +382,7 @@ class UserService {
     };
   }
 
-  // ─── Refresh Access Token ────────────────────────────────────────────────────
+  // ─── Refresh Access Token
   async refreshAccessToken(incomingRefreshToken) {
     if (!incomingRefreshToken) {
       throw new Error("Unauthorized request. Refresh token is missing.");
@@ -390,11 +395,13 @@ class UserService {
       );
 
       const [user] = await sequelize.query(
-        "SELECT id, refresh_token FROM users WHERE id = :id LIMIT 1",
+        "SELECT id, refresh_token, is_active FROM users WHERE id = :id LIMIT 1",
         { replacements: { id: decodedToken.id }, type: QueryTypes.SELECT },
       );
 
       if (!user) throw new Error("Invalid refresh token.");
+      if (!user.is_active)
+        throw new Error("Your account is deactivated. Please contact support.");
       if (incomingRefreshToken !== user.refresh_token) {
         throw new Error("Refresh token is expired or used.");
       }
@@ -416,7 +423,7 @@ class UserService {
     }
   }
 
-  // ─── Get User Profile ────────────────────────────────────────────────────────
+  // ─── Get User Profile
   async getUserProfile(userId) {
     const [user] = await sequelize.query(
       "SELECT * FROM users WHERE id = :id LIMIT 1",
@@ -449,7 +456,7 @@ class UserService {
     return formatted;
   }
 
-  // ─── Update Profile ──────────────────────────────────────────────────────────
+  // ─── Update Profile
   async updateProfile(userId, data, files) {
     const [user] = await sequelize.query(
       "SELECT * FROM users WHERE id = :id LIMIT 1",
@@ -564,7 +571,7 @@ class UserService {
     return this.formatUserResponse(updated);
   }
 
-  // ─── Change Password ─────────────────────────────────────────────────────────
+  // ─── Change Password
   async changePassword(userId, data) {
     const { old_password, new_password, confirm_password } = data;
     if (new_password !== confirm_password)
@@ -590,7 +597,7 @@ class UserService {
     return true;
   }
 
-  // ─── Forgot Password ─────────────────────────────────────────────────────────
+  // ─── Forgot Password
   async forgotPassword(email) {
     const [user] = await sequelize.query(
       "SELECT id, email FROM users WHERE email = :email LIMIT 1",
@@ -633,7 +640,7 @@ class UserService {
     return true;
   }
 
-  // ─── Reset Password ──────────────────────────────────────────────────────────
+  // ─── Reset Password
   async resetPassword(token, newPassword) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret");
@@ -665,7 +672,7 @@ class UserService {
     }
   }
 
-  // ─── Delete Account ──────────────────────────────────────────────────────────
+  // ─── Delete Account
   async deleteAccount(userId, password) {
     const [user] = await sequelize.query(
       "SELECT id, password FROM users WHERE id = :id LIMIT 1",
@@ -683,7 +690,7 @@ class UserService {
     return true;
   }
 
-  // ─── Get All Users (Paginated) ───────────────────────────────────────────────
+  // ─── Get All Users (Paginated)
   async getAllUsers(page = 1, limit = 10) {
     const offset = (page - 1) * limit;
 
@@ -706,12 +713,12 @@ class UserService {
     };
   }
 
-  // ─── Get User By ID ──────────────────────────────────────────────────────────
+  // ─── Get User By ID
   async getUserById(userId) {
     return await this.getUserProfile(userId);
   }
 
-  // ─── Delete User (Admin) ─────────────────────────────────────────────────────
+  // ─── Delete User (Admin)
   async deleteUser(userId) {
     const [user] = await sequelize.query(
       "SELECT id FROM users WHERE id = :id LIMIT 1",
@@ -742,7 +749,7 @@ class UserService {
     return updated;
   }
 
-  // ─── Search Users (Admin) ────────────────────────────────────────────────────
+  // ─── Search Users (Admin)
   async searchUsers(query, page = 1, limit = 10) {
     const offset = (page - 1) * limit;
     const searchTerm = `%${query}%`;
@@ -770,6 +777,32 @@ class UserService {
       currentPage: page,
       users: users.map((u) => this.formatUserResponse(u)),
     };
+  }
+  // ─── Toggle User Status (Admin)
+  async toggleUserStatus(userId) {
+    const [user] = await sequelize.query(
+      "SELECT id, is_active FROM users WHERE id = :id LIMIT 1",
+      { replacements: { id: userId }, type: QueryTypes.SELECT },
+    );
+
+    if (!user) throw new Error("User not found");
+
+    const newStatus = user.is_active ? 0 : 1;
+
+    await sequelize.query(
+      "UPDATE users SET is_active = :newStatus, updated_at = NOW() WHERE id = :id",
+      {
+        replacements: { newStatus, id: userId },
+        type: QueryTypes.UPDATE,
+      },
+    );
+
+    const [updatedUser] = await sequelize.query(
+      "SELECT id, is_active FROM users WHERE id = :id LIMIT 1",
+      { replacements: { id: userId }, type: QueryTypes.SELECT },
+    );
+
+    return updatedUser;
   }
 }
 

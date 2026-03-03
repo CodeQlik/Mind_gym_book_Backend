@@ -1,10 +1,6 @@
 import notificationService from "../services/notification.service.js";
 import sendResponse from "../utils/responseHandler.js";
 
-// ─────────────────────────────────────────────────────────────────────────────
-// FCM Token Registration
-// POST /api/v1/notifications/fcm-token
-// ─────────────────────────────────────────────────────────────────────────────
 export const registerFCMToken = async (req, res, next) => {
   try {
     const { fcm_token } = req.body;
@@ -15,10 +11,6 @@ export const registerFCMToken = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Get User Notifications (paginated)
-// GET /api/v1/notifications?page=1&limit=20
-// ─────────────────────────────────────────────────────────────────────────────
 export const getUserNotifications = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -41,10 +33,6 @@ export const getUserNotifications = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Get Unread Count
-// GET /api/v1/notifications/unread-count
-// ─────────────────────────────────────────────────────────────────────────────
 export const getUnreadCount = async (req, res, next) => {
   try {
     const count = await notificationService.getUnreadCount(req.user.id);
@@ -54,10 +42,6 @@ export const getUnreadCount = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Mark Single Notification as Read
-// PATCH /api/v1/notifications/:id/read
-// ─────────────────────────────────────────────────────────────────────────────
 export const markAsRead = async (req, res, next) => {
   try {
     const notification = await notificationService.markAsRead(
@@ -81,10 +65,6 @@ export const markAsRead = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Mark All Notifications as Read
-// PATCH /api/v1/notifications/mark-all-read
-// ─────────────────────────────────────────────────────────────────────────────
 export const markAllAsRead = async (req, res, next) => {
   try {
     await notificationService.markAllAsRead(req.user.id);
@@ -94,10 +74,6 @@ export const markAllAsRead = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Delete a Notification
-// DELETE /api/v1/notifications/:id
-// ─────────────────────────────────────────────────────────────────────────────
 export const deleteNotification = async (req, res, next) => {
   try {
     const success = await notificationService.deleteNotification(
@@ -115,10 +91,6 @@ export const deleteNotification = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Get Favorite Categories
-// GET /api/v1/notifications/favorite-categories
-// ─────────────────────────────────────────────────────────────────────────────
 export const getFavoriteCategories = async (req, res, next) => {
   try {
     const categories = await notificationService.getFavoriteCategories(
@@ -136,10 +108,6 @@ export const getFavoriteCategories = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Add Favorite Category
-// POST /api/v1/notifications/favorite-categories
-// ─────────────────────────────────────────────────────────────────────────────
 export const addFavoriteCategory = async (req, res, next) => {
   try {
     const { category_id } = req.body;
@@ -150,10 +118,6 @@ export const addFavoriteCategory = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Remove Favorite Category
-// DELETE /api/v1/notifications/favorite-categories/:categoryId
-// ─────────────────────────────────────────────────────────────────────────────
 export const removeFavoriteCategory = async (req, res, next) => {
   try {
     await notificationService.removeFavoriteCategory(
@@ -166,10 +130,6 @@ export const removeFavoriteCategory = async (req, res, next) => {
   }
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Sync Favorite Categories (replace all at once)
-// PUT /api/v1/notifications/favorite-categories/sync
-// ─────────────────────────────────────────────────────────────────────────────
 export const syncFavoriteCategories = async (req, res, next) => {
   try {
     const { category_ids } = req.body;

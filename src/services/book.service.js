@@ -1,9 +1,8 @@
 import { Op } from "sequelize";
 import { Book, Category, User, UserBook } from "../models/index.js";
 import {
-  uploadOnCloudinary,
   deleteFromCloudinary,
-  cloudinary,
+  uploadOnCloudinary,
 } from "../config/cloudinary.js";
 import notificationService from "./notification.service.js";
 import sequelize from "../config/db.js";
@@ -37,6 +36,9 @@ class BookService {
       isbn,
       language,
       otherdescription,
+      previewPages,
+      dimensions,
+      weight,
     } = data;
 
     // Validate category
@@ -48,77 +50,42 @@ class BookService {
     if (existingBook)
       throw new Error("Book title already exists (slug conflict)");
 
-    // Parallel Uploads Setup
-    const uploadTasks = [];
+    const uploadFiles = async (fileArray, folder) => {
+      if (!fileArray || fileArray.length === 0)
+        return { url: "", public_id: "", local_path: "" };
+      const res = await uploadOnCloudinary(fileArray[0].path, folder);
+      return res
+        ? {
+            url: res.secure_url,
+            public_id: res.public_id,
+            local_path: fileArray[0].path,
+          }
+        : { url: "", public_id: "", local_path: "" };
+    };
 
-    // Thumbnail
-    let thumbnailPromise = null;
-    if (files?.thumbnail?.[0]) {
-      thumbnailPromise = uploadOnCloudinary(
-        files.thumbnail[0].path,
-        "mindgymbook/books/thumbnails",
-      );
-    }
-
-    // Cover Image
-    let coverImagePromise = null;
-    if (files?.cover_image?.[0]) {
-      coverImagePromise = uploadOnCloudinary(
-        files.cover_image[0].path,
-        "mindgymbook/books/covers",
-      );
-    }
-
-    // PDF File
-    let pdfFilePromise = null;
-    if (files?.pdf_file?.[0]) {
-      console.log(
-        `[BOOK SERVICE] Attempting to upload PDF: ${files.pdf_file[0].originalname}, Path: ${files.pdf_file[0].path}, Size: ${files.pdf_file[0].size}`,
-      );
-      pdfFilePromise = uploadOnCloudinary(
-        files.pdf_file[0].path,
-        "mindgymbook/books/pdfs",
-      );
-    }
-
-    // Gallery Images
-    let galleryPromises = [];
-    if (files?.images?.length > 0) {
-      galleryPromises = files.images.map((file) =>
-        uploadOnCloudinary(file.path, "mindgymbook/books/gallery"),
-      );
-    }
-
-    // Wait for all uploads to finish
-    await Promise.all([
-      thumbnailPromise,
-      coverImagePromise,
-      pdfFilePromise,
-      ...galleryPromises,
-    ]);
-
-    // Extract Results
-    const thumbnailRes = thumbnailPromise ? await thumbnailPromise : null;
-    const thumbnailData = thumbnailRes
-      ? { url: thumbnailRes.secure_url, public_id: thumbnailRes.public_id }
-      : { url: "", public_id: "" };
-
-    const coverImageRes = coverImagePromise ? await coverImagePromise : null;
-    const coverImageData = coverImageRes
-      ? { url: coverImageRes.secure_url, public_id: coverImageRes.public_id }
-      : { url: "", public_id: "" };
-
-    const pdfFileRes = pdfFilePromise ? await pdfFilePromise : null;
-    const pdfFileData = pdfFileRes
-      ? { url: pdfFileRes.secure_url, public_id: pdfFileRes.public_id }
-      : { url: "", public_id: "" };
+    const thumbnailData = await uploadFiles(
+      files?.thumbnail,
+      "mindgymbook/books/thumbnails",
+    );
+    const coverImageData = await uploadFiles(
+      files?.cover_image,
+      "mindgymbook/books/covers",
+    );
+    const pdfFileData = await uploadFiles(
+      files?.pdf_file,
+      "mindgymbook/books/pdf",
+    );
 
     let extraImages = [];
-    if (galleryPromises.length > 0) {
-      const gResults = await Promise.all(galleryPromises);
-      extraImages = gResults
-        .filter((res) => res !== null)
-        .map((res) => ({ url: res.secure_url, public_id: res.public_id }));
+    if (files?.images?.length > 0) {
+      for (const file of files.images) {
+        const res = await uploadOnCloudinary(
+          file.path,
+          "mindgymbook/books/gallery",
+        );
+        if (res)
+          extraImages.push({ url: res.secure_url, public_id: res.public_id });
+      }
     }
 
     const book = await Book.create({
@@ -143,8 +110,11 @@ class BookService {
       highlights: highlights || null,
       isbn: isbn || null,
       language: language || null,
-      page_count: pdfFileRes?.pages || 0,
+      page_count: 0,
       otherdescription: otherdescription || null,
+      previewPages: parseInt(previewPages) || 5,
+      dimensions: dimensions || null,
+      weight: weight ? parseFloat(weight) : null,
     });
 
     // Reload with category association
@@ -285,91 +255,68 @@ class BookService {
       book.category_id = data.category_id;
     }
 
-    // Handle thumbnail upload
+    // Handle Cloudinary updates (Manual upload to keep local copies)
     if (files?.thumbnail?.[0]) {
-      const uploadResult = await uploadOnCloudinary(
+      if (book.thumbnail?.public_id)
+        await deleteFromCloudinary(book.thumbnail.public_id);
+      const res = await uploadOnCloudinary(
         files.thumbnail[0].path,
         "mindgymbook/books/thumbnails",
       );
-      if (!uploadResult) throw new Error("Failed to upload updated thumbnail");
-
-      // Delete old only after new succeeds
-      const oldThumb = book.thumbnail;
-      if (oldThumb?.public_id) await deleteFromCloudinary(oldThumb.public_id);
-
-      book.thumbnail = {
-        url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
-      };
+      if (res)
+        book.thumbnail = {
+          url: res.secure_url,
+          public_id: res.public_id,
+          local_path: files.thumbnail[0].path,
+        };
     }
 
-    // Handle cover image upload
     if (files?.cover_image?.[0]) {
-      const uploadResult = await uploadOnCloudinary(
+      if (book.cover_image?.public_id)
+        await deleteFromCloudinary(book.cover_image.public_id);
+      const res = await uploadOnCloudinary(
         files.cover_image[0].path,
         "mindgymbook/books/covers",
       );
-      if (!uploadResult)
-        throw new Error("Failed to upload updated cover image");
-
-      const oldCover = book.cover_image;
-      if (oldCover?.public_id) await deleteFromCloudinary(oldCover.public_id);
-
-      book.cover_image = {
-        url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
-      };
+      if (res)
+        book.cover_image = {
+          url: res.secure_url,
+          public_id: res.public_id,
+          local_path: files.cover_image[0].path,
+        };
     }
 
-    // Handle PDF upload
     if (files?.pdf_file?.[0]) {
-      const uploadResult = await uploadOnCloudinary(
+      if (book.pdf_file?.public_id)
+        await deleteFromCloudinary(book.pdf_file.public_id);
+      const res = await uploadOnCloudinary(
         files.pdf_file[0].path,
-        "mindgymbook/books/pdfs",
+        "mindgymbook/books/pdf",
       );
-
-      if (!uploadResult)
-        throw new Error(
-          "Failed to upload updated PDF to Cloudinary. Check logs for details.",
-        );
-
-      const oldPdf = book.pdf_file;
-      if (oldPdf?.public_id) await deleteFromCloudinary(oldPdf.public_id);
-
-      book.pdf_file = {
-        url: uploadResult.secure_url,
-        public_id: uploadResult.public_id,
-      };
-      book.page_count = uploadResult.pages || 0;
+      if (res)
+        book.pdf_file = {
+          url: res.secure_url,
+          public_id: res.public_id,
+          local_path: files.pdf_file[0].path,
+        };
     }
 
-    // Handle gallery images
     if (files?.images?.length > 0) {
-      const extraImages = [];
-      const uploadPromises = files.images.map((file) =>
-        uploadOnCloudinary(file.path, "mindgymbook/books/gallery"),
-      );
-      const results = await Promise.all(uploadPromises);
-
-      results.forEach((res) => {
-        if (res) {
-          extraImages.push({
-            url: res.secure_url,
-            public_id: res.public_id,
-          });
+      if (Array.isArray(book.images)) {
+        for (const img of book.images) {
+          if (img.public_id) await deleteFromCloudinary(img.public_id);
         }
-      });
-
-      if (extraImages.length > 0) {
-        // Delete old ONLY if we have new ones
-        const oldImages = book.images;
-        if (Array.isArray(oldImages)) {
-          for (const img of oldImages) {
-            if (img.public_id) await deleteFromCloudinary(img.public_id);
-          }
-        }
-        book.images = extraImages;
       }
+      const gallery = [];
+      for (const file of files.images) {
+        const res = await uploadOnCloudinary(
+          file.path,
+          "mindgymbook/books/gallery",
+        );
+        if (res)
+          gallery.push({ url: res.secure_url, public_id: res.public_id });
+      }
+      book.images = gallery;
     }
 
     // Scalar fields
@@ -385,6 +332,9 @@ class BookService {
       "language",
       "highlights",
       "otherdescription",
+      "previewPages",
+      "dimensions",
+      "weight",
     ];
     scalarFields.forEach((field) => {
       if (data[field] !== undefined) book[field] = data[field];
@@ -402,7 +352,6 @@ class BookService {
 
     await book.save();
 
-    // Reload with category association
     return await Book.findByPk(book.id, {
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
@@ -414,8 +363,10 @@ class BookService {
     const book = await Book.findByPk(id);
     if (!book) throw new Error("Book not found");
 
-    const thumbnail = book.thumbnail;
-    if (thumbnail?.public_id) await deleteFromCloudinary(thumbnail.public_id);
+    if (book.thumbnail?.public_id)
+      await deleteFromCloudinary(book.thumbnail.public_id);
+    if (book.pdf_file?.public_id)
+      await deleteFromCloudinary(book.pdf_file.public_id);
 
     await book.destroy();
     return true;
@@ -430,7 +381,6 @@ class BookService {
   ) {
     const offset = (page - 1) * limit;
     const searchTerm = `%${query}%`;
-
     const where = {
       [Op.or]: [
         { title: { [Op.like]: searchTerm } },
@@ -462,145 +412,44 @@ class BookService {
       books: rows,
     };
   }
+
+  async hasFullAccess(user, book) {
+    if (!user) return !book.is_premium;
+    const userId = user.id;
+    const userType = user.user_type;
+
+    if (userType === "admin") return true;
+    if (!book.is_premium) return true;
+
+    if (userId) {
+      const purchase = await UserBook.findOne({
+        where: { user_id: userId, book_id: book.id },
+      });
+      if (purchase) return true;
+
+      const dbUser = await User.findByPk(userId);
+      const now = new Date();
+      if (
+        dbUser?.subscription_status === "active" &&
+        new Date(dbUser.subscription_end_date) >= now
+      ) {
+        return true;
+      }
+    }
+    return false;
+  }
+
   async getReadPdfUrl(bookId, user) {
-    const userId = user?.id;
-    const userType = user?.user_type;
-
     const book = await Book.findByPk(bookId);
-
     if (!book) throw new Error("Book not found");
     if (!book.pdf_file || !book.pdf_file.url) throw new Error("PDF not found");
 
-    // 🔄 SELF-HEALING: If page_count is 0, sync it from Cloudinary now
-    if (!book.page_count || book.page_count === 0) {
-      try {
-        const tempUrl = book.pdf_file.url;
-        const tempIsRaw = tempUrl.includes("/raw/");
-        const tempCleanId = tempIsRaw
-          ? book.pdf_file.public_id
-          : book.pdf_file.public_id.replace(/\.pdf$/i, "").replace(/^\//, "");
-
-        console.log(
-          `[BOOK SERVICE] Syncing page_count for Book ${bookId} using ID: ${tempCleanId}...`,
-        );
-
-        const details = await cloudinary.api.resource(tempCleanId, {
-          resource_type: tempIsRaw ? "raw" : "image",
-          pages: true,
-        });
-
-        if (details && details.pages) {
-          book.page_count = details.pages;
-          await book.save();
-          console.log(
-            `[BOOK SERVICE] Successfully synced page_count DB updated to: ${details.pages}`,
-          );
-        }
-      } catch (err) {
-        console.warn(
-          "[BOOK SERVICE] Could not auto-sync pages for old book:",
-          err.message,
-        );
-      }
-    }
-
-    // 🔐 1. Access Control Logic
-    let hasAccess = false;
-    if (userType === "admin") {
-      hasAccess = true;
-    } else if (book.is_premium === false) {
-      hasAccess = true;
-    } else if (userId) {
-      const purchase = await UserBook.findOne({
-        where: { user_id: userId, book_id: bookId },
-      });
-      if (purchase) {
-        hasAccess = true;
-      } else {
-        const dbUser = await User.findByPk(userId);
-        const now = new Date();
-        if (
-          dbUser?.subscription_status === "active" &&
-          new Date(dbUser.subscription_end_date) >= now
-        ) {
-          hasAccess = true;
-        }
-      }
-    }
-
-    console.log(
-      `[BOOK SERVICE] Auth: ${userId || "Guest"}, Premium: ${book.is_premium}, Access: ${hasAccess}`,
-    );
-
-    // 📄 2. Cloudinary Variables
-    const originalUrl = book.pdf_file.url;
-    let publicId = book.pdf_file.public_id;
-
-    // Extract version and type from URL
-    const isRaw = originalUrl.includes("/raw/");
-    const isPrivate = originalUrl.includes("/private/");
-    const isAuth = originalUrl.includes("/authenticated/");
-
-    const versionMatch = originalUrl.match(/\/v(\d+)\//);
-    const version = versionMatch ? versionMatch[1] : undefined;
-
-    // 🛠️ 3. Fix: Consistent standard for PDFs
-    const isRestricted = isPrivate || isAuth || isRaw;
-    const cleanPublicId = isRaw
-      ? publicId
-      : publicId.replace(/\.pdf$/i, "").replace(/^\//, "");
-
-    let finalUrl;
-
-    try {
-      const deliveryType = isPrivate
-        ? "private"
-        : isAuth
-          ? "authenticated"
-          : "upload";
-
-      if (hasAccess) {
-        // ✅ 1. FULL ACCESS: Stable signed URL for download/view
-        finalUrl = cloudinary.utils.private_download_url(cleanPublicId, "pdf", {
-          resource_type: isRaw ? "raw" : "image",
-          type: deliveryType,
-          expires_at: Math.floor(Date.now() / 1000) + 3600,
-          attachment: false,
-        });
-      } else {
-        // 🔒 2. PREVIEW ACCESS: Restricted to 1-5 pages
-        // Using a highly specific signature format that Cloudinary expects for restricted transformations
-        finalUrl = cloudinary.url(cleanPublicId, {
-          resource_type: "image",
-          type: deliveryType,
-          secure: true,
-          sign_url: true,
-          version: version,
-          format: "pdf",
-          transformation: [{ page: "1-5" }],
-        });
-
-        // Final fallback: If signature still picky, we remove version from signature calculation
-        if (!finalUrl.includes("s--")) {
-          finalUrl = cloudinary.url(cleanPublicId, {
-            resource_type: "image",
-            type: deliveryType,
-            secure: true,
-            sign_url: true,
-            transformation: [{ page: "1-5" }],
-            format: "pdf",
-          });
-        }
-      }
-
-      console.log(`[BOOK SERVICE] Result URL: ${finalUrl}`);
-    } catch (err) {
-      console.error("[BOOK SERVICE] URL Generation Error:", err.message);
-      finalUrl = originalUrl;
-    }
+    const hasAccess = await this.hasFullAccess(user, book);
+    const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+    const finalUrl = `${baseUrl}/api/v1/book/readBook/${bookId}`;
 
     return {
-      pdf_url: finalUrl || originalUrl,
+      pdf_url: finalUrl,
       isPreview: !hasAccess,
       total_pages: book.page_count || 0,
     };

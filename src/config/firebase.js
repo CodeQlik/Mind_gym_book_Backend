@@ -5,7 +5,6 @@ let firebaseApp;
 const initializeFirebase = () => {
   if (firebaseApp) return firebaseApp;
 
-  // Firebase service account credentials from environment variables
   const serviceAccount = {
     type: "service_account",
     project_id: process.env.FIREBASE_PROJECT_ID,

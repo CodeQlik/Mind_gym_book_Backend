@@ -36,6 +36,15 @@ export const verifyJWT = async (req, res, next) => {
       return sendResponse(res, 401, false, "Invalid access token.");
     }
 
+    if (!user.is_active) {
+      return sendResponse(
+        res,
+        403,
+        false,
+        "Your account is deactivated. Please contact support.",
+      );
+    }
+
     req.user = user;
     next();
   } catch (error) {

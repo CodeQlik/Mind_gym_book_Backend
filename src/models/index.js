@@ -19,6 +19,7 @@ import Highlight from "./highlight.model.js";
 import Seller from "./seller.model.js";
 import UsedBookListing from "./usedBookListing.model.js";
 import Order from "./order.model.js";
+import OrderItem from "./orderItem.model.js";
 
 // Associations
 
@@ -129,6 +130,13 @@ UsedBookListing.belongsTo(Seller, { foreignKey: "seller_id", as: "seller" });
 User.hasMany(Order, { foreignKey: "user_id", as: "orders" });
 Order.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
+// OrderItem Associations
+Order.hasMany(OrderItem, { foreignKey: "order_id", as: "items" });
+OrderItem.belongsTo(Order, { foreignKey: "order_id", as: "order" });
+
+Book.hasMany(OrderItem, { foreignKey: "book_id", as: "order_items" });
+OrderItem.belongsTo(Book, { foreignKey: "book_id", as: "book" });
+
 export {
   User,
   Address,
@@ -151,4 +159,5 @@ export {
   Seller,
   UsedBookListing,
   Order,
+  OrderItem,
 };

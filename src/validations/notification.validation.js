@@ -1,6 +1,6 @@
 import Joi from "joi";
 
-// ─── Valid ENUM types (must match model) ─────────────────────────────────────
+// ─── Valid ENUM types (must match model)
 const NOTIFICATION_TYPES = [
   "ORDER",
   "RENEWAL",
@@ -10,7 +10,7 @@ const NOTIFICATION_TYPES = [
   "SALE",
 ];
 
-// ─── Register FCM Token ───────────────────────────────────────────────────────
+// ─── Register FCM Token
 export const registerFCMTokenValidation = Joi.object({
   fcm_token: Joi.string().required().trim().messages({
     "string.empty": "FCM token cannot be empty",
@@ -18,7 +18,7 @@ export const registerFCMTokenValidation = Joi.object({
   }),
 });
 
-// ─── Admin: Send Notification to User ────────────────────────────────────────
+// ─── Admin: Send Notification to User
 export const sendNotificationValidation = Joi.object({
   target: Joi.string().valid("ALL", "CATEGORY", "USER").default("USER"),
   user_id: Joi.number().integer().positive().when("target", {
@@ -41,7 +41,7 @@ export const sendNotificationValidation = Joi.object({
   metadata: Joi.object().optional().allow(null),
 });
 
-// ─── Add Favorite Category ────────────────────────────────────────────────────
+// ─── Add Favorite Category
 export const addFavoriteCategoryValidation = Joi.object({
   category_id: Joi.number().integer().positive().required().messages({
     "number.base": "category_id must be a number",
@@ -49,7 +49,7 @@ export const addFavoriteCategoryValidation = Joi.object({
   }),
 });
 
-// ─── Sync Favorite Categories ─────────────────────────────────────────────────
+// ─── Sync Favorite Categories
 export const syncFavoriteCategoriesValidation = Joi.object({
   category_ids: Joi.array()
     .items(Joi.number().integer().positive())

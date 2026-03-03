@@ -1,0 +1,1088 @@
+{
+  "info": {
+    "name": "Mind Gym Book API",
+    "_postman_id": "mindgymbook-api-collection",
+    "description": "Complete API collection for Mind Gym Book Backend\n\nBase URL: {{base_url}}\n\nPlatforms:\n- WEBSITE: Physical book cart + orders + payment\n- APP: Subscription + digital PDF reading",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "base_url", "value": "http://localhost:8000/api/v1", "type": "string" },
+    { "key": "token", "value": "", "type": "string" },
+    { "key": "book_id", "value": "1", "type": "string" },
+    { "key": "order_id", "value": "1", "type": "string" },
+    { "key": "category_id", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "item": [
+        {
+          "name": "Send Registration OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/send-registration-otp",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" }
+          }
+        },
+        {
+          "name": "Verify Registration OTP",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/verify-registration-otp",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}" }
+          }
+        },
+        {
+          "name": "Register",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/users/register",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Test User", "type": "text" },
+                { "key": "email", "value": "user@example.com", "type": "text" },
+                { "key": "password", "value": "Password@123", "type": "text" },
+                { "key": "phone", "value": "9999999999", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if(res.data && res.data.accessToken){",
+                  "  pm.collectionVariables.set('token', res.data.accessToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/login",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password@123\"\n}" }
+          }
+        },
+        {
+          "name": "Google Login",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/google-login",
+            "body": { "mode": "raw", "raw": "{\n  \"id_token\": \"GOOGLE_ID_TOKEN_HERE\"\n}" }
+          }
+        },
+        {
+          "name": "Logout",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/users/logout"
+          }
+        },
+        {
+          "name": "Refresh Token",
+          "request": {
+            "method": "POST",
+            "url": "{{base_url}}/users/refresh-token"
+          }
+        },
+        {
+          "name": "Forgot Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/forgot-password",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" }
+          }
+        },
+        {
+          "name": "Reset Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/reset-password",
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"RESET_TOKEN\",\n  \"password\": \"NewPassword@123\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👤 User Profile",
+      "item": [
+        {
+          "name": "Get My Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/users/profile"
+          }
+        },
+        {
+          "name": "Update Profile",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/users/update-profile",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Updated Name", "type": "text" },
+                { "key": "phone", "value": "8888888888", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Change Password",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/change-password",
+            "body": { "mode": "raw", "raw": "{\n  \"old_password\": \"Password@123\",\n  \"new_password\": \"NewPassword@123\"\n}" }
+          }
+        },
+        {
+          "name": "Update TTS Preferences",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/update-tts-preferences",
+            "body": { "mode": "raw", "raw": "{\n  \"tts_speed\": 1.5,\n  \"tts_voice\": \"en-US\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Account",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/delete-account",
+            "body": { "mode": "raw", "raw": "{\n  \"password\": \"Password@123\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "👑 Admin — Users",
+      "item": [
+        {
+          "name": "Get All Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/users/all-users?page=1&limit=10", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Search Users",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/users/search?q=john", "query": [{ "key": "q", "value": "john" }] }
+          }
+        },
+        {
+          "name": "Get User By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/users/1"
+          }
+        },
+        {
+          "name": "Update User",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/users/update/1",
+            "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "Updated By Admin", "type": "text" }] }
+          }
+        },
+        {
+          "name": "Toggle User Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/users/toggle-status/1"
+          }
+        },
+        {
+          "name": "Delete User",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/users/delete/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📚 Books",
+      "item": [
+        {
+          "name": "Get All Books",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/book/all?page=1&limit=10&is_premium=true", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }, { "key": "is_premium", "value": "true" }] }
+          }
+        },
+        {
+          "name": "Get Book By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/book/{{book_id}}"
+          }
+        },
+        {
+          "name": "Get Book By Slug",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/book/atomic-habits"
+          }
+        },
+        {
+          "name": "Search Books",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{base_url}}/book/search?q=habits", "query": [{ "key": "q", "value": "habits" }] }
+          }
+        },
+        {
+          "name": "Get Books By Category",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/book/category/{{category_id}}"
+          }
+        },
+        {
+          "name": "Toggle Bookmark",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/book/bookmark/toggle",
+            "body": { "mode": "raw", "raw": "{\n  \"book_id\": 1\n}" }
+          }
+        },
+        {
+          "name": "Get My Bookmarks",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/book/bookmark/all"
+          }
+        },
+        {
+          "name": "Admin — Get All Books",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/book/admin/all?page=1&limit=10", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Admin — Add Book",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/book/add",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Atomic Habits", "type": "text" },
+                { "key": "author", "value": "James Clear", "type": "text" },
+                { "key": "price", "value": "299", "type": "text" },
+                { "key": "original_price", "value": "499", "type": "text" },
+                { "key": "category_id", "value": "1", "type": "text" },
+                { "key": "description", "value": "Book description here", "type": "text" },
+                { "key": "is_premium", "value": "true", "type": "text" },
+                { "key": "stock", "value": "50", "type": "text" },
+                { "key": "language", "value": "English", "type": "text" },
+                { "key": "thumbnail", "value": "", "type": "file" },
+                { "key": "cover_image", "value": "", "type": "file" },
+                { "key": "pdf_file", "value": "", "type": "file" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Update Book",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/book/update/{{book_id}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "price", "value": "249", "type": "text" },
+                { "key": "stock", "value": "100", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Toggle Book Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/book/toggle-status/{{book_id}}"
+          }
+        },
+        {
+          "name": "Admin — Delete Book",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/book/delete/{{book_id}}"
+          }
+        },
+        {
+          "name": "📖 Read Book PDF (APP)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/book/readBook/{{book_id}}",
+            "description": "Returns signed Cloudinary PDF URL.\n- Subscriber/Admin → Full PDF\n- Others → Pages 1-5 preview"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏷️ Categories",
+      "item": [
+        {
+          "name": "Get All Categories",
+          "request": { "method": "GET", "url": "{{base_url}}/category/all" }
+        },
+        {
+          "name": "Search Categories",
+          "request": { "method": "GET", "url": { "raw": "{{base_url}}/category/search?q=self", "query": [{ "key": "q", "value": "self" }] } }
+        },
+        {
+          "name": "Get Category By ID",
+          "request": { "method": "GET", "url": "{{base_url}}/category/{{category_id}}" }
+        },
+        {
+          "name": "Get Category By Slug",
+          "request": { "method": "GET", "url": "{{base_url}}/category/self-help" }
+        },
+        {
+          "name": "Admin — Get All Categories",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/category/admin/all"
+          }
+        },
+        {
+          "name": "Admin — Add Category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/category/add",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Self Help", "type": "text" },
+                { "key": "description", "value": "Self improvement books", "type": "text" },
+                { "key": "image", "value": "", "type": "file" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Update Category",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/category/update/{{category_id}}",
+            "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "Updated Name", "type": "text" }] }
+          }
+        },
+        {
+          "name": "Admin — Toggle Category Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/category/toggle-status/{{category_id}}"
+          }
+        },
+        {
+          "name": "Admin — Delete Category",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/category/delete/{{category_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📍 Addresses",
+      "item": [
+        {
+          "name": "Add Address",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/user/addresses/add",
+            "body": { "mode": "raw", "raw": "{\n  \"name\": \"Home\",\n  \"phone\": \"9999999999\",\n  \"address_line1\": \"123 Main Street\",\n  \"address_line2\": \"Apt 4B\",\n  \"city\": \"Mumbai\",\n  \"state\": \"Maharashtra\",\n  \"pincode\": \"400001\",\n  \"country\": \"India\",\n  \"addresstype\": \"home\",\n  \"is_default\": true\n}" }
+          }
+        },
+        {
+          "name": "Get My Addresses",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/user/addresses/my-addresses"
+          }
+        },
+        {
+          "name": "Get Address By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/user/addresses/1"
+          }
+        },
+        {
+          "name": "Update Address",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/user/addresses/update/1",
+            "body": { "mode": "raw", "raw": "{\n  \"city\": \"Pune\",\n  \"pincode\": \"411001\"\n}" }
+          }
+        },
+        {
+          "name": "Set Default Address",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/user/addresses/set-default/1"
+          }
+        },
+        {
+          "name": "Delete Address",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/user/addresses/delete/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🛒 Cart (WEBSITE)",
+      "item": [
+        {
+          "name": "Add to Cart",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/cart/add",
+            "body": { "mode": "formdata", "formdata": [{ "key": "book_id", "value": "{{book_id}}", "type": "text" }, { "key": "quantity", "value": "1", "type": "text" }] }
+          }
+        },
+        {
+          "name": "Get Cart",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/cart/"
+          }
+        },
+        {
+          "name": "Update Cart Quantity",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/cart/update/1",
+            "body": { "mode": "formdata", "formdata": [{ "key": "quantity", "value": "2", "type": "text" }] }
+          }
+        },
+        {
+          "name": "Remove from Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/cart/remove/1"
+          }
+        },
+        {
+          "name": "Clear Cart",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/cart/clear"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📦 Orders (WEBSITE)",
+      "item": [
+        {
+          "name": "⭐ STEP 1 — Checkout from Cart",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if(res.data && res.data.id){",
+                  "  pm.collectionVariables.set('order_id', res.data.id);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/orders/checkout",
+            "body": { "mode": "raw", "raw": "{\n  \"address_id\": 1\n}" },
+            "description": "Creates DB order from cart. Saves order_id to variable automatically."
+          }
+        },
+        {
+          "name": "⭐ STEP 2 — Create Physical Payment (Razorpay)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/payment/create-physical-payment",
+            "body": { "mode": "raw", "raw": "{\n  \"order_id\": {{order_id}}\n}" },
+            "description": "Creates Razorpay order for the physical book order. Open Razorpay checkout with this."
+          }
+        },
+        {
+          "name": "⭐ STEP 3 — Verify Physical Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/payment/verify",
+            "body": { "mode": "raw", "raw": "{\n  \"razorpay_order_id\": \"order_XXXXXXXXX\",\n  \"razorpay_payment_id\": \"pay_XXXXXXXXX\",\n  \"razorpay_signature\": \"test_signature\"\n}" },
+            "description": "Verifies Razorpay payment & marks order as PAID. Use 'test_signature' for dev bypass."
+          }
+        },
+        {
+          "name": "Get My Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/my-orders?page=1&limit=10", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Get My Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/orders/my-orders/{{order_id}}"
+          }
+        },
+        {
+          "name": "Request Refund",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/orders/refund/{{order_id}}",
+            "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Item damaged on delivery\"\n}" }
+          }
+        },
+        {
+          "name": "Admin — Get All Orders",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/admin/all?delivery_status=processing&page=1&limit=10", "query": [{ "key": "delivery_status", "value": "processing" }, { "key": "payment_status", "value": "" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Admin — Get Order By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/orders/admin/{{order_id}}"
+          }
+        },
+        {
+          "name": "Admin — Dispatch Order 🚚",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/orders/admin/dispatch/{{order_id}}",
+            "body": { "mode": "raw", "raw": "{\n  \"tracking_id\": \"DTDC123456789\",\n  \"courier_name\": \"DTDC\",\n  \"dispatch_note\": \"Dispatched from Mumbai warehouse\"\n}" },
+            "description": "Sets delivery_status = 'shipped' with tracking info."
+          }
+        },
+        {
+          "name": "Admin — Update Order Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/orders/admin/status/{{order_id}}",
+            "body": { "mode": "raw", "raw": "{\n  \"delivery_status\": \"delivered\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "💳 Payment",
+      "item": [
+        {
+          "name": "APP — Create Subscription Order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/payment/create-subscription-order",
+            "body": { "mode": "raw", "raw": "{\n  \"plan_type\": \"monthly\"\n}" },
+            "description": "APP use: Creates Razorpay order for subscription purchase."
+          }
+        },
+        {
+          "name": "APP — Verify Subscription Payment",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/payment/verify",
+            "body": { "mode": "raw", "raw": "{\n  \"razorpay_order_id\": \"order_XXXXXXXXX\",\n  \"razorpay_payment_id\": \"pay_XXXXXXXXX\",\n  \"razorpay_signature\": \"test_signature\"\n}" },
+            "description": "Activates subscription after payment."
+          }
+        },
+        {
+          "name": "Admin — Get All Payments",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/payment/admin/all?page=1&limit=10", "query": [{ "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎟️ Plans & Subscriptions (APP)",
+      "item": [
+        {
+          "name": "Get All Plans",
+          "request": { "method": "GET", "url": "{{base_url}}/plans/" }
+        },
+        {
+          "name": "Get Plan By ID",
+          "request": { "method": "GET", "url": "{{base_url}}/plans/1" }
+        },
+        {
+          "name": "Admin — Create Plan",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/plans/",
+            "body": { "mode": "raw", "raw": "{\n  \"plan_type\": \"monthly\",\n  \"price\": 199,\n  \"duration_months\": 1,\n  \"status\": \"active\"\n}" }
+          }
+        },
+        {
+          "name": "Admin — Update Plan",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/plans/1",
+            "body": { "mode": "raw", "raw": "{\n  \"price\": 249\n}" }
+          }
+        },
+        {
+          "name": "Admin — Delete Plan",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/plans/1"
+          }
+        },
+        {
+          "name": "Get My Subscription",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/subscriptions/"
+          }
+        },
+        {
+          "name": "Get Subscription By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/subscriptions/1"
+          }
+        },
+        {
+          "name": "Admin — Get All Subscriptions",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/subscriptions/admin/all?page=1", "query": [{ "key": "page", "value": "1" }] }
+          }
+        },
+        {
+          "name": "Admin — Get By User ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/subscriptions/user/1"
+          }
+        },
+        {
+          "name": "Admin — Update Subscription Status",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/subscriptions/admin/status/1",
+            "body": { "mode": "raw", "raw": "{\n  \"status\": \"expired\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "❤️ Wishlist",
+      "item": [
+        {
+          "name": "Add to Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/wishlist/add",
+            "body": { "mode": "formdata", "formdata": [{ "key": "book_id", "value": "{{book_id}}", "type": "text" }] }
+          }
+        },
+        {
+          "name": "Toggle Wishlist",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/wishlist/toggle",
+            "body": { "mode": "formdata", "formdata": [{ "key": "book_id", "value": "{{book_id}}", "type": "text" }] }
+          }
+        },
+        {
+          "name": "Get Wishlist",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/wishlist/"
+          }
+        },
+        {
+          "name": "Remove from Wishlist",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/wishlist/remove/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "⭐ Reviews",
+      "item": [
+        {
+          "name": "Get Book Reviews",
+          "request": { "method": "GET", "url": "{{base_url}}/review/book/{{book_id}}" }
+        },
+        {
+          "name": "Add Review",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/review/add",
+            "body": { "mode": "raw", "raw": "{\n  \"book_id\": 1,\n  \"rating\": 5,\n  \"comment\": \"Amazing book!\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Review",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/review/delete/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📖 Reading Sync (APP)",
+      "item": [
+        {
+          "name": "Sync Reading Progress",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/reading-sync/progress/{{book_id}}",
+            "body": { "mode": "raw", "raw": "{\n  \"current_page\": 45,\n  \"percentage\": 30\n}" }
+          }
+        },
+        {
+          "name": "Get Reading Progress",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/reading-sync/progress/{{book_id}}"
+          }
+        },
+        {
+          "name": "Get My Library",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/reading-sync/my-library"
+          }
+        },
+        {
+          "name": "Add Highlight",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/reading-sync/highlights/{{book_id}}",
+            "body": { "mode": "raw", "raw": "{\n  \"text\": \"This is a highlighted sentence\",\n  \"page\": 12,\n  \"color\": \"#FFFF00\",\n  \"rect_x\": 50.5,\n  \"rect_y\": 120.0,\n  \"rect_width\": 300.2,\n  \"rect_height\": 25.5\n}" }
+          }
+        },
+        {
+          "name": "Get Highlights",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/reading-sync/highlights/{{book_id}}"
+          }
+        },
+        {
+          "name": "Delete Highlight",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/reading-sync/highlights/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📝 Notes (APP)",
+      "item": [
+        {
+          "name": "Save Note",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/note/saveNote",
+            "body": { "mode": "raw", "raw": "{\n  \"book_id\": 1,\n  \"page\": 10,\n  \"content\": \"My note here\"\n}" }
+          }
+        },
+        {
+          "name": "Get All Notes",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/note/getAllNotes"
+          }
+        },
+        {
+          "name": "Update Note",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/note/updateNote/1",
+            "body": { "mode": "raw", "raw": "{\n  \"content\": \"Updated note content\"\n}" }
+          }
+        },
+        {
+          "name": "Delete Note",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/note/deleteNote/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🔔 Notifications",
+      "item": [
+        {
+          "name": "Register FCM Token",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/notifications/fcm-token",
+            "body": { "mode": "raw", "raw": "{\n  \"fcm_token\": \"FCM_TOKEN_FROM_DEVICE\"\n}" }
+          }
+        },
+        {
+          "name": "Get Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/notifications/"
+          }
+        },
+        {
+          "name": "Get Unread Count",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/notifications/unread-count"
+          }
+        },
+        {
+          "name": "Mark As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/notifications/1/read"
+          }
+        },
+        {
+          "name": "Mark All As Read",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/notifications/mark-all-read"
+          }
+        },
+        {
+          "name": "Delete Notification",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/notifications/1"
+          }
+        },
+        {
+          "name": "Get Favorite Categories",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/notifications/favorite-categories"
+          }
+        },
+        {
+          "name": "Add Favorite Category",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/notifications/favorite-categories",
+            "body": { "mode": "raw", "raw": "{\n  \"category_id\": 1\n}" }
+          }
+        },
+        {
+          "name": "Remove Favorite Category",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/notifications/favorite-categories/1"
+          }
+        },
+        {
+          "name": "Sync Favorite Categories",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/notifications/favorite-categories/sync",
+            "body": { "mode": "raw", "raw": "{\n  \"category_ids\": [1, 2, 3]\n}" }
+          }
+        },
+        {
+          "name": "Admin — Send Notification",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/notifications/admin/send",
+            "body": { "mode": "raw", "raw": "{\n  \"user_id\": 1,\n  \"title\": \"New Book Alert!\",\n  \"body\": \"A new book has been added.\"\n}" }
+          }
+        }
+      ]
+    },
+    {
+      "name": "🏪 Marketplace",
+      "item": [
+        {
+          "name": "Register as Seller",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/marketplace/register",
+            "body": { "mode": "raw", "raw": "{\n  \"bank_account\": \"123456789\",\n  \"ifsc\": \"SBIN0001234\"\n}" }
+          }
+        },
+        {
+          "name": "Get Seller Profile",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/marketplace/profile"
+          }
+        },
+        {
+          "name": "Create Listing",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/marketplace/listing/1",
+            "body": { "mode": "raw", "raw": "{\n  \"book_id\": 1,\n  \"price\": 150,\n  \"condition\": \"good\",\n  \"description\": \"Lightly used book\"\n}" }
+          }
+        },
+        {
+          "name": "Get Active Listings",
+          "request": { "method": "GET", "url": "{{base_url}}/marketplace/listings" }
+        },
+        {
+          "name": "Admin — Pending Sellers",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/marketplace/admin/pending-sellers"
+          }
+        },
+        {
+          "name": "Admin — Approve Seller",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/marketplace/admin/approve-seller/1"
+          }
+        },
+        {
+          "name": "Admin — Approve Listing",
+          "request": {
+            "method": "PATCH",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/marketplace/admin/approve-listing/1"
+          }
+        },
+        {
+          "name": "Admin — Release Escrow",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/marketplace/admin/release-escrow/{{order_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📊 Analytics (Admin)",
+      "item": [
+        {
+          "name": "Dashboard Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/analytics/dashboard"
+          }
+        }
+      ]
+    }
+  ]
+}

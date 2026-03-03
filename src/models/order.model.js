@@ -14,6 +14,17 @@ const Order = sequelize.define(
       allowNull: false,
       references: { model: "users", key: "id" },
     },
+    // Address snapshot at time of order (denormalized for reliability)
+    shipping_address: {
+      type: DataTypes.TEXT,
+      allowNull: false,
+    },
+    // Link to user's address record (optional convenience FK)
+    address_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "addresses", key: "id" },
+    },
     total_amount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
@@ -21,6 +32,7 @@ const Order = sequelize.define(
     order_type: {
       type: DataTypes.ENUM("physical_book", "marketplace_book"),
       allowNull: false,
+      defaultValue: "physical_book",
     },
     payment_status: {
       type: DataTypes.ENUM("pending", "paid", "failed", "refunded"),
@@ -36,16 +48,22 @@ const Order = sequelize.define(
       ),
       defaultValue: "processing",
     },
-    escrow_status: {
-      type: DataTypes.ENUM("held", "released", "disputed", "refunded"),
+    // Razorpay order ID linked to this physical order
+    razorpay_order_id: {
+      type: DataTypes.STRING,
       allowNull: true,
-    },
-    shipping_address: {
-      type: DataTypes.TEXT,
-      allowNull: false,
     },
     tracking_id: {
       type: DataTypes.STRING,
+      allowNull: true,
+    },
+    courier_name: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    dispatch_note: {
+      type: DataTypes.TEXT,
+      allowNull: true,
     },
     refund_requested: {
       type: DataTypes.BOOLEAN,
@@ -53,6 +71,7 @@ const Order = sequelize.define(
     },
     refund_reason: {
       type: DataTypes.TEXT,
+      allowNull: true,
     },
   },
   {

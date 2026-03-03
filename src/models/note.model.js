@@ -13,7 +13,7 @@ const UserNote = sequelize.define(
     userId: {
       type: DataTypes.INTEGER,
       allowNull: false,
-      field: "user_id", // 🔥 DB column mapping
+      field: "user_id", //  DB column mapping
     },
 
     title: {
@@ -26,7 +26,7 @@ const UserNote = sequelize.define(
 
     chapterName: {
       type: DataTypes.STRING,
-      field: "chapter_name", // 🔥 mapping
+      field: "chapter_name", // mapping
     },
   },
   {

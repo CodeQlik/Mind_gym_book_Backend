@@ -363,3 +363,18 @@ export const updateTTSPreferences = async (req, res, next) => {
     next(error);
   }
 };
+export const toggleUserStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await userService.toggleUserStatus(id);
+    return sendResponse(
+      res,
+      200,
+      true,
+      `User ${result.is_active ? "activated" : "deactivated"} successfully`,
+      result,
+    );
+  } catch (error) {
+    next(error);
+  }
+};

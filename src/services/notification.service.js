@@ -4,7 +4,6 @@ import { User, Category } from "../models/index.js";
 import UserFavoriteCategory from "../models/userFavoriteCategory.model.js";
 
 class NotificationService {
-  // ─── Template Helper: Replace placeholders with real values ─────────────────
   // Usage: formatMessage("Hello {user_name}, {book_title} is available!", user, metadata)
   formatMessage(template, userData = {}, metadata = {}) {
     return template

@@ -12,7 +12,10 @@ import {
   searchBooks,
   readBookPdf,
   pdfLimiter,
+  extractBookText,
+  extractBookPageText,
 } from "../controllers/book.controller.js";
+
 import {
   toggleBookmark,
   getUserBookmarks,
@@ -40,6 +43,12 @@ router.get("/category/:categoryId", optionalVerifyJWT, getBooksByCategory);
 router.get("/:id(\\d+)", optionalVerifyJWT, getBookById);
 router.get("/:slug", optionalVerifyJWT, getBookBySlug);
 router.get("/readBook/:id", optionalVerifyJWT, readBookPdf);
+router.get("/readText/:id", optionalVerifyJWT, extractBookText);
+router.get(
+  "/readText/:id/page/:page_number",
+  optionalVerifyJWT,
+  extractBookPageText,
+);
 router.post("/bookmark/toggle", verifyJWT, toggleBookmark);
 router.get("/bookmark/all", verifyJWT, getUserBookmarks);
 
