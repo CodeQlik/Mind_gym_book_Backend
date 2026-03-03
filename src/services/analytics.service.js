@@ -60,7 +60,7 @@ class AnalyticsService {
           attributes: ["title", "author", "thumbnail", "slug"],
         },
       ],
-      group: ["book_id", "books.id"], // Using Title Case for model name in group if needed by Sequelize
+      group: ["Payment.book_id", "book.id"], // Using correct alias name 'book' and model 'Payment'
       order: [[sequelize.literal("sales_count"), "DESC"]],
       limit: 5,
     });
