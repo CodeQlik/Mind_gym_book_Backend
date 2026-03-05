@@ -27,20 +27,30 @@ const upload = multer({
     fileSize: 50 * 1024 * 1024, // 50MB
   },
   fileFilter: function (req, file, cb) {
-    const allowedExtensions = /\.(jpg|jpeg|png|gif|svg|webp|avif|heic|pdf)$/i;
+    const allowedExtensions =
+      /\.(jpg|jpeg|png|gif|svg|webp|avif|heic|jfif|pdf|epub)$/i;
     const allowedMimeTypes =
-      /^(image\/(jpeg|png|gif|svg\+xml|webp|avif|heic)|application\/pdf)$/;
+      /^(image\/(jpeg|png|gif|svg\+xml|webp|avif|heic)|application\/pdf|application\/epub\+zip|application\/x-epub\+zip)$/;
 
     const isExtensionValid = allowedExtensions.test(
       path.extname(file.originalname),
     );
     const isMimeTypeValid = allowedMimeTypes.test(file.mimetype);
 
+    // Support for smart 'book_file' and traditional fields
     if (isExtensionValid || isMimeTypeValid) {
       cb(null, true);
     } else {
-      req.fileValidationError = "Only images or PDF files are allowed!";
-      return cb(new Error("Only images or PDF files are allowed!"), false);
+      console.log("Rejected File Details:", {
+        name: file.originalname,
+        mimetype: file.mimetype,
+        extension: path.extname(file.originalname),
+      });
+      req.fileValidationError = "Only images, PDF, or EPUB files are allowed!";
+      return cb(
+        new Error("Only images, PDF, or EPUB files are allowed!"),
+        false,
+      );
     }
   },
 });

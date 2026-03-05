@@ -1,4 +1,5 @@
 import { Op } from "sequelize";
+import path from "path";
 import { Book, Category, User, UserBook } from "../models/index.js";
 import {
   deleteFromCloudinary,
@@ -41,6 +42,17 @@ class BookService {
       weight,
     } = data;
 
+    // Smart routing for 'book_file'
+    if (files?.book_file?.[0]) {
+      const file = files.book_file[0];
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (ext === ".pdf") {
+        if (!files.pdf_file) files.pdf_file = [file];
+      } else if (ext === ".epub") {
+        if (!files.epub_file) files.epub_file = [file];
+      }
+    }
+
     // Validate category
     const category = await Category.findByPk(category_id);
     if (!category) throw new Error("Invalid category ID");
@@ -51,8 +63,7 @@ class BookService {
       throw new Error("Book title already exists (slug conflict)");
 
     const uploadFiles = async (fileArray, folder) => {
-      if (!fileArray || fileArray.length === 0)
-        return { url: "", public_id: "", local_path: "" };
+      if (!fileArray || fileArray.length === 0) return null;
       const res = await uploadOnCloudinary(fileArray[0].path, folder);
       return res
         ? {
@@ -60,7 +71,7 @@ class BookService {
             public_id: res.public_id,
             local_path: fileArray[0].path,
           }
-        : { url: "", public_id: "", local_path: "" };
+        : null;
     };
 
     const thumbnailData = await uploadFiles(
@@ -71,10 +82,31 @@ class BookService {
       files?.cover_image,
       "mindgymbook/books/covers",
     );
-    const pdfFileData = await uploadFiles(
-      files?.pdf_file,
-      "mindgymbook/books/pdf",
-    );
+    // Detect file type and upload single book file
+    let bookFileData = null;
+    const bookFileInput = files?.pdf_file?.[0] || files?.epub_file?.[0];
+    if (bookFileInput) {
+      const ext = path
+        .extname(bookFileInput.originalname)
+        .toLowerCase()
+        .replace(".", "");
+      const folder =
+        ext === "pdf" ? "mindgymbook/books/pdf" : "mindgymbook/books/epub";
+      const res = await uploadOnCloudinary(bookFileInput.path, folder);
+      if (res) {
+        bookFileData = {
+          url: res.secure_url,
+          public_id: res.public_id,
+          type: ext, // "pdf" or "epub"
+          local_path: bookFileInput.path,
+        };
+      }
+    }
+
+    // ✅ Validation: Book file (PDF or EPUB) is required
+    if (!bookFileData) {
+      throw new Error("Please upload a book file (PDF or EPUB)");
+    }
 
     let extraImages = [];
     if (files?.images?.length > 0) {
@@ -97,9 +129,9 @@ class BookService {
       original_price: original_price ? parseFloat(original_price) : null,
       condition: condition || "good",
       stock: parseInt(stock) || 1,
-      thumbnail: thumbnailData,
-      cover_image: coverImageData,
-      pdf_file: pdfFileData,
+      thumbnail: thumbnailData || { url: "", public_id: "" },
+      cover_image: coverImageData || { url: "", public_id: "" },
+      file_data: bookFileData,
       images: extraImages,
       category_id,
       is_active: is_active !== undefined ? String(is_active) !== "false" : true,
@@ -236,6 +268,17 @@ class BookService {
 
     if (!book) throw new Error("Book not found");
 
+    // Smart routing for 'book_file'
+    if (files?.book_file?.[0]) {
+      const file = files.book_file[0];
+      const ext = path.extname(file.originalname).toLowerCase();
+      if (ext === ".pdf") {
+        if (!files.pdf_file) files.pdf_file = [file];
+      } else if (ext === ".epub") {
+        if (!files.epub_file) files.epub_file = [file];
+      }
+    }
+
     // Handle title/slug change
     if (data.title && data.title !== book.title) {
       const newSlug = this.generateSlug(data.title);
@@ -286,19 +329,31 @@ class BookService {
         };
     }
 
-    if (files?.pdf_file?.[0]) {
-      if (book.pdf_file?.public_id)
-        await deleteFromCloudinary(book.pdf_file.public_id);
-      const res = await uploadOnCloudinary(
-        files.pdf_file[0].path,
-        "mindgymbook/books/pdf",
-      );
-      if (res)
-        book.pdf_file = {
+    // Handle book file update (PDF or EPUB — only one at a time)
+    const newBookFile = files?.pdf_file?.[0] || files?.epub_file?.[0];
+    if (newBookFile) {
+      // Delete old file from Cloudinary
+      const rawFileData = book.getDataValue("file_data");
+      const existingFile =
+        typeof rawFileData === "string" ? JSON.parse(rawFileData) : rawFileData;
+      if (existingFile?.public_id)
+        await deleteFromCloudinary(existingFile.public_id);
+
+      const ext = path
+        .extname(newBookFile.originalname)
+        .toLowerCase()
+        .replace(".", "");
+      const folder =
+        ext === "pdf" ? "mindgymbook/books/pdf" : "mindgymbook/books/epub";
+      const res = await uploadOnCloudinary(newBookFile.path, folder);
+      if (res) {
+        book.setDataValue("file_data", {
           url: res.secure_url,
           public_id: res.public_id,
-          local_path: files.pdf_file[0].path,
-        };
+          type: ext,
+          local_path: newBookFile.path,
+        });
+      }
     }
 
     if (files?.images?.length > 0) {
@@ -365,8 +420,8 @@ class BookService {
 
     if (book.thumbnail?.public_id)
       await deleteFromCloudinary(book.thumbnail.public_id);
-    if (book.pdf_file?.public_id)
-      await deleteFromCloudinary(book.pdf_file.public_id);
+    if (book.file_data?.public_id)
+      await deleteFromCloudinary(book.file_data.public_id);
 
     await book.destroy();
     return true;
@@ -442,7 +497,7 @@ class BookService {
   async getReadPdfUrl(bookId, user) {
     const book = await Book.findByPk(bookId);
     if (!book) throw new Error("Book not found");
-    if (!book.pdf_file || !book.pdf_file.url) throw new Error("PDF not found");
+    if (!book.file_data?.url) throw new Error("Book file not found");
 
     const hasAccess = await this.hasFullAccess(user, book);
     const baseUrl = process.env.BASE_URL || "http://localhost:5000";

@@ -53,7 +53,7 @@ export const bookValidation = Joi.object({
   otherdescription: Joi.string().optional().trim().allow(null, ""),
   dimensions: Joi.string().optional().trim().allow(null, ""),
   weight: Joi.number().optional().allow(null),
-});
+}).unknown(true);
 
 export const updateBookValidation = Joi.object({
   title: Joi.string().optional().not().empty().trim().messages({
@@ -101,4 +101,4 @@ export const updateBookValidation = Joi.object({
   otherdescription: Joi.string().optional().trim().allow(null, ""),
   dimensions: Joi.string().optional().trim().allow(null, ""),
   weight: Joi.number().optional().allow(null),
-});
+}).unknown(true);

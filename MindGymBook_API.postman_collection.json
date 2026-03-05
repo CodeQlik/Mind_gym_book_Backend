@@ -6,7 +6,7 @@
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [
-    { "key": "base_url", "value": "http://localhost:8000/api/v1", "type": "string" },
+    { "key": "base_url", "value": "https://mindgymbook.ductfabrication.in/api/v1", "type": "string" },
     { "key": "token", "value": "", "type": "string" },
     { "key": "book_id", "value": "1", "type": "string" },
     { "key": "order_id", "value": "1", "type": "string" },

@@ -61,7 +61,7 @@ router.post(
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
     { name: "cover_image", maxCount: 1 },
-    { name: "pdf_file", maxCount: 1 },
+    { name: "book_file", maxCount: 1 },
     { name: "images", maxCount: 5 },
   ]),
   validate(bookValidation),
@@ -74,7 +74,7 @@ router.put(
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
     { name: "cover_image", maxCount: 1 },
-    { name: "pdf_file", maxCount: 1 },
+    { name: "book_file", maxCount: 1 },
     { name: "images", maxCount: 10 },
   ]),
   validate(updateBookValidation),

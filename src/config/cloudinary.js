@@ -54,9 +54,10 @@ export const uploadOnCloudinary = async (localFilePath, folderName = "") => {
   try {
     if (!localFilePath || !fs.existsSync(localFilePath)) return null;
 
-    const isPdf = localFilePath.toLowerCase().endsWith(".pdf");
+    const extension = localFilePath.toLowerCase().split(".").pop();
+    const isRaw = ["pdf", "epub"].includes(extension);
     const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: isPdf ? "raw" : "auto",
+      resource_type: isRaw ? "raw" : "auto",
       folder: folderName || "mindgymbook",
     });
 

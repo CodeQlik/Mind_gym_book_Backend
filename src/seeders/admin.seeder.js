@@ -3,9 +3,10 @@ import { User } from "../models/index.js";
 
 const seedAdmin = async () => {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || "admin@mindgym.com";
+    const adminEmail = process.env.ADMIN_EMAIL || "ashokvarma9636@gmail.com";
     const adminPassword = process.env.ADMIN_PASSWORD || "Admin@123";
 
+    console.log(`[SEEDER]: Checking for admin with email: ${adminEmail}`);
     const existingAdmin = await User.findOne({
       where: {
         email: adminEmail,
@@ -14,12 +15,13 @@ const seedAdmin = async () => {
     });
 
     if (existingAdmin) {
+      console.log(`[SEEDER]: Admin already exists. Skipping.`);
       return;
     }
 
     const hashedPassword = await bcrypt.hash(adminPassword, 10);
 
-    await User.create({
+    const newAdmin = await User.create({
       name: "System Admin",
       email: adminEmail,
       password: hashedPassword,
@@ -33,7 +35,10 @@ const seedAdmin = async () => {
         initials: "SA",
       },
     });
-  } catch (error) {}
+    console.log(`[SEEDER]: New admin created successfully: ${adminEmail}`);
+  } catch (error) {
+    console.error(`[SEEDER ERROR]: ${error.message}`);
+  }
 };
 
 export default seedAdmin;
