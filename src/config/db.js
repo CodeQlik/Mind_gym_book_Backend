@@ -23,16 +23,12 @@ const connectDB = async () => {
     await connection.end();
 
     await sequelize.authenticate();
-    console.log(
-      `MySQL Database "${DB_NAME}" Connected Successfully via Sequelize`,
-    );
   } catch (error) {
     console.error("Unable to connect to the database:", error.message);
-    throw error; // Rethrow to stop server start
+    throw error;
   }
 };
 
-// Initial connection handled in index.js  dfdfdfd
 export { connectDB };
 
 export default sequelize;

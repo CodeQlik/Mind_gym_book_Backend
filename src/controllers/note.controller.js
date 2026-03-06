@@ -3,19 +3,22 @@ import sendResponse from "../utils/responseHandler.js";
 
 export const saveNote = async (req, res, next) => {
   try {
-    const { title, notes, chapter_name, book_name } = req.body;
+    const { title, content, chapter_name, chapterName } = req.body;
     const userId = req.user?.id;
 
     if (!userId) {
       return sendResponse(res, 401, false, "Unauthorized: User not found");
     }
 
+    if (!content) {
+      return sendResponse(res, 400, false, "Content is required");
+    }
+
     const note = await UserNote.create({
-      userId: userId, // 👈 NOT user_id
-      title,
-      notes,
-      chapterName: chapter_name,
-      bookName: book_name,
+      userId: userId,
+      title: title || null,
+      content: content,
+      chapterName: chapter_name || chapterName || null,
     });
 
     return sendResponse(res, 201, true, "Note saved successfully", note);
@@ -33,16 +36,15 @@ export const getUserNotes = async (req, res, next) => {
       return sendResponse(res, 401, false, "Unauthorized: User not found");
     }
 
-    const notes = await UserNote.findAll({
+    const content = await UserNote.findAll({
       where: { userId: userId },
       order: [
-        ["bookName", "ASC"], // Use model attribute name here
         ["chapterName", "ASC"],
         ["updatedAt", "DESC"],
       ],
     });
 
-    return sendResponse(res, 200, true, "Notes fetched successfully", notes);
+    return sendResponse(res, 200, true, "Notes fetched successfully", content);
   } catch (error) {
     next(error);
   }
@@ -52,7 +54,7 @@ export const getUserNotes = async (req, res, next) => {
 export const updateNote = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const { title, notes, chapter_name, book_name } = req.body;
+    const { title, content, chapter_name, chapterName } = req.body;
     const userId = req.user?.id;
 
     const note = await UserNote.findOne({
@@ -65,9 +67,8 @@ export const updateNote = async (req, res, next) => {
 
     await note.update({
       title: title || note.title,
-      notes: notes || note.notes,
-      chapterName: chapter_name || note.chapterName,
-      bookName: book_name || note.bookName,
+      content: content || note.content,
+      chapterName: chapter_name || chapterName || note.chapterName,
     });
 
     return sendResponse(res, 200, true, "Note updated successfully", note);

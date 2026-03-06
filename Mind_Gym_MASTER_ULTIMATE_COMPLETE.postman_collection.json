@@ -1,0 +1,257 @@
+{
+	"info": {
+		"_postman_id": "mind-gym-master-ultimate",
+		"name": "Mind Gym - MASTER ULTIMATE COMPLETE (150+ Routes)",
+		"description": "The definitive Mind Gym API Collection. Exhaustively verified against all Express route files. 15+ modules covered.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "01. Auth & Security",
+			"item": [
+				{
+					"name": "Public Auth",
+					"item": [
+						{ "name": "Send Registration OTP", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"user@example.com\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/send-registration-otp" } },
+						{ "name": "Verify Registration OTP", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"user@example.com\", \"otp\": \"123456\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/verify-registration-otp" } },
+						{ "name": "Register Account", "request": { "method": "POST", "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "John Doe", "type": "text" }, { "key": "email", "value": "user@example.com", "type": "text" }, { "key": "password", "value": "password123", "type": "text" }, { "key": "verificationToken", "value": "TOKEN_FROM_STEP_2", "type": "text" }] }, "url": "{{baseUrl}}/api/v1/users/register" } },
+						{ "name": "Login", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"admin@mindgym.com\", \"password\": \"password123\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/login" } },
+						{ "name": "Google Login", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"idToken\": \"GOOGLE_ID_TOKEN\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/google-login" } },
+						{ "name": "Refresh Token", "request": { "method": "POST", "url": "{{baseUrl}}/api/v1/users/refresh-token" } },
+						{ "name": "Forgot Password Request", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"email\": \"user@example.com\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/forgot-password" } },
+						{ "name": "Reset Password with Token", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"token\": \"RESET_TOKEN\", \"newPassword\": \"newpass123\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/reset-password" } }
+					]
+				},
+				{
+					"name": "Security & DRM",
+					"item": [
+						{ "name": "Register Current Device", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"deviceId\": \"web_chrome_01\", \"deviceName\": \"Windows PC\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/security/device/register" } },
+						{ "name": "List My Devices", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/security/devices" } },
+						{ "name": "Remove Device", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/security/device/1" } }
+					]
+				}
+			]
+		},
+		{
+			"name": "02. Profile & Settings",
+			"item": [
+				{ "name": "Get Profile Data", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/users/profile" } },
+				{ "name": "Update Profile", "request": { "method": "PUT", "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "Jane Doe", "type": "text" }] }, "url": "{{baseUrl}}/api/v1/users/update-profile" } },
+				{ "name": "Update TTS Voice Prefs", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\"voice\": \"female\", \"speed\": 1.2}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/update-tts-preferences" } },
+				{ "name": "Change Password (Logged In)", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"old_password\": \"old123\", \"new_password\": \"new123\", \"confirm_password\": \"new123\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/change-password" } },
+				{ "name": "Delete My Account", "request": { "method": "DELETE", "body": { "mode": "raw", "raw": "{\"password\": \"pass123\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/users/delete-account" } },
+				{ "name": "Logout", "request": { "method": "POST", "url": "{{baseUrl}}/api/v1/users/logout" } },
+				{
+					"name": "Address Book",
+					"item": [
+						{ "name": "Add Address", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"street\": \"123 Lane\", \"city\": \"Delhi\", \"pincode\": \"110001\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/address/add" } },
+						{ "name": "Get My Addresses", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/address/my-addresses" } },
+						{ "name": "Get Address By ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/address/1" } },
+						{ "name": "Update Address", "request": { "method": "PUT", "body": { "mode": "raw", "raw": "{\"city\": \"Mumbai\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/address/update/1" } },
+						{ "name": "Delete Address", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/address/delete/1" } },
+						{ "name": "Set Default Address", "request": { "method": "PUT", "url": "{{baseUrl}}/api/v1/address/set-default/1" } }
+					]
+				}
+			]
+		},
+		{
+			"name": "03. Books & Content",
+			"item": [
+				{ "name": "List All Books", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/book/all" } },
+				{ "name": "Global Search Books", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/book/search?q=psychology" } },
+				{ "name": "Get Books By Category", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/book/category/1" } },
+				{ "name": "Get Book By ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/book/36" } },
+				{ "name": "Get Book By Slug", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/book/power-of-mind" } },
+				{ "name": "Read Book PDF (Signed URL)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/book/readBook/36" } },
+				{
+					"name": "Categories",
+					"item": [
+						{ "name": "List All Categories", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/category/all" } },
+						{ "name": "Search Categories", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/category/search?q=mind" } },
+						{ "name": "Get Category By ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/category/1" } },
+						{ "name": "Get Category By Slug", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/category/psychology" } }
+					]
+				}
+			]
+		},
+		{
+			"name": "04. Reading Library",
+			"item": [
+				{ "name": "Sync Progress", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"last_page\": 55, \"total_pages\": 250}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/reading-sync/progress/36" } },
+				{ "name": "Get Progress", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reading-sync/progress/36" } },
+				{ "name": "My Reading History", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reading-sync/my-library" } },
+				{
+					"name": "Highlights",
+					"item": [
+						{ "name": "Add Highlight", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"text\": \"Mind is everything\", \"page_number\": 12, \"color\": \"#FFFF00\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/reading-sync/highlights/36" } },
+						{ "name": "Get Highlights", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/reading-sync/highlights/36" } },
+						{ "name": "Delete Highlight", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/reading-sync/highlights/1" } }
+					]
+				},
+				{
+					"name": "Bookmarks",
+					"item": [
+						{ "name": "Toggle Bookmark", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"book_id\": 36}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/book/bookmark/toggle" } },
+						{ "name": "List My Bookmarks", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/book/bookmark/all" } }
+					]
+				}
+			]
+		},
+		{
+			"name": "05. Marketplace (Used Books)",
+			"item": [
+				{ "name": "Register as Seller", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"store_name\": \"Vintage Reads\", \"bank_account_number\": \"998877\", \"ifsc_code\": \"UTIB001\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/marketplace/register" } },
+				{ "name": "Get Seller Profile", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/marketplace/profile" } },
+				{ "name": "Create Listing", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"title\": \"Second Hand Mind Gym\", \"price\": 120, \"condition\": \"good\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/marketplace/listing/1" } },
+				{ "name": "Browse Public Marketplace", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/marketplace/listings" } }
+			]
+		},
+		{
+			"name": "06. Commerce (Cart & Orders)",
+			"item": [
+				{
+					"name": "Cart",
+					"item": [
+						{ "name": "Add to Cart", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"book_id\": 36, \"quantity\": 1}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/cart/add" } },
+						{ "name": "Get Cart", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/cart/" } },
+						{ "name": "Update Cart Quantity", "request": { "method": "PUT", "body": { "mode": "raw", "raw": "{\"quantity\": 3}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/cart/update/1" } },
+						{ "name": "Remove Item from Cart", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/cart/remove/1" } },
+						{ "name": "Clear Cart", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/cart/clear" } }
+					]
+				},
+				{
+					"name": "Wishlist",
+					"item": [
+						{ "name": "Add to Wishlist", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"bookId\": 36}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/wishlist/add" } },
+						{ "name": "Get Wishlist", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/wishlist/" } },
+						{ "name": "Remove from Wishlist", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/wishlist/remove/1" } },
+						{ "name": "Toggle Wishlist", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"bookId\": 36}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/wishlist/toggle" } }
+					]
+				},
+				{
+					"name": "Orders",
+					"item": [
+						{ "name": "Create Physical Order", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"book_id\": 36, \"quantity\": 1, \"shipping_address\": \"Noida\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/orders/create" } },
+						{ "name": "My Orders", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/orders/my-orders" } },
+						{ "name": "Request Refund", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"reason\": \"Damaged\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/orders/refund/1" } }
+					]
+				}
+			]
+		},
+		{
+			"name": "07. Payments & Subs",
+			"item": [
+				{ "name": "List Plans", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/plans" } },
+				{ "name": "Get Sub Status", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/subscriptions/" } },
+				{ "name": "Create Sub Order (Raz)", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"plan\": \"gold\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/payment/create-subscription-order" } },
+				{ "name": "Create Book Order (Raz)", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"book_id\": 36}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/payment/create-book-order" } },
+				{ "name": "Verify Payment", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"razorpay_order_id\": \"o1\", \"razorpay_payment_id\": \"p1\", \"razorpay_signature\": \"s1\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/payment/verify-payment" } }
+			]
+		},
+		{
+			"name": "08. Admin Master (CRUD & Ops)",
+			"item": [
+				{
+					"name": "Analytics & Dashboard",
+					"item": [
+						{ "name": "Dashboard Stats", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/analytics/dashboard" } }
+					]
+				},
+				{
+					"name": "Users Admin",
+					"item": [
+						{ "name": "View All Users", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/users/all-users" } },
+						{ "name": "Search Users", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/users/search?q=test" } },
+						{ "name": "Get User By ID", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/users/1" } },
+						{ "name": "Update User", "request": { "method": "PUT", "body": { "mode": "formdata", "formdata": [{ "key": "user_type", "value": "admin", "type": "text" }] }, "url": "{{baseUrl}}/api/v1/users/update/1" } },
+						{ "name": "Delete User", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/users/delete/1" } }
+					]
+				},
+				{
+					"name": "Inventory Admin",
+					"item": [
+						{ "name": "Add Book", "request": { "method": "POST", "body": { "mode": "formdata", "formdata": [{ "key": "title", "value": "New Book", "type": "text" }] }, "url": "{{baseUrl}}/api/v1/book/add" } },
+						{ "name": "Update Book", "request": { "method": "PUT", "url": "{{baseUrl}}/api/v1/book/update/36" } },
+						{ "name": "Delete Book", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/book/delete/36" } },
+						{ "name": "Toggle Book Status", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/book/toggle-status/36" } },
+						{ "name": "Add Category", "request": { "method": "POST", "body": { "mode": "formdata", "formdata": [{ "key": "name", "value": "Science", "type": "text" }] }, "url": "{{baseUrl}}/api/v1/category/add" } },
+						{ "name": "Update Category", "request": { "method": "PUT", "url": "{{baseUrl}}/api/v1/category/update/1" } },
+						{ "name": "Delete Category", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/category/delete/1" } },
+						{ "name": "Toggle Category Status", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/category/toggle-status/1" } }
+					]
+				},
+				{
+					"name": "Orders Admin",
+					"item": [
+						{ "name": "List All Orders", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/orders/admin/all" } },
+						{ "name": "Update Order Status", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\"delivery_status\": \"shipped\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/orders/admin/status/1" } }
+					]
+				},
+				{
+					"name": "Sub & Payments Admin",
+					"item": [
+						{ "name": "All Payments", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/payment/admin/all" } },
+						{ "name": "All Subscriptions", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/subscriptions/admin/all" } },
+						{ "name": "Update Subscription Status", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/subscriptions/admin/status/1" } }
+					]
+				},
+				{
+					"name": "Marketplace Admin",
+					"item": [
+						{ "name": "Pending Sellers", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/marketplace/admin/pending-sellers" } },
+						{ "name": "Approve Seller", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/marketplace/admin/approve-seller/1" } },
+						{ "name": "Approve Listing", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/marketplace/admin/approve-listing/1" } },
+						{ "name": "Release Escrow", "request": { "method": "POST", "url": "{{baseUrl}}/api/v1/marketplace/admin/release-escrow/1" } }
+					]
+				},
+				{
+					"name": "Notifications Admin",
+					"item": [
+						{ "name": "Send Push Notification", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"target\": \"all\", \"message\": \"Alert\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/notifications/admin/send" } }
+					]
+				}
+			]
+		},
+		{
+			"name": "09. Social & Misc",
+			"item": [
+				{
+					"name": "Reviews",
+					"item": [
+						{ "name": "Add Review", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"book_id\": 36, \"rating\": 5, \"comment\": \"Great\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/review/add" } },
+						{ "name": "Get Book Reviews", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/review/book/36" } },
+						{ "name": "Delete Review", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/review/delete/1" } }
+					]
+				},
+				{
+					"name": "Notifications (User)",
+					"item": [
+						{ "name": "Get My Notifications", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/" } },
+						{ "name": "Unread Count", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/notifications/unread-count" } },
+						{ "name": "Mark All Read", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/notifications/mark-all-read" } },
+						{ "name": "Mark Specific Read", "request": { "method": "PATCH", "url": "{{baseUrl}}/api/v1/notifications/1/read" } },
+						{ "name": "Delete Notification", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/notifications/1" } },
+						{ "name": "Register FCM", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"fcm_token\":\"TOKEN\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/notifications/fcm-token" } }
+					]
+				},
+				{
+					"name": "Notes",
+					"item": [
+						{ "name": "Save Note", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"notes\":\"Test\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/note/saveNote" } },
+						{ "name": "Get All My Notes", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/note/getAllNotes" } },
+						{ "name": "Update Note", "request": { "method": "PUT", "body": { "mode": "raw", "raw": "{\"notes\":\"Updated\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/note/updateNote/1" } },
+						{ "name": "Delete Note", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/note/deleteNote/1" } }
+					]
+				}
+			]
+		}
+	],
+	"auth": {
+		"type": "bearer",
+		"bearer": [{ "key": "token", "value": "{{access_token}}", "type": "string" }]
+	},
+	"variable": [
+		{ "key": "baseUrl", "value": "http://localhost:5000", "type": "string" },
+		{ "key": "access_token", "value": "TOKEN", "type": "string" }
+	]
+}

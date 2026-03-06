@@ -315,7 +315,7 @@ export const getUserById = async (req, res, next) => {
 
 export const searchUsers = async (req, res, next) => {
   try {
-    const { q } = req.query;
+    const q = req.query.q || req.query.query;
     const page = parseInt(req.query.page) || 1;
     const limit = parseInt(req.query.limit) || 10;
 
@@ -345,6 +345,36 @@ export const deleteUser = async (req, res, next) => {
     const { id } = req.params;
     await userService.deleteUser(id);
     return sendResponse(res, 200, true, "User deleted successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const updateTTSPreferences = async (req, res, next) => {
+  try {
+    const user = await userService.updateTTSPreferences(req.user.id, req.body);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "TTS preferences updated",
+      user.tts_preferences,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+export const toggleUserStatus = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = await userService.toggleUserStatus(id);
+    return sendResponse(
+      res,
+      200,
+      true,
+      `User ${result.is_active ? "activated" : "deactivated"} successfully`,
+      result,
+    );
   } catch (error) {
     next(error);
   }

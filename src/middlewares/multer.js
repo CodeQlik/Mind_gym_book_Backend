@@ -1,10 +1,9 @@
-import fs from "fs";
-import path from "path";
 import multer from "multer";
+import path from "path";
+import fs from "fs";
 
-const uploadDir = path.join(process.cwd(), "temp");
+const uploadDir = "temp";
 
-// Ensure the directory exists
 if (!fs.existsSync(uploadDir)) {
   fs.mkdirSync(uploadDir, { recursive: true });
 }
@@ -24,17 +23,35 @@ const storage = multer.diskStorage({
 
 const upload = multer({
   storage: storage,
+  limits: {
+    fileSize: 50 * 1024 * 1024, // 50MB
+  },
   fileFilter: function (req, file, cb) {
-    // Accept images or pdf only
-    if (
-      !file.originalname.match(
-        /\.(jpg|JPG|jpeg|JPEG|png|PNG|gif|GIF|svg|SVG|webp|WEBP|pdf|PDF)$/,
-      )
-    ) {
-      req.fileValidationError = "Only image or pdf files are allowed!";
-      return cb(new Error("Only image or pdf files are allowed!"), false);
+    const allowedExtensions =
+      /\.(jpg|jpeg|png|gif|svg|webp|avif|heic|jfif|pdf|epub)$/i;
+    const allowedMimeTypes =
+      /^(image\/(jpeg|png|gif|svg\+xml|webp|avif|heic)|application\/pdf|application\/epub\+zip|application\/x-epub\+zip)$/;
+
+    const isExtensionValid = allowedExtensions.test(
+      path.extname(file.originalname),
+    );
+    const isMimeTypeValid = allowedMimeTypes.test(file.mimetype);
+
+    // Support for smart 'book_file' and traditional fields
+    if (isExtensionValid || isMimeTypeValid) {
+      cb(null, true);
+    } else {
+      console.log("Rejected File Details:", {
+        name: file.originalname,
+        mimetype: file.mimetype,
+        extension: path.extname(file.originalname),
+      });
+      req.fileValidationError = "Only images, PDF, or EPUB files are allowed!";
+      return cb(
+        new Error("Only images, PDF, or EPUB files are allowed!"),
+        false,
+      );
     }
-    cb(null, true);
   },
 });
 

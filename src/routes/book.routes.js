@@ -11,7 +11,11 @@ import {
   getBookBySlug,
   searchBooks,
   readBookPdf,
+  pdfLimiter,
+  extractBookText,
+  extractBookPageText,
 } from "../controllers/book.controller.js";
+
 import {
   toggleBookmark,
   getUserBookmarks,
@@ -28,6 +32,7 @@ import { isAdmin } from "../middlewares/admin.middleware.js";
 import upload from "../middlewares/multer.js";
 import { checkBookAccess } from "../middlewares/accessControl.js";
 import validate from "../middlewares/validate.middleware.js";
+import { checkSub } from "../middlewares/subscription.middleware.js";
 
 const router = express.Router();
 
@@ -38,6 +43,12 @@ router.get("/category/:categoryId", optionalVerifyJWT, getBooksByCategory);
 router.get("/:id(\\d+)", optionalVerifyJWT, getBookById);
 router.get("/:slug", optionalVerifyJWT, getBookBySlug);
 router.get("/readBook/:id", optionalVerifyJWT, readBookPdf);
+router.get("/readText/:id", optionalVerifyJWT, extractBookText);
+router.get(
+  "/readText/:id/page/:page_number",
+  optionalVerifyJWT,
+  extractBookPageText,
+);
 router.post("/bookmark/toggle", verifyJWT, toggleBookmark);
 router.get("/bookmark/all", verifyJWT, getUserBookmarks);
 
@@ -50,7 +61,7 @@ router.post(
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
     { name: "cover_image", maxCount: 1 },
-    { name: "pdf_file", maxCount: 1 },
+    { name: "book_file", maxCount: 1 },
     { name: "images", maxCount: 5 },
   ]),
   validate(bookValidation),
@@ -63,7 +74,7 @@ router.put(
   upload.fields([
     { name: "thumbnail", maxCount: 1 },
     { name: "cover_image", maxCount: 1 },
-    { name: "pdf_file", maxCount: 1 },
+    { name: "book_file", maxCount: 1 },
     { name: "images", maxCount: 10 },
   ]),
   validate(updateBookValidation),

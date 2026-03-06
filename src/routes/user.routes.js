@@ -18,6 +18,8 @@ import {
   sendRegistrationOTP,
   verifyRegistrationOTP,
   googleLogin,
+  updateTTSPreferences,
+  toggleUserStatus,
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -95,6 +97,7 @@ router.delete(
   validate(deleteAccountValidation),
   deleteAccount,
 );
+router.patch("/update-tts-preferences", verifyJWT, updateTTSPreferences);
 
 // Admin Only Routes (Admin Panel)
 router.get("/all-users", verifyJWT, isAdmin, getAllUsers);
@@ -109,5 +112,6 @@ router.put(
   updateUser,
 );
 router.delete("/delete/:id", verifyJWT, isAdmin, deleteUser);
+router.patch("/toggle-status/:id", verifyJWT, isAdmin, toggleUserStatus);
 
 export default router;

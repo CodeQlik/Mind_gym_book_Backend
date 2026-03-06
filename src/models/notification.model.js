@@ -9,13 +9,24 @@ const Notification = sequelize.define(
       autoIncrement: true,
       primaryKey: true,
     },
-    user_id: {
+    userId: {
       type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "users", key: "id" },
+      field: "user_id",
+    },
+    type: {
+      type: DataTypes.ENUM(
+        "ORDER",
+        "RENEWAL",
+        "APPROVAL",
+        "PRICE_DROP",
+        "NEW_RELEASE",
+        "SALE",
+        "WELCOME",
+        "SYSTEM",
+      ),
       allowNull: false,
-      references: {
-        model: "users",
-        key: "id",
-      },
     },
     title: {
       type: DataTypes.STRING,
@@ -25,17 +36,14 @@ const Notification = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: false,
     },
-    type: {
-      type: DataTypes.STRING, // e.g., 'order_update', 'new_release', 'price_drop'
-      allowNull: false,
+    // Metadata ke liye JSON column (Book ID ya Order ID store karne ke liye)
+    metadata: {
+      type: DataTypes.JSON,
+      allowNull: true,
     },
     is_read: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
-    },
-    data: {
-      type: DataTypes.JSON, // For any extra info like book_id or order_id
-      allowNull: true,
     },
   },
   {

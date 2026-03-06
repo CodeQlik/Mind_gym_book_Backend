@@ -1,417 +1,467 @@
 import bookService from "../services/book.service.js";
+import pdfService from "../services/pdf.service.js";
 import sendResponse from "../utils/responseHandler.js";
+import { asyncHandler } from "../utils/asyncHandler.js";
 
-import {
-  User,
-  Book,
-  Subscription,
-  UserBook,
-  Bookmark,
-} from "../models/index.js";
+import { Bookmark, Book } from "../models/index.js";
 import { Op } from "sequelize";
-import https from "https";
-import { v2 as cloudinary } from "cloudinary";
+import rateLimit from "express-rate-limit";
+import { PDFDocument } from "pdf-lib";
+import fs from "fs";
+import path from "path";
+import axios from "axios";
+import { cloudinary } from "../config/cloudinary.js";
 
-export const createBook = async (req, res, next) => {
-  try {
-    const book = await bookService.createBook(req.body, req.files);
-    return sendResponse(res, 201, true, "Book added successfully", book);
-  } catch (error) {
-    next(error);
+// ULTRA PREMIUM: Rate limit for PDF streaming (10 requests per minute)
+export const pdfLimiter = rateLimit({
+  windowMs: 1 * 60 * 1000,
+  max: 10,
+  message: {
+    success: false,
+    message: "Too many PDF requests. Please wait a minute.",
+  },
+  standardHeaders: true,
+  legacyHeaders: false,
+});
+
+export const createBook = asyncHandler(async (req, res) => {
+  const book = await bookService.createBook(req.body, req.files);
+
+  return sendResponse(res, 201, true, "Book added successfully", {
+    ...book.toJSON(),
+  });
+});
+
+export const getAllBooks = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const status = req.query.status;
+
+  const isAdminRequest = req.user && req.user.user_type === "admin";
+  let filters = isAdminRequest ? {} : { is_active: true };
+
+  if (status && isAdminRequest) {
+    if (status === "active") filters.is_active = true;
+    if (status === "inactive") filters.is_active = false;
   }
-};
 
-export const getAllBooks = async (req, res, next) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const status = req.query.status;
+  const result = await bookService.getBooks(filters, page, limit);
 
-    const isAdminRequest = req.user && req.user.user_type === "admin";
-    let filters = isAdminRequest ? {} : { is_active: true };
-
-    if (status && isAdminRequest) {
-      if (status === "active") filters.is_active = true;
-      if (status === "inactive") filters.is_active = false;
-    }
-
-    const result = await bookService.getBooks(filters, page, limit);
-
-    if (result.books.length === 0) {
-      return sendResponse(res, 200, true, "No books found", {
-        books: [],
-        totalItems: 0,
-        totalPages: 0,
-        currentPage: page,
-      });
-    }
-    return sendResponse(res, 200, true, "Books fetched successfully", result);
-  } catch (error) {
-    next(error);
+  if (result.books.length === 0) {
+    return sendResponse(res, 200, true, "No books found", {
+      books: [],
+      totalItems: 0,
+      totalPages: 0,
+      currentPage: page,
+    });
   }
-};
+  return sendResponse(res, 200, true, "Books fetched successfully", result);
+});
 
 // Admin: All books including inactive
-export const getAdminBooks = async (req, res, next) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+export const getAdminBooks = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
 
-    const result = await bookService.getBooks({}, page, limit);
+  const result = await bookService.getBooks({}, page, limit);
 
-    if (result.books.length === 0) {
-      return sendResponse(res, 200, true, "No books found in inventory", {
-        books: [],
-        totalItems: 0,
-        totalPages: 0,
-        currentPage: page,
-      });
-    }
-    return sendResponse(
-      res,
-      200,
-      true,
-      "Admin books fetched successfully",
-      result,
-    );
-  } catch (error) {
-    next(error);
-  }
-};
-
-export const getBookById = async (req, res, next) => {
-  try {
-    // Publicly we only show active books
-    const isAdminRequest = req.user && req.user.user_type === "admin";
-    const book = await bookService.getBookById(req.params.id, !isAdminRequest);
-
-    let isBookmarked = false;
-    if (req.user) {
-      const bookmark = await Bookmark.findOne({
-        where: { user_id: req.user.id, book_id: book.id },
-      });
-      isBookmarked = !!bookmark;
-    }
-
-    return sendResponse(res, 200, true, "Book fetched successfully", {
-      ...book.toJSON(),
-      isBookmarked,
+  if (result.books.length === 0) {
+    return sendResponse(res, 200, true, "No books found in inventory", {
+      books: [],
+      totalItems: 0,
+      totalPages: 0,
+      currentPage: page,
     });
-  } catch (error) {
-    next(error);
   }
-};
+  return sendResponse(
+    res,
+    200,
+    true,
+    "Admin books fetched successfully",
+    result,
+  );
+});
 
-export const getBookBySlug = async (req, res, next) => {
-  try {
-    const isAdminRequest = req.user && req.user.user_type === "admin";
-    const book = await bookService.getBookBySlug(
-      req.params.slug,
-      !isAdminRequest,
-    );
+export const getBookById = asyncHandler(async (req, res) => {
+  const isAdminRequest = req.user && req.user.user_type === "admin";
+  const book = await bookService.getBookById(req.params.id, !isAdminRequest);
 
-    let isBookmarked = false;
-    if (req.user) {
-      const bookmark = await Bookmark.findOne({
-        where: { user_id: req.user.id, book_id: book.id },
-      });
-      isBookmarked = !!bookmark;
-    }
-
-    return sendResponse(res, 200, true, "Book fetched successfully", {
-      ...book.toJSON(),
-      isBookmarked,
+  let isBookmarked = false;
+  if (req.user) {
+    const bookmark = await Bookmark.findOne({
+      where: { user_id: req.user.id, book_id: book.id },
     });
-  } catch (error) {
-    next(error);
+    isBookmarked = !!bookmark;
   }
-};
 
-export const getBooksByCategory = async (req, res, next) => {
-  try {
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
-    const isAdminRequest = req.user && req.user.user_type === "admin";
+  return sendResponse(res, 200, true, "Book fetched successfully", {
+    ...book.toJSON(),
+    isBookmarked,
+  });
+});
 
-    const result = await bookService.getBooksByCategoryId(
-      req.params.categoryId,
-      !isAdminRequest,
-      page,
-      limit,
-    );
+export const getBookBySlug = asyncHandler(async (req, res) => {
+  const isAdminRequest = req.user && req.user.user_type === "admin";
+  const book = await bookService.getBookBySlug(
+    req.params.slug,
+    !isAdminRequest,
+  );
 
-    if (result.books.length === 0) {
-      return sendResponse(res, 200, true, "No books found for this category", {
-        books: [],
-        totalItems: 0,
-        totalPages: 0,
-        currentPage: page,
+  let isBookmarked = false;
+  if (req.user) {
+    const bookmark = await Bookmark.findOne({
+      where: { user_id: req.user.id, book_id: book.id },
+    });
+    isBookmarked = !!bookmark;
+  }
+
+  return sendResponse(res, 200, true, "Book fetched successfully", {
+    ...book.toJSON(),
+    isBookmarked,
+  });
+});
+
+export const getBooksByCategory = asyncHandler(async (req, res) => {
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+  const isAdminRequest = req.user && req.user.user_type === "admin";
+
+  const result = await bookService.getBooksByCategoryId(
+    req.params.categoryId,
+    !isAdminRequest,
+    page,
+    limit,
+  );
+
+  if (result.books.length === 0) {
+    return sendResponse(res, 200, true, "No books found for this category", {
+      books: [],
+      totalItems: 0,
+      totalPages: 0,
+      currentPage: page,
+    });
+  }
+  return sendResponse(
+    res,
+    200,
+    true,
+    "Category books fetched successfully",
+    result,
+  );
+});
+
+export const updateBook = asyncHandler(async (req, res) => {
+  const book = await bookService.updateBook(req.params.id, req.body, req.files);
+
+  return sendResponse(res, 200, true, "Book updated successfully", {
+    ...book.toJSON(),
+  });
+});
+
+export const deleteBook = asyncHandler(async (req, res) => {
+  await bookService.deleteBook(req.params.id);
+  return sendResponse(res, 200, true, "Book deleted successfully");
+});
+
+export const toggleBookStatus = asyncHandler(async (req, res) => {
+  const book = await bookService.toggleBookStatus(req.params.id);
+  return sendResponse(
+    res,
+    200,
+    true,
+    `Book ${book.is_active ? "activated" : "deactivated"} successfully`,
+    book,
+  );
+});
+
+export const searchBooks = asyncHandler(async (req, res) => {
+  const { q, status } = req.query;
+  const page = parseInt(req.query.page) || 1;
+  const limit = parseInt(req.query.limit) || 10;
+
+  const isAdminRequest = req.user && req.user.user_type === "admin";
+  const result = await bookService.searchBooks(
+    q,
+    !isAdminRequest,
+    page,
+    limit,
+    status,
+  );
+
+  if (result.books.length === 0) {
+    return sendResponse(res, 200, true, "No books found matches your search", {
+      books: [],
+      totalItems: 0,
+      totalPages: 0,
+      currentPage: page,
+    });
+  }
+  return sendResponse(res, 200, true, "Search results fetched", result);
+});
+
+export const readBookPdf = asyncHandler(async (req, res) => {
+  const { id: bookId } = req.params;
+  const user = req.user;
+
+  const book = await Book.findByPk(bookId);
+  if (!book) return res.status(404).json({ message: "Book nahi mili" });
+
+  const fileInfo = book.file_data;
+
+  // No file attached to this book
+  if (!fileInfo?.url) {
+    return res.status(404).json({ message: "Is book ka koi file nahi hai" });
+  }
+
+  const fullAccess = await bookService.hasFullAccess(user, book);
+  const fileType = fileInfo.type || "pdf"; // default pdf for older records
+
+  // ─── EPUB Handling
+  if (fileType === "epub") {
+    if (!fullAccess) {
+      return res.status(403).json({
+        success: false,
+        message:
+          "Is book ko padhne ke liye subscription ya purchase zaruri hai.",
+        isPreview: true,
       });
     }
+    // EPUB ke liye direct Cloudinary URL redirect karo
+    res.setHeader("X-File-Type", "epub");
+    res.setHeader("X-Is-Preview", "false");
+    return res.redirect(fileInfo.url);
+  }
+
+  // ─── PDF Handling ─────────────────────────────────────────────────────────────
+  let existingPdfBytes;
+
+  // 1. Local File se lo (agar available hai)
+  if (fileInfo?.local_path) {
+    const fullLocalPath = path.resolve(fileInfo.local_path);
+    if (fs.existsSync(fullLocalPath)) {
+      existingPdfBytes = fs.readFileSync(fullLocalPath);
+    }
+  }
+
+  // 2. Cloudinary se download karo
+  if (!existingPdfBytes && fileInfo?.url?.startsWith("http")) {
+    try {
+      const response = await axios.get(fileInfo.url, {
+        responseType: "arraybuffer",
+        timeout: 15000,
+      });
+      existingPdfBytes = response.data;
+      console.log("PDF fetched from Cloudinary successfully!");
+    } catch (error) {
+      return res.status(500).json({
+        message: "Cloudinary se PDF fetch karne mein error hua",
+        debug: error.message,
+      });
+    }
+  }
+
+  if (!existingPdfBytes) {
+    return res
+      .status(404)
+      .json({ message: "PDF file kahi nahi mili (Local/Cloud)" });
+  }
+
+  // Full Access → Poori PDF
+  if (fullAccess) {
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader("Content-Disposition", "inline");
+    res.setHeader("X-Is-Preview", "false");
+    res.setHeader("X-File-Type", "pdf");
+    return res.send(Buffer.from(existingPdfBytes));
+  }
+
+  // Preview Mode → Sirf kuch pages
+  try {
+    const pdfDoc = await PDFDocument.load(existingPdfBytes);
+    const previewDoc = await PDFDocument.create();
+
+    const pagesToCopyCount = Math.min(
+      book.previewPages || 5,
+      pdfDoc.getPageCount(),
+    );
+    const indices = Array.from({ length: pagesToCopyCount }, (_, i) => i);
+
+    const copiedPages = await previewDoc.copyPages(pdfDoc, indices);
+    copiedPages.forEach((page) => previewDoc.addPage(page));
+
+    const previewBytes = await previewDoc.save();
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `inline; filename="${book.title}.pdf"`,
+    );
+    res.setHeader("X-Is-Preview", "true");
+    res.setHeader("X-File-Type", "pdf");
+    return res.send(Buffer.from(previewBytes));
+  } catch (pdfError) {
+    console.error("PDF Processing Error:", pdfError);
+    return res.status(500).json({ message: "Error generating preview" });
+  }
+});
+
+export const extractBookText = asyncHandler(async (req, res) => {
+  const { id: bookId } = req.params;
+
+  const book = await Book.findByPk(bookId);
+  if (!book) {
+    return sendResponse(res, 404, false, "Book nahi mili.");
+  }
+
+  const fileData = book.file_data;
+  if (!fileData?.url) {
+    return sendResponse(res, 400, false, "Is book ki koi file nahi hai.");
+  }
+
+  const user = req.user;
+  const isAdmin = user?.user_type === "admin";
+  const hasSubscription =
+    user?.subscription_status === "active" &&
+    user?.subscription_end_date &&
+    new Date(user.subscription_end_date) > new Date();
+
+  if (!isAdmin && !hasSubscription) {
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Full book extraction ke liye please subscribe karein.",
+    );
+  }
+
+  try {
+    let text;
+    if (fileData.type === "epub") {
+      text = await pdfService.extractTextFromEpubUrl(
+        fileData.url,
+        bookId,
+        book,
+      );
+    } else {
+      text = await pdfService.extractTextFromPdfUrl(fileData.url, bookId, book);
+    }
+
     return sendResponse(
       res,
       200,
       true,
-      "Category books fetched successfully",
-      result,
+      "Text extracted successfully for TTS.",
+      {
+        book_id: bookId,
+        title: book.title,
+        file_type: fileData.type || "pdf",
+        text,
+      },
     );
   } catch (error) {
-    next(error);
+    console.error("Text Extraction Error:", error.message);
+    return sendResponse(res, 500, false, "Text extract karne mein error hua.", {
+      error: error.message,
+    });
   }
-};
+});
 
-export const updateBook = async (req, res, next) => {
-  try {
-    console.log(
-      `[CONTROLLER] Update Book Request for ID: ${req.params.id}`,
-      req.body,
-    );
-    const book = await bookService.updateBook(
-      req.params.id,
-      req.body,
-      req.files,
-    );
-    return sendResponse(res, 200, true, "Book updated successfully", book);
-  } catch (error) {
-    next(error);
+export const extractBookPageText = asyncHandler(async (req, res) => {
+  const { id: bookId, page_number } = req.params;
+  const pageNum = parseInt(page_number);
+
+  const book = await Book.findByPk(bookId);
+  if (!book) {
+    return sendResponse(res, 404, false, "Book nahi mili.");
   }
-};
 
-export const deleteBook = async (req, res, next) => {
-  try {
-    await bookService.deleteBook(req.params.id);
-    return sendResponse(res, 200, true, "Book deleted successfully");
-  } catch (error) {
-    next(error);
+  const fileData = book.file_data;
+  if (!fileData?.url) {
+    return sendResponse(res, 400, false, "Is book ki koi file nahi hai.");
   }
-};
 
-export const toggleBookStatus = async (req, res, next) => {
-  try {
-    const book = await bookService.toggleBookStatus(req.params.id);
-    return sendResponse(
-      res,
-      200,
-      true,
-      `Book ${book.is_active ? "activated" : "deactivated"} successfully`,
-      book,
-    );
-  } catch (error) {
-    next(error);
-  }
-};
-export const searchBooks = async (req, res, next) => {
-  try {
-    const { q, status } = req.query;
-    const page = parseInt(req.query.page) || 1;
-    const limit = parseInt(req.query.limit) || 10;
+  const user = req.user;
+  const isAdmin = user?.user_type === "admin";
+  const hasSubscription =
+    user?.subscription_status === "active" &&
+    user?.subscription_end_date &&
+    new Date(user.subscription_end_date) > new Date();
 
-    const isAdminRequest = req.user && req.user.user_type === "admin";
-    const result = await bookService.searchBooks(
-      q,
-      !isAdminRequest,
-      page,
-      limit,
-      status,
-    );
+  const fileType = fileData.type || "pdf";
 
-    if (result.books.length === 0) {
+  // ── EPUB: Full subscription required (no free pages) ──────────────────────
+  if (fileType === "epub") {
+    if (!isAdmin && !hasSubscription) {
       return sendResponse(
         res,
-        200,
-        true,
-        "No books found matches your search",
+        403,
+        false,
+        "Is EPUB book ko padhne ke liye subscription zaruri hai. Please subscribe karein.",
+        { requires_subscription: true, file_type: "epub" },
+      );
+    }
+  }
+
+  // ── PDF: First 5 pages free, rest needs subscription ─────────────────────
+  if (fileType === "pdf") {
+    const FREE_LIMIT = 5;
+    if (!isAdmin && !hasSubscription && pageNum > FREE_LIMIT) {
+      return sendResponse(
+        res,
+        403,
+        false,
+        `PDF ke pehle ${FREE_LIMIT} pages free hain. Aage sunne ke liye please subscribe karein.`,
         {
-          books: [],
-          totalItems: 0,
-          totalPages: 0,
-          currentPage: page,
+          requires_subscription: true,
+          file_type: "pdf",
+          free_pages: FREE_LIMIT,
         },
       );
     }
-    return sendResponse(res, 200, true, "Search results fetched", result);
-  } catch (error) {
-    next(error);
   }
-};
 
-export const readBookPdf = async (req, res, next) => {
   try {
-    const { id } = req.params;
-    const user = req.user;
-    const userId = user?.id;
-    const userType = user?.user_type;
-
-    const book = await Book.findByPk(id);
-    if (!book) {
-      return res
-        .status(404)
-        .json({ success: false, message: "Book not found" });
-    }
-
-    // Ensure Cloudinary is configured (failsafe in case process.env was loaded late)
-    if (!cloudinary.config().api_secret) {
-      console.log("[PDF] re-configuring cloudinary in controller...");
-      cloudinary.config({
-        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-        api_key: process.env.CLOUDINARY_API_KEY,
-        api_secret: process.env.CLOUDINARY_API_SECRET,
-      });
-    }
-
-    if (!book.pdf_file || !book.pdf_file.url) {
-      return res
-        .status(404)
-        .json({ success: false, message: "PDF file not found for this book" });
-    }
-
-    console.log(
-      `[PDF] Processing request for book: ${id}, public_id: ${book.pdf_file.public_id}`,
-    );
-
-    let pdfUrl = book.pdf_file.url;
-    let isRestricted = false;
-
-    // Force full access for Admin
-    if (userType === "admin") {
-      isRestricted = false;
-      console.log(`[AUTH] Admin access granted for book ${id}`);
-    } else if (book.is_premium) {
-      let hasAccess = false;
-
-      if (userId) {
-        // Check individual book purchase
-        const purchase = await UserBook.findOne({
-          where: { user_id: userId, book_id: id },
-        });
-
-        if (purchase) {
-          hasAccess = true;
-        } else {
-          // Check active subscription
-          const now = new Date();
-          const hasActiveSubscription =
-            user?.subscription_status === "active" &&
-            user?.subscription_end_date &&
-            new Date(user.subscription_end_date) >= now;
-
-          if (hasActiveSubscription) {
-            hasAccess = true;
-          }
-        }
-      }
-
-      if (!hasAccess) {
-        isRestricted = true;
-      }
-    }
-
-    if (isRestricted) {
-      // Cloudinary transformation for first 5 pages
-      if (pdfUrl.includes("/upload/")) {
-        pdfUrl = pdfUrl.replace("/raw/upload/", "/image/upload/");
-        pdfUrl = pdfUrl.replace("/upload/", "/upload/pg_1-5/");
-      }
-      res.setHeader("X-Subscription-Required", "true");
-    }
-
-    // Extract version from the stored URL to ensure signature matches
-    // Stored URL format: .../upload/v1234567/path/to/file
-    let version = null;
-    if (pdfUrl.includes("/upload/v")) {
-      const parts = pdfUrl.split("/upload/v");
-      if (parts.length > 1) {
-        version = parts[1].split("/")[0];
-      }
-    }
-
-    console.log(
-      `[PDF] Generating signature. Version: ${version || "none"}, Restricted: ${isRestricted}`,
-    );
-
-    // Generate a secure Signed URL for internal fetching
-    let signedUrl;
-    const urlOptions = {
-      resource_type: "image",
-      type: "upload",
-      format: "pdf",
-      sign_url: true,
-      secure: true,
-      version: version,
-    };
-
-    if (isRestricted) {
-      signedUrl = cloudinary.url(book.pdf_file.public_id, {
-        ...urlOptions,
-        page: "1-5",
-      });
+    let result;
+    if (fileData.type === "epub") {
+      result = await pdfService.extractPageTextFromEpubUrl(
+        fileData.url,
+        bookId,
+        pageNum,
+        book,
+      );
     } else {
-      signedUrl = cloudinary.url(book.pdf_file.public_id, urlOptions);
+      result = await pdfService.extractPageTextFromPdfUrl(
+        fileData.url,
+        bookId,
+        pageNum,
+        book,
+      );
     }
 
-    console.log(`[PDF] Proxying signed URL: ${signedUrl}`);
-
-    // Use a proxy stream to avoid "Token Leakage" (401 error in frontend/postman)
-    const streamPdf = (url) => {
-      const options = {
-        headers: {
-          "User-Agent": "Mozilla/5.0",
-        },
-      };
-
-      https
-        .get(url, options, (pdfRes) => {
-          // Handle Cloudinary/CDN redirects
-          if (
-            pdfRes.statusCode >= 300 &&
-            pdfRes.statusCode < 400 &&
-            pdfRes.headers.location
-          ) {
-            console.log(`[PDF] Proxy following redirect: ${pdfRes.statusCode}`);
-            return streamPdf(pdfRes.headers.location);
-          }
-
-          if (pdfRes.statusCode !== 200) {
-            console.error(`[PDF] Storage error: ${pdfRes.statusCode}`);
-            if (!res.headersSent) {
-              return res.status(pdfRes.statusCode).json({
-                success: false,
-                message: `Cloudinary error ${pdfRes.statusCode}. Please check if the file is public.`,
-              });
-            }
-            return;
-          }
-
-          // Forward headers and stream data
-          res.setHeader("Content-Type", "application/pdf");
-          res.setHeader(
-            "Content-Disposition",
-            `inline; filename="book-${id}.pdf"`,
-          );
-          res.setHeader("Cache-Control", "private, max-age=3600");
-
-          console.log(`[PDF] Streaming started for book ${id}`);
-          pdfRes.pipe(res);
-
-          pdfRes.on("error", (err) => {
-            console.error("[PDF] Stream Error:", err);
-          });
-        })
-        .on("error", (err) => {
-          console.error("[PDF] Internal Fetch Error:", err.message);
-          if (!res.headersSent) {
-            res
-              .status(500)
-              .json({ success: false, message: "Could not stream document" });
-          }
-        });
-    };
-
-    // We use the original Cloudinary URL for the internal fetch to avoid signature mismatch issues
-    // during proxying, as our server is trusted by the network.
-    streamPdf(signedUrl || pdfUrl);
+    return sendResponse(
+      res,
+      200,
+      true,
+      `Page/Chapter ${pageNum} text extracted successfully.`,
+      {
+        id: bookId,
+        book_id: bookId,
+        file_type: fileData.type || "pdf",
+        page_number: pageNum,
+        total_pages: result.total_pages,
+        text_content: result.text_content,
+      },
+    );
   } catch (error) {
-    console.error("Error in readBookPdf:", error);
-    next(error);
+    console.error("Page Text Extraction Controller Error:", error.message);
+    return sendResponse(
+      res,
+      500,
+      false,
+      "Page text extract karne mein error hua.",
+      {
+        error: error.message,
+      },
+    );
   }
-};
+});

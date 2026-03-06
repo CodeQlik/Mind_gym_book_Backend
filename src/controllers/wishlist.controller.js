@@ -3,7 +3,7 @@ import sendResponse from "../utils/responseHandler.js";
 
 export const addToWishlist = async (req, res, next) => {
   try {
-    const { book_id } = req.body;
+    const book_id = req.body.book_id || req.body.bookId;
     if (!book_id) {
       return sendResponse(res, 400, false, "Book ID is required");
     }
@@ -35,7 +35,7 @@ export const removeFromWishlist = async (req, res, next) => {
 
 export const toggleWishlist = async (req, res, next) => {
   try {
-    const { book_id } = req.body;
+    const book_id = req.body.book_id || req.body.bookId;
     if (!book_id) {
       return sendResponse(res, 400, false, "Book ID is required");
     }

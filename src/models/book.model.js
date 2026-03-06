@@ -103,16 +103,16 @@ const Book = sequelize.define(
       type: DataTypes.DATEONLY,
       allowNull: true,
     },
-    pdf_file: {
+    file_data: {
       type: DataTypes.JSON,
-      defaultValue: { url: "", public_id: "" },
       allowNull: true,
+      defaultValue: null,
       get() {
-        const rawValue = this.getDataValue("pdf_file");
+        const value = this.getDataValue("file_data");
         try {
-          return typeof rawValue === "string" ? JSON.parse(rawValue) : rawValue;
+          return typeof value === "string" ? JSON.parse(value) : value;
         } catch (e) {
-          return rawValue;
+          return value || null;
         }
       },
     },
@@ -128,8 +128,25 @@ const Book = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    page_count: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      defaultValue: 0,
+    },
+    previewPages: {
+      type: DataTypes.INTEGER,
+      defaultValue: 5, // Default 5 pages free preview
+    },
     otherdescription: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    dimensions: {
+      type: DataTypes.STRING, // e.g. "8 x 5 x 1 inches"
+      allowNull: true,
+    },
+    weight: {
+      type: DataTypes.FLOAT, // numeric value
       allowNull: true,
     },
   },
