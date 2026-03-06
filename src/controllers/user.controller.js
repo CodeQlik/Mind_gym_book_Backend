@@ -57,12 +57,29 @@ export const registerUser = async (req, res, next) => {
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     });
 
+    const accessTokenOptions = {
+      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    };
+
+    const refreshTokenOptions = {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    };
+
+    res.cookie("accessToken", result.accessToken, accessTokenOptions);
+    res.cookie("refreshToken", result.refreshToken, refreshTokenOptions);
+
     return sendResponse(
       res,
       201,
       true,
       "User registered successfully.",
-      result.user,
+      result,
     );
   } catch (error) {
     next(error);
@@ -88,16 +105,42 @@ export const login = async (req, res, next) => {
       sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
     };
 
-    const { accessToken, refreshToken, ...userWithoutTokens } = result;
+    res.cookie("accessToken", result.accessToken, accessTokenOptions);
+    res.cookie("refreshToken", result.refreshToken, refreshTokenOptions);
 
-    res.cookie("accessToken", accessToken, accessTokenOptions);
-    res.cookie("refreshToken", refreshToken, refreshTokenOptions);
+    return sendResponse(res, 200, true, "Login successful", result);
+  } catch (error) {
+    next(error);
+  }
+};
 
-    return sendResponse(res, 200, true, "Login successful", {
-      user: userWithoutTokens,
-      accessToken,
-      refreshToken,
-    });
+export const googleLogin = async (req, res, next) => {
+  try {
+    const { idToken } = req.body;
+    if (!idToken) {
+      return sendResponse(res, 400, false, "Google ID Token is required");
+    }
+
+    const result = await userService.googleLogin(idToken);
+
+    const accessTokenOptions = {
+      expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    };
+
+    const refreshTokenOptions = {
+      expires: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000), // 7 days
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "None",
+    };
+
+    res.cookie("accessToken", result.accessToken, accessTokenOptions);
+    res.cookie("refreshToken", result.refreshToken, refreshTokenOptions);
+
+    return sendResponse(res, 200, true, "Google Login successful", result);
   } catch (error) {
     next(error);
   }
