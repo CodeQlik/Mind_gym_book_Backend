@@ -47,7 +47,7 @@ class PaymentService {
     return { razorpay_order: order, plan };
   }
 
-  //  WEBSITE: Physical Book Payment
+  //  WEBSITE: Physical Book Payment (Online: UPI / Card / Prepaid)
   async createPhysicalBookPaymentOrder(userId, dbOrderId) {
     const dbOrder = await Order.findOne({
       where: { id: dbOrderId, user_id: userId },
@@ -55,6 +55,12 @@ class PaymentService {
     if (!dbOrder) throw new Error("Order not found");
     if (dbOrder.payment_status === "paid") {
       throw new Error("This order is already paid");
+    }
+    // COD orders do NOT go through Razorpay
+    if (dbOrder.payment_method === "cod") {
+      throw new Error(
+        "COD orders do not require online payment. Order is already confirmed.",
+      );
     }
 
     const amount = Math.round(parseFloat(dbOrder.total_amount) * 100); // paise
@@ -71,14 +77,18 @@ class PaymentService {
       order_id: razorpayOrder.id,
       amount: dbOrder.total_amount,
       payment_type: "book_purchase",
+      payment_method: dbOrder.payment_method, // upi | card | prepaid
       status: "created",
-      // book_id is null — order items contain the books
     });
 
     // Link Razorpay order ID to our DB order
     await orderService.linkRazorpayOrder(dbOrderId, razorpayOrder.id);
 
-    return { razorpay_order: razorpayOrder, db_order_id: dbOrderId };
+    return {
+      razorpay_order: razorpayOrder,
+      db_order_id: dbOrderId,
+      payment_method: dbOrder.payment_method,
+    };
   }
 
   //  SHARED: Verify Payment (handles both subscription + physical book)
@@ -120,11 +130,25 @@ class PaymentService {
       return { payment, message: "Already processed" };
     }
 
-    // 4. Update payment record
+    // 4. Update payment record — save payment_method from Razorpay response
+    // Razorpay returns method: 'upi' | 'card' | 'netbanking' | 'wallet' etc.
+    // We map it to our ENUM: upi->upi, card->card, netbanking/wallet->prepaid
+    let capturedMethod = null;
+    try {
+      const rzpPayment = await razorpay.payments.fetch(razorpay_payment_id);
+      const rzpMethod = rzpPayment?.method;
+      if (rzpMethod === "upi") capturedMethod = "upi";
+      else if (rzpMethod === "card") capturedMethod = "card";
+      else capturedMethod = "prepaid"; // netbanking, wallet, etc.
+    } catch (_) {
+      // Non-critical: if fetch fails, leave as null
+    }
+
     await payment.update({
       payment_id: razorpay_payment_id,
       signature: razorpay_signature,
       status: "captured",
+      ...(capturedMethod && { payment_method: capturedMethod }),
     });
 
     // 5. Fulfillment based on payment type
@@ -181,6 +205,34 @@ class PaymentService {
     }
 
     return { payment };
+  }
+
+  // ─── COD: Create payment record for Cash on Delivery orders
+  async createCodPaymentRecord(userId, dbOrderId) {
+    const dbOrder = await Order.findOne({
+      where: { id: dbOrderId, user_id: userId },
+    });
+    if (!dbOrder) throw new Error("Order not found");
+    if (dbOrder.payment_method !== "cod") {
+      throw new Error("This order is not a COD order");
+    }
+
+    // Check if COD payment record already exists
+    const existing = await Payment.findOne({
+      where: { order_id: `cod_${dbOrderId}` },
+    });
+    if (existing) return { payment: existing, message: "Already recorded" };
+
+    const payment = await Payment.create({
+      user_id: userId,
+      order_id: `cod_${dbOrderId}`, // Unique identifier for COD
+      amount: dbOrder.total_amount,
+      payment_type: "book_purchase",
+      payment_method: "cod",
+      status: "created", // COD: payment happens on delivery
+    });
+
+    return { payment, message: "COD order recorded" };
   }
 
   //  ADMIN

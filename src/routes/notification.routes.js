@@ -11,6 +11,10 @@ import {
   removeFavoriteCategory,
   syncFavoriteCategories,
   sendNotificationToUser,
+  getAllNotificationsAdmin,
+  getNotificationStats,
+  deleteNotificationAdmin,
+  markAllAsReadAdmin,
 } from "../controllers/notification.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
@@ -64,5 +68,10 @@ router.post(
   validate(sendNotificationValidation),
   sendNotificationToUser,
 );
+
+router.get("/admin/all", verifyJWT, isAdmin, getAllNotificationsAdmin);
+router.get("/admin/stats", verifyJWT, isAdmin, getNotificationStats);
+router.patch("/admin/mark-all-read", verifyJWT, isAdmin, markAllAsReadAdmin);
+router.delete("/admin/delete/:id", verifyJWT, isAdmin, deleteNotificationAdmin);
 
 export default router;

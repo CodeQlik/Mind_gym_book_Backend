@@ -8,6 +8,7 @@
   "variable": [
     { "key": "base_url", "value": "https://mindgymbook.ductfabrication.in/api/v1", "type": "string" },
     { "key": "token", "value": "", "type": "string" },
+    { "key": "reset_token", "value": "", "type": "string" },
     { "key": "book_id", "value": "1", "type": "string" },
     { "key": "order_id", "value": "1", "type": "string" },
     { "key": "category_id", "value": "1", "type": "string" }
@@ -97,21 +98,46 @@
           }
         },
         {
-          "name": "Forgot Password",
+          "name": "Forgot Password — Send OTP",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/users/forgot-password",
-            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\"\n}" },
+            "description": "Step 1: Sends a 6-digit OTP to the user's email (valid 2 minutes)."
           }
         },
         {
-          "name": "Reset Password",
+          "name": "Forgot Password — Verify OTP",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "var res = pm.response.json();",
+                  "if(res.data && res.data.resetToken){",
+                  "  pm.collectionVariables.set('reset_token', res.data.resetToken);",
+                  "}"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "url": "{{base_url}}/users/verify-forgot-password-otp",
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"otp\": \"123456\"\n}" },
+            "description": "Step 2: Verify OTP. Returns resetToken (valid 15 min). Auto-saves to {{reset_token}}."
+          }
+        },
+        {
+          "name": "Forgot Password — Reset Password",
           "request": {
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/users/reset-password",
-            "body": { "mode": "raw", "raw": "{\n  \"token\": \"RESET_TOKEN\",\n  \"password\": \"NewPassword@123\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"token\": \"{{reset_token}}\",\n  \"new_password\": \"NewPassword@123\",\n  \"confirm_password\": \"NewPassword@123\"\n}" },
+            "description": "Step 3: Reset password using the token from Step 2."
           }
         }
       ]
@@ -599,11 +625,94 @@
           }
         },
         {
+          "name": "Cancel Order",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/orders/cancel/{{order_id}}",
+            "description": "User can cancel order only if it's in 'processing' state. Restocks items automatically."
+          }
+        },
+        {
+          "name": "Admin — Get Order Stats 📊",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/orders/admin/stats",
+            "description": "Returns tab counts: { all, processing, shipped, delivered, cancelled, returned }"
+          }
+        },
+        {
+          "name": "Admin — Search Orders 🔍",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/orders/admin/search?q=john&page=1&limit=10",
+              "query": [
+                { "key": "q", "value": "john", "description": "Search by user name / email / phone / order ID" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            },
+            "description": "Search orders by customer name, email, phone, or order ID."
+          }
+        },
+        {
           "name": "Admin — Get All Orders",
           "request": {
             "method": "GET",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
-            "url": { "raw": "{{base_url}}/orders/admin/all?delivery_status=processing&page=1&limit=10", "query": [{ "key": "delivery_status", "value": "processing" }, { "key": "payment_status", "value": "" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+            "url": {
+              "raw": "{{base_url}}/orders/admin/all?page=1&limit=10",
+              "query": [
+                { "key": "delivery_status", "value": "", "description": "processing | shipped | delivered | cancelled | returned" },
+                { "key": "payment_status", "value": "", "description": "pending | paid | failed | refunded" },
+                { "key": "search", "value": "", "description": "Search by name / email / phone / order ID" },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Get All Orders (Processing Tab)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/admin/all?delivery_status=processing&page=1&limit=10", "query": [{ "key": "delivery_status", "value": "processing" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Admin — Get All Orders (Shipped Tab)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/admin/all?delivery_status=shipped&page=1&limit=10", "query": [{ "key": "delivery_status", "value": "shipped" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Admin — Get All Orders (Delivered Tab)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/admin/all?delivery_status=delivered&page=1&limit=10", "query": [{ "key": "delivery_status", "value": "delivered" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Admin — Get All Orders (Cancelled Tab)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/admin/all?delivery_status=cancelled&page=1&limit=10", "query": [{ "key": "delivery_status", "value": "cancelled" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
+          }
+        },
+        {
+          "name": "Admin — Get All Orders (Returned Tab)",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": { "raw": "{{base_url}}/orders/admin/all?delivery_status=returned&page=1&limit=10", "query": [{ "key": "delivery_status", "value": "returned" }, { "key": "page", "value": "1" }, { "key": "limit", "value": "10" }] }
           }
         },
         {
@@ -620,8 +729,8 @@
             "method": "PATCH",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/orders/admin/dispatch/{{order_id}}",
-            "body": { "mode": "raw", "raw": "{\n  \"tracking_id\": \"DTDC123456789\",\n  \"courier_name\": \"DTDC\",\n  \"dispatch_note\": \"Dispatched from Mumbai warehouse\"\n}" },
-            "description": "Sets delivery_status = 'shipped' with tracking info."
+            "body": { "mode": "raw", "raw": "{\n  \"tracking_id\": \"DTDC123456789\",\n  \"courier_name\": \"DTDC\",\n  \"tracking_url\": \"https://track.dtdc.com/123456\"\n}" },
+            "description": "Sets delivery_status = 'shipped'. Allowed for PAID online orders or any COD orders."
           }
         },
         {
@@ -630,7 +739,17 @@
             "method": "PATCH",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/orders/admin/status/{{order_id}}",
-            "body": { "mode": "raw", "raw": "{\n  \"delivery_status\": \"delivered\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"delivery_status\": \"returned\"\n}" },
+            "description": "Allowed: delivery_status (processing|shipped|delivered|cancelled|returned), payment_status, tracking_id, courier_name, tracking_url. Note: Marking as 'returned' automatically restocks books."
+          }
+        },
+        {
+          "name": "Admin — Delete Order 🗑️",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/orders/admin/delete/{{order_id}}",
+            "description": "Permanently deletes an order."
           }
         }
       ]
@@ -999,7 +1118,43 @@
             "method": "POST",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/notifications/admin/send",
-            "body": { "mode": "raw", "raw": "{\n  \"user_id\": 1,\n  \"title\": \"New Book Alert!\",\n  \"body\": \"A new book has been added.\"\n}" }
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"target\": \"USER\",\n  \"user_id\": 23,\n  \"type\": \"SYSTEM\",\n  \"title\": \"Hello User\",\n  \"message\": \"This is a test notification for {user_name}\",\n  \"metadata\": { \"info\": \"test\" }\n}"
+            },
+            "description": "Targets: ALL, CATEGORY, USER. Placeholder {user_name} is supported."
+          }
+        },
+        {
+          "name": "Admin — Get All System Notifications",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/notifications/admin/all?page=1&limit=20&type=SYSTEM",
+              "query": [
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "20" },
+                { "key": "type", "value": "SYSTEM", "disabled": true },
+                { "key": "user_id", "value": "23", "disabled": true }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Get Notification Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/notifications/admin/stats"
+          }
+        },
+        {
+          "name": "Admin — Delete Notification (Any)",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/notifications/admin/delete/1"
           }
         }
       ]

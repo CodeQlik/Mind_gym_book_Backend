@@ -8,6 +8,7 @@ const NOTIFICATION_TYPES = [
   "PRICE_DROP",
   "NEW_RELEASE",
   "SALE",
+  "REFUND_REQUEST",
 ];
 
 // ─── Register FCM Token
@@ -18,27 +19,26 @@ export const registerFCMTokenValidation = Joi.object({
   }),
 });
 
-// ─── Admin: Send Notification to User
 export const sendNotificationValidation = Joi.object({
-  target: Joi.string().valid("ALL", "CATEGORY", "USER").default("USER"),
-  user_id: Joi.number().integer().positive().when("target", {
-    is: "USER",
-    then: Joi.required(),
-  }),
-  category_id: Joi.number().integer().positive().when("target", {
-    is: "CATEGORY",
-    then: Joi.required(),
-  }),
-  type: Joi.string()
-    .valid(...NOTIFICATION_TYPES)
+  target: Joi.string()
+    .valid("ALL", "CATEGORY", "USER", "SUBSCRIBED", "WISHLIST", "EXPIRING")
     .required()
     .messages({
-      "any.only": `type must be one of: ${NOTIFICATION_TYPES.join(", ")}`,
-      "any.required": "type is required",
+      "any.only":
+        "Target must be one of [ALL, CATEGORY, USER, SUBSCRIBED, WISHLIST, EXPIRING]",
     }),
+  user_id: Joi.number().integer().positive().optional(),
+  category_id: Joi.number().integer().positive().optional(),
+  type: Joi.string()
+    .valid(...NOTIFICATION_TYPES)
+    .required(),
   title: Joi.string().required().trim().max(255),
   message: Joi.string().required().trim(),
   metadata: Joi.object().optional().allow(null),
+  status: Joi.string()
+    .valid("SENT", "PENDING", "RECURRING", "FAILED")
+    .optional(),
+  scheduled_at: Joi.date().iso().optional().allow(null),
 });
 
 // ─── Add Favorite Category

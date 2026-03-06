@@ -8,31 +8,31 @@ import {
   requestRefund,
   getAllOrders,
   getOrderByIdAdmin,
+  getOrderStats,
+  searchOrders,
   dispatchOrder,
   updateOrderStatus,
+  cancelOrder,
+  deleteOrder,
 } from "../controllers/order.controller.js";
 
 const router = express.Router();
 
-//  User Routes
-// Step 1: Place order from cart (creates DB order, payment_status = pending)
-router.post("/checkout", verifyJWT, checkoutFromCart);
+//USER Routes
 
-// List & detail
+router.post("/checkout", verifyJWT, checkoutFromCart);
 router.get("/my-orders", verifyJWT, getMyOrders);
 router.get("/my-orders/:orderId", verifyJWT, getMyOrderById);
-
-// Refund request
 router.post("/refund/:orderId", verifyJWT, requestRefund);
+router.post("/cancel/:orderId", verifyJWT, cancelOrder);
 
-// Admin Routes
+// ─── ADMIN Routes ───
+router.get("/admin/stats", verifyJWT, isAdmin, getOrderStats);
+router.get("/admin/search", verifyJWT, isAdmin, searchOrders);
 router.get("/admin/all", verifyJWT, isAdmin, getAllOrders);
 router.get("/admin/:orderId", verifyJWT, isAdmin, getOrderByIdAdmin);
-
-// Dispatch order (sets tracking_id + delivery_status = shipped)
 router.patch("/admin/dispatch/:orderId", verifyJWT, isAdmin, dispatchOrder);
-
-// Generic status update
 router.patch("/admin/status/:orderId", verifyJWT, isAdmin, updateOrderStatus);
+router.delete("/admin/delete/:orderId", verifyJWT, isAdmin, deleteOrder);
 
 export default router;

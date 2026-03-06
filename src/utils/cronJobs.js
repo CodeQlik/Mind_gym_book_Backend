@@ -60,6 +60,7 @@ export const runSubscriptionExpiryJob = async () => {
 };
 
 const initCronJobs = () => {
+  // ── Job 1: Subscription Expiry (Daily)
   cron.schedule(
     "5 0 * * *", // 00:05 every day
     runSubscriptionExpiryJob,
@@ -67,6 +68,17 @@ const initCronJobs = () => {
       timezone: "Asia/Kolkata", // IST timezone
     },
   );
+
+  // ── Job 2: Background Notification Processor (Every Minute)
+  cron.schedule("* * * * *", async () => {
+    try {
+      const { default: notificationService } =
+        await import("../services/notification.service.js");
+      await notificationService.processScheduledNotifications();
+    } catch (error) {
+      console.error("[CRON] Notification processor failed:", error);
+    }
+  });
 };
 
 export default initCronJobs;

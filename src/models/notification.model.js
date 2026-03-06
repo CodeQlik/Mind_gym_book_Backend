@@ -16,16 +16,7 @@ const Notification = sequelize.define(
       field: "user_id",
     },
     type: {
-      type: DataTypes.ENUM(
-        "ORDER",
-        "RENEWAL",
-        "APPROVAL",
-        "PRICE_DROP",
-        "NEW_RELEASE",
-        "SALE",
-        "WELCOME",
-        "SYSTEM",
-      ),
+      type: DataTypes.STRING, // Use STRING to be flexible with new types
       allowNull: false,
     },
     title: {
@@ -44,6 +35,14 @@ const Notification = sequelize.define(
     is_read: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
+    },
+    status: {
+      type: DataTypes.ENUM("SENT", "PENDING", "RECURRING", "FAILED"),
+      defaultValue: "SENT",
+    },
+    scheduled_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
     },
   },
   {

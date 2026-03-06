@@ -237,7 +237,23 @@ export const forgotPassword = async (req, res, next) => {
       res,
       200,
       true,
-      "Password reset link sent to your email",
+      "Password reset OTP has been sent to your email",
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const verifyForgotPasswordOTP = async (req, res, next) => {
+  try {
+    const { email, otp } = req.body;
+    const resetToken = await userService.verifyForgotPasswordOTP(email, otp);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "OTP verified successfully. You can now reset your password.",
+      { resetToken },
     );
   } catch (error) {
     next(error);
@@ -246,7 +262,10 @@ export const forgotPassword = async (req, res, next) => {
 
 export const resetPassword = async (req, res, next) => {
   try {
-    const { token, new_password } = req.body;
+    const { token, new_password, confirm_password } = req.body;
+    if (new_password !== confirm_password) {
+      return sendResponse(res, 400, false, "Passwords do not match");
+    }
     await userService.resetPassword(token, new_password);
     return sendResponse(res, 200, true, "Password has been reset successfully");
   } catch (error) {

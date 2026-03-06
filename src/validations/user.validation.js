@@ -142,7 +142,7 @@ export const resetPasswordValidation = Joi.object({
     .required()
     .valid(Joi.ref("new_password"))
     .messages({
-      "any.only": "Password confirmation does not match password",
+      "any.only": "Password confirmation does not match new password",
       "any.required": "Confirm password is required",
     }),
 });

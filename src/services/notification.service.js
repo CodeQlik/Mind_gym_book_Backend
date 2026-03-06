@@ -1,7 +1,10 @@
 import { getMessaging } from "../config/firebase.js";
 import Notification from "../models/notification.model.js";
-import { User, Category } from "../models/index.js";
+import { User, Category, Subscription, Wishlist } from "../models/index.js";
 import UserFavoriteCategory from "../models/userFavoriteCategory.model.js";
+import { Op } from "sequelize";
+import sequelize from "../config/db.js";
+import { emitNotification } from "../utils/socket.js";
 
 class NotificationService {
   // Usage: formatMessage("Hello {user_name}, {book_title} is available!", user, metadata)
@@ -76,15 +79,33 @@ class NotificationService {
   }
 
   // DB: Save a notification record
-  async saveNotification(userId, type, title, message, metadata = null) {
-    return await Notification.create({
+  async saveNotification(
+    userId,
+    type,
+    title,
+    message,
+    metadata = null,
+    status = "SENT",
+    scheduledAt = null,
+    senderId = null,
+  ) {
+    const notification = await Notification.create({
       userId: userId,
       type,
       title,
       message,
       metadata,
+      status,
+      scheduled_at: scheduledAt,
       is_read: false,
     });
+
+    // Real-time emit via Socket.IO if status is SENT
+    if (status === "SENT") {
+      emitNotification(userId, notification, senderId);
+    }
+
+    return notification;
   }
 
   // Notify users when a new book releases in their favorite category
@@ -142,7 +163,16 @@ class NotificationService {
     } catch (error) {}
   }
   // Admin: Send notification to a specific user
-  async sendToUser(userId, type, title, message, metadata = null) {
+  async sendToUser(
+    userId,
+    type,
+    title,
+    message,
+    metadata = null,
+    status = "SENT",
+    scheduledAt = null,
+    senderId = null,
+  ) {
     const user = await User.findByPk(userId, {
       attributes: ["id", "name", "fcm_token"],
     });
@@ -158,10 +188,13 @@ class NotificationService {
       title,
       formattedMessage,
       metadata,
+      status,
+      scheduledAt,
+      senderId,
     );
 
-    // Send FCM push if token exists
-    if (user.fcm_token) {
+    // Send FCM push ONLY IF status is SENT
+    if (status === "SENT" && user.fcm_token) {
       await this.sendFCM(
         user.fcm_token,
         title,
@@ -174,82 +207,241 @@ class NotificationService {
   }
 
   // Admin: Send notification to ALL active users
-  async sendToAll(type, title, message, metadata = null) {
+  async sendToAll(
+    type,
+    title,
+    message,
+    metadata = null,
+    status = "SENT",
+    scheduledAt = null,
+    senderId = null,
+  ) {
+    // Save only ONE notification for the entire system (Broadcast)
+    const meta =
+      typeof metadata === "object" && metadata !== null ? metadata : {};
+    await this.saveNotification(
+      null, // Master record
+      type,
+      title,
+      message,
+      { ...meta, target: "ALL" },
+      status,
+      scheduledAt,
+      senderId,
+    );
+
     const users = await User.findAll({
       where: { is_active: true },
-      attributes: ["id", "name", "fcm_token"],
+      attributes: ["id", "fcm_token"],
     });
 
-    const fcmTokens = [];
-    const dbPromises = [];
-
-    for (const user of users) {
-      const formattedMessage = this.formatMessage(
-        message,
-        user,
-        metadata || {},
-      );
-
-      dbPromises.push(
-        this.saveNotification(user.id, type, title, formattedMessage, metadata),
-      );
-
-      if (user.fcm_token) {
-        fcmTokens.push(user.fcm_token);
-      }
-    }
-
-    await Promise.allSettled(dbPromises);
+    const fcmTokens = users
+      .map((u) => u.fcm_token)
+      .filter((token) => token && status === "SENT");
 
     if (fcmTokens.length > 0) {
-      await this.sendFCMMulticast(fcmTokens, title, message, metadata || {});
+      await this.sendFCMMulticast(fcmTokens, title, message, meta);
     }
 
-    return { dbCount: users.length, fcmCount: fcmTokens.length };
+    return { dbCount: 1, fcmCount: fcmTokens.length };
   }
 
   // Admin: Send notification by Category Interest
-  async sendToCategory(categoryId, type, title, message, metadata = null) {
+  async sendToCategory(
+    categoryId,
+    type,
+    title,
+    message,
+    metadata = null,
+    status = "SENT",
+    scheduledAt = null,
+    senderId = null,
+  ) {
+    // Save only ONE notification for this category broadcast
+    const meta =
+      typeof metadata === "object" && metadata !== null ? metadata : {};
+    await this.saveNotification(
+      null,
+      type,
+      title,
+      message,
+      { ...meta, target: "CATEGORY", category_id: categoryId },
+      status,
+      scheduledAt,
+      senderId,
+    );
+
     const favorites = await UserFavoriteCategory.findAll({
       where: { categoryId: categoryId },
       include: [
         {
           model: User,
           as: "user",
-          attributes: ["id", "name", "fcm_token"],
+          attributes: ["id", "fcm_token"],
           where: { is_active: true },
         },
       ],
     });
 
-    const fcmTokens = [];
-    const dbPromises = [];
-
-    for (const fav of favorites) {
-      const user = fav.user;
-      if (!user) continue;
-
-      const formattedMessage = this.formatMessage(
-        message,
-        user,
-        metadata || {},
-      );
-      dbPromises.push(
-        this.saveNotification(user.id, type, title, formattedMessage, metadata),
-      );
-
-      if (user.fcm_token) {
-        fcmTokens.push(user.fcm_token);
-      }
-    }
-
-    await Promise.allSettled(dbPromises);
+    const fcmTokens = favorites
+      .map((f) => f.user?.fcm_token)
+      .filter((token) => token && status === "SENT");
 
     if (fcmTokens.length > 0) {
-      await this.sendFCMMulticast(fcmTokens, title, message, metadata || {});
+      await this.sendFCMMulticast(fcmTokens, title, message, meta);
     }
 
-    return { dbCount: favorites.length, fcmCount: fcmTokens.length };
+    return { dbCount: 1, fcmCount: fcmTokens.length };
+  }
+
+  // Admin: Send notification to all ACTIVE SUBSCRIBERS
+  async sendToSubscribed(
+    type,
+    title,
+    message,
+    metadata = null,
+    status = "SENT",
+    scheduledAt = null,
+    senderId = null,
+  ) {
+    // Save ONE master notification
+    const meta =
+      typeof metadata === "object" && metadata !== null ? metadata : {};
+    await this.saveNotification(
+      null,
+      type,
+      title,
+      message,
+      { ...meta, target: "SUBSCRIBED" },
+      status,
+      scheduledAt,
+      senderId,
+    );
+
+    const activeSubs = await Subscription.findAll({
+      where: { status: "active" },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "fcm_token"],
+          where: { is_active: true },
+        },
+      ],
+    });
+
+    const fcmTokens = activeSubs
+      .map((s) => s.user?.fcm_token)
+      .filter((t) => t && status === "SENT");
+
+    if (fcmTokens.length > 0) {
+      await this.sendFCMMulticast(fcmTokens, title, message, meta);
+    }
+
+    return { dbCount: 1, fcmCount: fcmTokens.length };
+  }
+
+  // Admin: Send notification to users with items in WISHLIST
+  async sendToWishlist(
+    type,
+    title,
+    message,
+    metadata = null,
+    status = "SENT",
+    scheduledAt = null,
+    senderId = null,
+  ) {
+    // Save ONE master notification
+    const meta =
+      typeof metadata === "object" && metadata !== null ? metadata : {};
+    await this.saveNotification(
+      null,
+      type,
+      title,
+      message,
+      { ...meta, target: "WISHLIST" },
+      status,
+      scheduledAt,
+      senderId,
+    );
+
+    const wishlistUsers = await Wishlist.findAll({
+      attributes: [
+        [sequelize.fn("DISTINCT", sequelize.col("user_id")), "user_id"],
+      ],
+    });
+
+    const userIds = wishlistUsers.map((w) => w.user_id);
+    const users = await User.findAll({
+      where: { id: { [Op.in]: userIds }, is_active: true },
+      attributes: ["id", "fcm_token"],
+    });
+
+    const fcmTokens = users
+      .map((u) => u.fcm_token)
+      .filter((t) => t && status === "SENT");
+
+    if (fcmTokens.length > 0) {
+      await this.sendFCMMulticast(fcmTokens, title, message, meta);
+    }
+
+    return { dbCount: 1, fcmCount: fcmTokens.length };
+  }
+
+  // Admin: Send notification to users whose subscription is EXPIRING (within 7 days)
+  async sendToExpiring(
+    type,
+    title,
+    message,
+    metadata = null,
+    status = "SENT",
+    scheduledAt = null,
+    senderId = null,
+  ) {
+    // Save ONE master notification
+    const meta =
+      typeof metadata === "object" && metadata !== null ? metadata : {};
+    await this.saveNotification(
+      null,
+      type,
+      title,
+      message,
+      { ...meta, target: "EXPIRING" },
+      status,
+      scheduledAt,
+      senderId,
+    );
+
+    const today = new Date();
+    const sevenDaysLater = new Date();
+    sevenDaysLater.setDate(today.getDate() + 7);
+
+    const expiringSubs = await Subscription.findAll({
+      where: {
+        status: "active",
+        end_date: {
+          [Op.between]: [today, sevenDaysLater],
+        },
+      },
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "fcm_token"],
+          where: { is_active: true },
+        },
+      ],
+    });
+
+    const fcmTokens = expiringSubs
+      .map((s) => s.user?.fcm_token)
+      .filter((t) => t && status === "SENT");
+
+    if (fcmTokens.length > 0) {
+      await this.sendFCMMulticast(fcmTokens, title, message, meta);
+    }
+
+    return { dbCount: 1, fcmCount: fcmTokens.length };
   }
 
   // Get user notifications (paginated)
@@ -257,8 +449,10 @@ class NotificationService {
     const offset = (page - 1) * limit;
 
     const { count, rows } = await Notification.findAndCountAll({
-      where: { userId: userId },
-      order: [["created_at", "DESC"]],
+      where: {
+        [Op.or]: [{ userId: userId }, { userId: null }],
+      },
+      order: [["createdAt", "DESC"]],
       limit,
       offset,
     });
@@ -295,6 +489,15 @@ class NotificationService {
     await Notification.update(
       { is_read: true },
       { where: { userId: userId, is_read: false } },
+    );
+    return true;
+  }
+
+  // Admin: Mark all notifications in the system as read
+  async markAllAsReadAdmin() {
+    await Notification.update(
+      { is_read: true },
+      { where: { is_read: false } }, // All unread notifications
     );
     return true;
   }
@@ -372,6 +575,174 @@ class NotificationService {
     }
 
     return await this.getFavoriteCategories(userId);
+  }
+
+  // Admin: Get all notifications (system-wide)
+  async getAllNotificationsAdmin({
+    page = 1,
+    limit = 20,
+    userId,
+    type,
+    status,
+    target,
+  }) {
+    const offset = (page - 1) * limit;
+    const where = {};
+    if (userId) where.userId = userId;
+    if (type) where.type = type;
+    if (status) where.status = status.toUpperCase();
+    if (target === "ALL") {
+      where.userId = null;
+    } else if (target === "USER") {
+      where.userId = { [Op.ne]: null };
+    }
+
+    const { count, rows } = await Notification.findAndCountAll({
+      where,
+      include: [
+        {
+          model: User,
+          as: "user",
+          attributes: ["id", "name", "email"],
+        },
+      ],
+      order: [["createdAt", "DESC"]],
+      limit,
+      offset,
+    });
+
+    return {
+      total_items: count,
+      total_pages: Math.ceil(count / limit),
+      current_page: page,
+      notifications: rows,
+    };
+  }
+
+  // Admin: Delete any notification
+  async deleteNotificationAdmin(notificationId) {
+    const notification = await Notification.findByPk(notificationId);
+    if (!notification) return false;
+    await notification.destroy();
+    return true;
+  }
+
+  // Admin: Process background scheduled notifications (Run by Cron)
+  async processScheduledNotifications() {
+    const now = new Date();
+    const pendingNotifications = await Notification.findAll({
+      where: {
+        status: "PENDING",
+        scheduled_at: { [Op.lte]: now },
+      },
+    });
+
+    for (const notif of pendingNotifications) {
+      try {
+        const target = notif.metadata?.target || "ALL";
+        // Convert to SENT before processing to avoid race conditions
+        notif.status = "SENT";
+        await notif.save();
+
+        if (target === "ALL") {
+          await this.sendToAll(
+            notif.type,
+            notif.title,
+            notif.message,
+            notif.metadata,
+          );
+        } else if (target === "CATEGORY") {
+          await this.sendToCategory(
+            notif.metadata.category_id,
+            notif.type,
+            notif.title,
+            notif.message,
+            notif.metadata,
+          );
+        } else if (target === "SUBSCRIBED") {
+          await this.sendToSubscribed(
+            notif.type,
+            notif.title,
+            notif.message,
+            notif.metadata,
+          );
+        } else if (target === "WISHLIST") {
+          await this.sendToWishlist(
+            notif.type,
+            notif.title,
+            notif.message,
+            notif.metadata,
+          );
+        } else if (target === "EXPIRING") {
+          await this.sendToExpiring(
+            notif.type,
+            notif.title,
+            notif.message,
+            notif.metadata,
+          );
+        }
+      } catch (err) {
+        console.error(
+          `Failed to process scheduled notification ${notif.id}:`,
+          err,
+        );
+        notif.status = "FAILED";
+        await notif.save();
+      }
+    }
+  }
+
+  // Admin: Get stats
+  async getNotificationStatsAdmin() {
+    try {
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+
+      const totalNotifications = await Notification.count();
+      const unreadCount = await Notification.count({
+        where: { is_read: false },
+      });
+      const broadcastCount = await Notification.count({
+        where: { userId: null },
+      });
+      const pendingCount = await Notification.count({
+        where: { status: "PENDING" },
+      });
+      const recurringCount = await Notification.count({
+        where: { status: "RECURRING" },
+      });
+      const failedCount = await Notification.count({
+        where: { status: "FAILED" },
+      });
+
+      const sentToday = await Notification.count({
+        where: {
+          status: "SENT",
+          createdAt: { [Op.gte]: today },
+        },
+      });
+
+      return {
+        totalNotifications,
+        unreadCount,
+        sentToday,
+        broadcastCount,
+        pendingCount,
+        recurringCount,
+        failedCount,
+      };
+    } catch (error) {
+      console.error("Error fetching notification stats:", error);
+      return {
+        totalNotifications: 0,
+        unreadCount: 0,
+        sentToday: 0,
+        broadcastCount: 0,
+        pendingCount: 0,
+        recurringCount: 0,
+        failedCount: 0,
+      };
+    }
   }
 }
 
