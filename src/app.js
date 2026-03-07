@@ -54,6 +54,8 @@ app.use(
     optionsSuccessStatus: 200,
   }),
 );
+
+app.options("*", cors());
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
