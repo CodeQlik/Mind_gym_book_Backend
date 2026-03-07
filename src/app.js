@@ -26,6 +26,7 @@ const app = express();
 const allowedOrigins = [
   process.env.CLIENT_URL,
   "http://localhost:5173",
+  "http://localhost:3000",
   "https://mindgymbook.ductfabrication.in",
 ].filter(Boolean);
 
@@ -37,6 +38,7 @@ app.use(
       } else {
         console.log("Origin blocked by CORS:", origin);
         callback(new Error("Not allowed by CORS"));
+        
       }
     },
     credentials: true,

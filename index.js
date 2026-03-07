@@ -5,7 +5,11 @@ import "./src/models/index.js";
 import seedAdmin from "./src/seeders/admin.seeder.js";
 import initCronJobs from "./src/utils/cronJobs.js";
 
+import { createServer } from "http";
+import { initSocket } from "./src/utils/socket.js";
+
 const PORT = process.env.PORT || 5000;
+const server = createServer(app);
 
 const startServer = async () => {
   try {
@@ -13,7 +17,9 @@ const startServer = async () => {
     await connectDB();
 
     // 2. Sync models (Create/Alter tables)
-    // await sequelize.sync({ alter: true });
+    // We only alter Notification to add its new columns, avoiding global FK issues
+    const { Notification } = await import("./src/models/index.js");
+    await Notification.sync({ alter: true });
     await sequelize.sync();
 
     // 3. Seed admin user
@@ -22,8 +28,11 @@ const startServer = async () => {
     // 4. Start Cron Jobs
     initCronJobs();
 
-    // 5. Start listening
-    app.listen(PORT, () => {});
+    // 5. Initialize Socket.IO
+    initSocket(server);
+
+    // 6. Start listening
+    server.listen(PORT, () => {});
   } catch (error) {
     console.error("Failed to start server:", error);
     process.exit(1);
