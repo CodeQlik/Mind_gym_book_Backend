@@ -11,8 +11,6 @@ export const initSocket = (server) => {
   });
 
   io.on("connection", (socket) => {
-    console.log("A user connected:", socket.id);
-
     // Join a room based on userId for private notifications
     socket.on("join", (data) => {
       const { userId, isAdmin } =
@@ -22,7 +20,6 @@ export const initSocket = (server) => {
       }
       if (isAdmin) {
         socket.join("admins");
-        console.log(`Admin joined admin room`);
       }
     });
 

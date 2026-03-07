@@ -3,14 +3,12 @@ import { User } from "../models/index.js";
 
 const seedAdmin = async () => {
   try {
-    const adminEmail = process.env.ADMIN_EMAIL || "ashokvarma9636@gmail.com";
+    const adminEmail = process.env.ADMIN_EMAIL || "admin@mindgym.com";
     const adminPassword = process.env.ADMIN_PASSWORD || "Admin@123";
 
-    console.log(`[SEEDER]: Checking for admin with email: ${adminEmail}`);
     const existingAdmin = await User.findOne({
       where: {
         email: adminEmail,
-        user_type: "admin",
       },
     });
 
@@ -35,9 +33,17 @@ const seedAdmin = async () => {
         initials: "SA",
       },
     });
-    console.log(`[SEEDER]: New admin created successfully: ${adminEmail}`);
   } catch (error) {
-    console.error(`[SEEDER ERROR]: ${error.message}`);
+    if (
+      error.name === "SequelizeValidationError" ||
+      error.name === "SequelizeUniqueConstraintError"
+    ) {
+      console.error(
+        `[SEEDER ERROR]: Validation error - ${error.errors.map((e) => e.message).join(", ")}`,
+      );
+    } else {
+      console.error(`[SEEDER ERROR]: ${error.message}`);
+    }
   }
 };
 
