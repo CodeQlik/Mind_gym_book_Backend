@@ -32,7 +32,7 @@ const startServer = async () => {
     initSocket(server);
 
     // 6. Start listening
-    server.listen(PORT, () => {});
+    server.listen(PORT, () => { });
   } catch (error) {
     console.error("Failed to start server:", error);
     process.exit(1);
