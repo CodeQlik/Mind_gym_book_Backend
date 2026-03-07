@@ -61,6 +61,10 @@ const Order = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    tracking_url: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     dispatch_note: {
       type: DataTypes.TEXT,
       allowNull: true,
@@ -73,11 +77,27 @@ const Order = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    // Payment method chosen by user: upi | card | prepaid | cod
+    payment_method: {
+      type: DataTypes.ENUM("upi", "card", "prepaid", "cod"),
+      allowNull: false,
+      defaultValue: "prepaid",
+    },
+    // Virtual field to display ID as "ORD-000001"
+    order_no: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const id = this.getDataValue("id");
+        return id ? `ORD-${id.toString().padStart(6, "0")}` : null;
+      },
+    },
   },
   {
     timestamps: true,
     underscored: true,
     tableName: "orders",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 

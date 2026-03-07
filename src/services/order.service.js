@@ -1,10 +1,21 @@
 import sequelize from "../config/db.js";
-import { QueryTypes } from "sequelize";
+import { QueryTypes, Op } from "sequelize";
 import { Order, OrderItem, Book, User, Cart } from "../models/index.js";
+import notificationService from "./notification.service.js";
 
 class OrderService {
-  async createOrderFromCart(userId, { address_id }) {
+  async createOrderFromCart(
+    userId,
+    { address_id, payment_method = "prepaid" },
+  ) {
     if (!address_id) throw new Error("address_id is required");
+
+    const VALID_PAYMENT_METHODS = ["upi", "card", "prepaid", "cod"];
+    if (!VALID_PAYMENT_METHODS.includes(payment_method)) {
+      throw new Error(
+        `Invalid payment_method. Allowed: ${VALID_PAYMENT_METHODS.join(", ")}`,
+      );
+    }
 
     // 1. Get user's cart with book details
     const cartItems = await Cart.findAll({
@@ -67,6 +78,10 @@ class OrderService {
           shipping_address: addressSnapshot,
           total_amount: totalAmount.toFixed(2),
           order_type: "physical_book",
+          payment_method,
+          // Both COD and Online start as pending
+          // Online stays pending until Razorpay confirms
+          // COD stays pending until delivery/manual confirmation
           payment_status: "pending",
           delivery_status: "processing",
         },
@@ -100,8 +115,22 @@ class OrderService {
       return newOrder;
     });
 
+    // 6. Notify user about new order
+    const orderWithDetails = await this._getOrderWithDetails(order.id);
+    try {
+      await notificationService.sendToUser(
+        userId,
+        "ORDER_CREATED",
+        "📦 Order Placed Successfully!",
+        `Your order ${orderWithDetails.order_no} for ${orderWithDetails.items.length} item(s) has been placed. Payment Method: ${payment_method.toUpperCase()}.`,
+        { order_id: String(order.id), order_no: orderWithDetails.order_no },
+      );
+    } catch (notifError) {
+      console.error("Notification failed:", notifError.message);
+    }
+
     // Return order with items
-    return await this._getOrderWithDetails(order.id);
+    return orderWithDetails;
   }
 
   /**
@@ -123,6 +152,18 @@ class OrderService {
     });
     if (!order) return null; // not a physical order, skip
     await order.update({ payment_status: "paid" });
+
+    // Notify user about payment success
+    try {
+      await notificationService.sendToUser(
+        order.user_id,
+        "ORDER_PAID",
+        "💰 Payment Received!",
+        `We have received the payment for your order ${order.order_no}. We'll start processing it soon.`,
+        { order_id: String(order.id), order_no: order.order_no },
+      );
+    } catch (notifError) {}
+
     return order;
   }
 
@@ -171,7 +212,7 @@ class OrderService {
   }
 
   /**
-   * ADMIN: Get all orders with filters and pagination
+   * ADMIN: Get all orders with filters, search and pagination
    */
   async getAllOrders(filters = {}, page = 1, limit = 10) {
     const offset = (page - 1) * limit;
@@ -180,6 +221,35 @@ class OrderService {
       where.delivery_status = filters.delivery_status;
     if (filters.payment_status) where.payment_status = filters.payment_status;
 
+    // User search filter (via association on users table)
+    const userWhere = {};
+    if (filters.search) {
+      userWhere[Op.or] = [
+        { name: { [Op.like]: `%${filters.search}%` } },
+        { email: { [Op.like]: `%${filters.search}%` } },
+        { phone: { [Op.like]: `%${filters.search}%` } },
+      ];
+    }
+
+    // Order ID search — support both numeric (4) and formatted (ORD-000004)
+    if (filters.search) {
+      let searchId = null;
+      if (!isNaN(filters.search)) {
+        searchId = parseInt(filters.search);
+      } else if (
+        filters.search.toUpperCase().startsWith("ORD-") &&
+        !isNaN(filters.search.split("-")[1])
+      ) {
+        searchId = parseInt(filters.search.split("-")[1]);
+      }
+
+      if (searchId) {
+        where[Op.or] = [{ id: searchId }];
+      }
+    }
+
+    const hasUserSearch = Object.keys(userWhere).length > 0;
+
     const { count, rows } = await Order.findAndCountAll({
       where,
       include: [
@@ -187,6 +257,8 @@ class OrderService {
           model: User,
           as: "user",
           attributes: ["id", "name", "email", "phone"],
+          where: hasUserSearch ? userWhere : undefined,
+          required: hasUserSearch,
         },
         {
           model: OrderItem,
@@ -201,6 +273,7 @@ class OrderService {
         },
       ],
       order: [["created_at", "DESC"]],
+      distinct: true,
       limit,
       offset,
     });
@@ -214,14 +287,63 @@ class OrderService {
   }
 
   /**
+   * ADMIN: Get order counts grouped by delivery_status (for tab badges)
+   * Returns: { all, processing, shipped, delivered, cancelled, returned }
+   */
+  async getOrderStats() {
+    const [totalResult] = await sequelize.query(
+      "SELECT COUNT(*) AS total FROM orders",
+      { type: QueryTypes.SELECT },
+    );
+
+    const statusCounts = await sequelize.query(
+      `SELECT delivery_status, COUNT(*) AS count FROM orders GROUP BY delivery_status`,
+      { type: QueryTypes.SELECT },
+    );
+
+    const stats = {
+      all: parseInt(totalResult.total),
+      processing: 0,
+      shipped: 0,
+      delivered: 0,
+      cancelled: 0,
+      returned: 0,
+    };
+
+    for (const row of statusCounts) {
+      if (stats.hasOwnProperty(row.delivery_status)) {
+        stats[row.delivery_status] = parseInt(row.count);
+      }
+    }
+
+    return stats;
+  }
+
+  /**
+   * ADMIN: Search orders by order ID, user name, email or phone
+   */
+  async searchOrders(query, page = 1, limit = 10) {
+    return await this.getAllOrders({ search: query }, page, limit);
+  }
+
+  /**
    * ADMIN: Dispatch an order — set tracking ID, courier name, shipped status
    */
-  async dispatchOrder(orderId, { tracking_id, courier_name, dispatch_note }) {
+  async dispatchOrder(orderId, { tracking_id, courier_name, tracking_url }) {
     const order = await Order.findByPk(orderId);
     if (!order) throw new Error("Order not found");
 
-    if (order.payment_status !== "paid") {
-      throw new Error("Cannot dispatch an unpaid order");
+    if (!tracking_id) {
+      throw new Error("Tracking ID is required to dispatch the order");
+    }
+
+    // Allow dispatch if:
+    // 1. Payment is already 'paid' (Online)
+    // 2. Payment method is 'cod' (Amber/Pending status is valid for COD dispatch)
+    if (order.payment_status !== "paid" && order.payment_method !== "cod") {
+      throw new Error(
+        "Cannot dispatch an unpaid order (only Paid or COD orders can be dispatched)",
+      );
     }
     if (
       order.delivery_status === "shipped" ||
@@ -234,33 +356,109 @@ class OrderService {
       delivery_status: "shipped",
       tracking_id: tracking_id || null,
       courier_name: courier_name || null,
-      dispatch_note: dispatch_note || null,
+      tracking_url: tracking_url || null,
     });
+
+    // Notify user about dispatch
+    try {
+      await notificationService.sendToUser(
+        order.user_id,
+        "ORDER_SHIPPED",
+        "🚚 Order Dispatched!",
+        `Great news! Your order ${order.order_no} has been shipped via ${courier_name || "our courier partner"}. Tracking ID: ${tracking_id || "N/A"}.`,
+        {
+          order_id: String(order.id),
+          order_no: order.order_no,
+          tracking_id: tracking_id || "",
+          tracking_url: tracking_url || "",
+        },
+      );
+    } catch (notifError) {}
 
     return await this._getOrderWithDetails(order.id);
   }
 
-  /**
-   * ADMIN: Update any order status field
-   */
   async updateOrderStatus(orderId, statusData) {
-    const order = await Order.findByPk(orderId);
+    const order = await Order.findByPk(orderId, {
+      include: [{ model: OrderItem, as: "items" }],
+    });
     if (!order) throw new Error("Order not found");
+
+    const oldStatus = order.delivery_status;
+    const newStatus = statusData.delivery_status;
 
     const allowed = [
       "delivery_status",
       "payment_status",
+      "payment_method",
       "tracking_id",
       "courier_name",
-      "dispatch_note",
+      "tracking_url",
     ];
     const updates = {};
     for (const key of allowed) {
       if (statusData[key] !== undefined) updates[key] = statusData[key];
     }
 
-    await order.update(updates);
+    // Handle restocking if status changes to 'returned'
+    // Only restock if the previous status was NOT 'returned' or 'cancelled'
+    const needsRestock =
+      newStatus === "returned" &&
+      oldStatus !== "returned" &&
+      oldStatus !== "cancelled";
+
+    if (needsRestock) {
+      await sequelize.transaction(async (t) => {
+        await order.update(updates, { transaction: t });
+
+        // Restock items
+        for (const item of order.items) {
+          await Book.update(
+            { stock: sequelize.literal(`stock + ${item.quantity}`) },
+            { where: { id: item.book_id }, transaction: t },
+          );
+        }
+      });
+    } else {
+      await order.update(updates);
+    }
+
+    // Notify user about status update
+    if (newStatus && newStatus !== oldStatus) {
+      try {
+        let title = "📋 Order Status Updated";
+        let message = `The status of your order ${order.order_no} has been updated to ${newStatus.toUpperCase()}.`;
+
+        if (newStatus === "returned") {
+          title = "🔄 Order Returned";
+          message = `Your order ${order.order_no} has been successfully returned and processed.`;
+        }
+
+        await notificationService.sendToUser(
+          order.user_id,
+          newStatus === "returned" ? "ORDER_RETURNED" : "ORDER_STATUS_UPDATE",
+          title,
+          message,
+          {
+            order_id: String(order.id),
+            order_no: order.order_no,
+            status: newStatus,
+          },
+        );
+      } catch (notifError) {}
+    }
+
     return await this._getOrderWithDetails(order.id);
+  }
+
+  /**
+   * ADMIN: Delete an order permanently
+   */
+  async deleteOrder(orderId) {
+    const order = await Order.findByPk(orderId);
+    if (!order) throw new Error("Order not found");
+    await order.destroy();
+    return true;
   }
 
   /**
@@ -287,10 +485,70 @@ class OrderService {
     }
 
     await order.update({ refund_requested: true, refund_reason: reason });
+
+    // Create a system notification for the admin
+    try {
+      await notificationService.saveNotification(
+        null, // System-level notification
+        "REFUND_REQUEST",
+        "🔄 New Refund Request",
+        `User #${userId} has requested a refund for Order ${order.order_no}. Reason: ${reason || "Not specified."}`,
+        { order_id: order.id, order_no: order.order_no, user_id: userId },
+      );
+    } catch (notifErr) {
+      console.error("Failed to create refund notification log:", notifErr);
+    }
+
     return order;
   }
 
-  //  Private Helpers
+  /**
+   * USER: Cancel an order (only if it is still 'processing')
+   */
+  async cancelOrder(userId, orderId) {
+    const order = await Order.findOne({
+      where: { id: orderId, user_id: userId },
+      include: [{ model: OrderItem, as: "items" }],
+    });
+
+    if (!order) throw new Error("Order not found");
+
+    if (order.delivery_status !== "processing") {
+      throw new Error(
+        `Cannot cancel an order that is already ${order.delivery_status}`,
+      );
+    }
+
+    // Cancel in a transaction to ensure stock is returned
+    await sequelize.transaction(async (t) => {
+      await order.update({ delivery_status: "cancelled" }, { transaction: t });
+
+      // Restock items
+      for (const item of order.items) {
+        await Book.update(
+          { stock: sequelize.literal(`stock + ${item.quantity}`) },
+          { where: { id: item.book_id }, transaction: t },
+        );
+      }
+    });
+
+    // Notify user
+    try {
+      await notificationService.sendToUser(
+        userId,
+        "ORDER_CANCELLED",
+        "❌ Order Cancelled",
+        `Your order ${order.order_no} has been cancelled successfully. Any payment made will be refunded according to our policy.`,
+        { order_id: String(order.id), order_no: order.order_no },
+      );
+    } catch (notifError) {
+      console.error("Order cancel notification failed:", notifError.message);
+    }
+
+    return await this._getOrderWithDetails(order.id);
+  }
+
+  // ─── Private Helpers ───
 
   async _getOrderWithDetails(orderId, extraWhere = {}) {
     return await Order.findOne({
@@ -299,7 +557,7 @@ class OrderService {
         {
           model: User,
           as: "user",
-          attributes: ["id", "name", "email"],
+          attributes: ["id", "name", "email", "phone"],
         },
         {
           model: OrderItem,

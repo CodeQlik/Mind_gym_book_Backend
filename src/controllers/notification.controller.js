@@ -152,10 +152,20 @@ export const syncFavoriteCategories = async (req, res, next) => {
 // [ADMIN] Send Notification (Supports Targeting)
 export const sendNotificationToUser = async (req, res, next) => {
   try {
-    const { target, user_id, category_id, type, title, message, metadata } =
-      req.body;
+    const {
+      target,
+      user_id,
+      category_id,
+      type,
+      title,
+      message,
+      metadata,
+      status,
+      scheduled_at,
+    } = req.body;
 
     let result;
+    const senderId = req.user.id;
 
     if (target === "ALL") {
       result = await notificationService.sendToAll(
@@ -163,6 +173,9 @@ export const sendNotificationToUser = async (req, res, next) => {
         title,
         message,
         metadata || null,
+        status,
+        scheduled_at,
+        senderId,
       );
     } else if (target === "CATEGORY") {
       if (!category_id)
@@ -173,16 +186,53 @@ export const sendNotificationToUser = async (req, res, next) => {
         title,
         message,
         metadata || null,
+        status,
+        scheduled_at,
+        senderId,
+      );
+    } else if (target === "SUBSCRIBED") {
+      result = await notificationService.sendToSubscribed(
+        type,
+        title,
+        message,
+        metadata || null,
+        status,
+        scheduled_at,
+        senderId,
+      );
+    } else if (target === "WISHLIST") {
+      result = await notificationService.sendToWishlist(
+        type,
+        title,
+        message,
+        metadata || null,
+        status,
+        scheduled_at,
+        senderId,
+      );
+    } else if (target === "EXPIRING") {
+      result = await notificationService.sendToExpiring(
+        type,
+        title,
+        message,
+        metadata || null,
+        status,
+        scheduled_at,
+        senderId,
       );
     } else {
-      // Default: Single User targeting
-      if (!user_id) throw new Error("user_id or target is required");
+      // Default: Single User targeting (USER)
+      if (!user_id && target !== "ALL" && target !== "CATEGORY")
+        throw new Error("user_id or target is required");
       result = await notificationService.sendToUser(
         user_id,
         type,
         title,
         message,
         metadata || null,
+        status,
+        scheduled_at,
+        senderId,
       );
     }
 
@@ -193,6 +243,68 @@ export const sendNotificationToUser = async (req, res, next) => {
       "Notification process completed",
       result,
     );
+  } catch (error) {
+    next(error);
+  }
+};
+// [ADMIN] Get All System Notifications (History)
+export const getAllNotificationsAdmin = async (req, res, next) => {
+  try {
+    const { page, limit, user_id, type, status, target } = req.query;
+    const result = await notificationService.getAllNotificationsAdmin({
+      page: parseInt(page) || 1,
+      limit: parseInt(limit) || 20,
+      userId: user_id,
+      type,
+      status,
+      target,
+    });
+    return sendResponse(
+      res,
+      200,
+      true,
+      "System notifications fetched successfully",
+      result,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// [ADMIN] Get Notification stats
+export const getNotificationStats = async (req, res, next) => {
+  try {
+    const stats = await notificationService.getNotificationStatsAdmin();
+    return sendResponse(res, 200, true, "Notification stats fetched", stats);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// [ADMIN] Mark all notifications as read in the entire system
+export const markAllAsReadAdmin = async (req, res, next) => {
+  try {
+    await notificationService.markAllAsReadAdmin();
+    return sendResponse(
+      res,
+      200,
+      true,
+      "All system notifications marked as read",
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// [ADMIN] Delete any notification
+export const deleteNotificationAdmin = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const success = await notificationService.deleteNotificationAdmin(id);
+    if (!success) {
+      return sendResponse(res, 404, false, "Notification not found");
+    }
+    return sendResponse(res, 200, true, "Notification deleted by admin");
   } catch (error) {
     next(error);
   }

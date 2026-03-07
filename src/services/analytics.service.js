@@ -1,38 +1,33 @@
-import { Payment, User, Book } from "../models/index.js";
+import { Payment, User, Book, Order, OrderItem } from "../models/index.js";
 import { Op } from "sequelize";
 import sequelize from "../config/db.js";
 
 class AnalyticsService {
   async getRevenueStats() {
-    const revenue = await Payment.findAll({
-      attributes: [
-        "payment_type",
-        [sequelize.fn("SUM", sequelize.col("amount")), "total_amount"],
-      ],
-      where: {
-        status: "captured",
-      },
-      group: ["payment_type"],
+    // 1. Subscription Income from captured payments
+    const subPaymentArr = await Payment.findAll({
+      attributes: [[sequelize.fn("SUM", sequelize.col("amount")), "total"]],
+      where: { payment_type: "subscription", status: "captured" },
+      raw: true,
     });
+    const subscriptionIncome = parseFloat(subPaymentArr[0]?.total) || 0;
+
+    // 2. E-commerce Income from Paid Orders (Physical + Marketplace)
+    // Pulling directly from Orders table for maximum accuracy
+    const orderRevenueArr = await Order.findAll({
+      attributes: [
+        [sequelize.fn("SUM", sequelize.col("total_amount")), "total"],
+      ],
+      where: { payment_status: "paid" },
+      raw: true,
+    });
+    const ecommerceIncome = parseFloat(orderRevenueArr[0]?.total) || 0;
 
     const stats = {
-      subscriptionIncome: 0,
-      ecommerceIncome: 0,
-      marketplaceCommission: 0, // Mocked for now as marketplace is not fully implemented
+      subscriptionIncome,
+      ecommerceIncome,
+      marketplaceCommission: ecommerceIncome * 0.05, // Placeholder 5% commission
     };
-
-    revenue.forEach((item) => {
-      const type = item.getDataValue("payment_type");
-      const total = parseFloat(item.getDataValue("total_amount")) || 0;
-      if (type === "subscription") {
-        stats.subscriptionIncome = total;
-      } else if (type === "book_purchase") {
-        stats.ecommerceIncome = total;
-      }
-    });
-
-    // Marketplace commission mockup (5% of ecommerce income as a placeholder)
-    stats.marketplaceCommission = stats.ecommerceIncome * 0.05;
 
     return stats;
   }
@@ -43,25 +38,28 @@ class AnalyticsService {
       where: { is_active: true },
     });
 
-    // Popular books based on captured book purchases
-    // Refactored to a 2-step process to be 100% robust against strict SQL modes on production
-    const topPaymentStats = await Payment.findAll({
+    // Popular books based on OrderItems from PAID orders
+    // Summing quantities to get true sales count
+    const topSalesStats = await OrderItem.findAll({
       attributes: [
         "book_id",
-        [sequelize.fn("COUNT", sequelize.col("book_id")), "sales_count"],
+        [sequelize.fn("SUM", sequelize.col("quantity")), "sales_count"],
       ],
-      where: {
-        payment_type: "book_purchase",
-        status: "captured",
-        book_id: { [Op.ne]: null },
-      },
+      include: [
+        {
+          model: Order,
+          as: "order",
+          where: { payment_status: "paid" },
+          attributes: [],
+        },
+      ],
       group: ["book_id"],
       order: [[sequelize.literal("sales_count"), "DESC"]],
-      limit: 5,
+      limit: 10,
       raw: true,
     });
 
-    const bookIds = topPaymentStats.map((s) => s.book_id);
+    const bookIds = topSalesStats.map((s) => s.book_id);
 
     // Fetch book details for these IDs
     const booksDetails = await Book.findAll({
@@ -70,7 +68,7 @@ class AnalyticsService {
     });
 
     // Map details back to stats
-    const popularBooks = topPaymentStats
+    const popularBooks = topSalesStats
       .map((stat) => {
         const bookDetail = booksDetails.find((b) => b.id === stat.book_id);
         return {
@@ -79,13 +77,19 @@ class AnalyticsService {
           book: bookDetail || null,
         };
       })
-      .filter((item) => item.book !== null); // Only return if book info exists
+      .filter((item) => item.book !== null);
 
     // Mocked top audiobooks (if you implement later)
     const topAudiobooks = [];
 
+    // Total users (excluding admins) and books count
+    const totalUsers = await User.count({ where: { user_type: "user" } });
+    const totalBooks = await Book.count({ where: { is_active: true } });
+
     return {
       activeUsers,
+      totalUsers,
+      totalBooks,
       popularBooks,
       topAudiobooks,
     };

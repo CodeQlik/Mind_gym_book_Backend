@@ -51,6 +51,11 @@ const Payment = sequelize.define(
       type: DataTypes.INTEGER,
       allowNull: true, // only for book_purchase
     },
+    // Actual payment method used: upi | card | prepaid | cod
+    payment_method: {
+      type: DataTypes.ENUM("upi", "card", "prepaid", "cod"),
+      allowNull: true, // null until payment is completed/verified
+    },
   },
   {
     timestamps: true,

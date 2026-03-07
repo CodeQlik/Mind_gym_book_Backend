@@ -130,7 +130,7 @@ class UserService {
       { replacements: { email, otp }, type: QueryTypes.INSERT },
     );
 
-    const message = `<h2>Registration Verification Code</h2><p>Your OTP is:</p><h1>${otp}</h1><p>This code is valid for 10 minutes.</p>`;
+    const message = `<h2>Registration Verification Code</h2><p>Your OTP is:</p><h1>${otp}</h1><p>This code is valid for 2 minutes.</p>`;
     await sendEmail(email, "Verify Your Email", message);
     return true;
   }
@@ -145,13 +145,13 @@ class UserService {
     );
     if (!record) throw new Error("Invalid OTP");
 
-    const expiryTime = new Date(record.updated_at).getTime() + 10 * 60 * 1000;
+    const expiryTime = new Date(record.updated_at).getTime() + 2 * 60 * 1000;
     if (Date.now() > expiryTime) throw new Error("OTP has expired.");
 
     const verificationToken = jwt.sign(
       { email, type: "email_verified" },
       process.env.JWT_SECRET || "secret",
-      { expiresIn: "10m" },
+      { expiresIn: "2m" },
     );
     return verificationToken;
   }
@@ -597,7 +597,7 @@ class UserService {
     return true;
   }
 
-  // ─── Forgot Password
+  // ─── Forgot Password (OTP Based)
   async forgotPassword(email) {
     const [user] = await sequelize.query(
       "SELECT id, email FROM users WHERE email = :email LIMIT 1",
@@ -605,12 +605,15 @@ class UserService {
     );
     if (!user) throw new Error("No account found with this email");
 
-    const resetToken = jwt.sign(
-      { email: user.email, type: "reset" },
-      process.env.JWT_SECRET || "secret",
-      { expiresIn: "1h" },
+    const otp = Math.floor(100000 + Math.random() * 900000).toString();
+
+    // Upsert OTP into email_verifications table
+    await sequelize.query(
+      `INSERT INTO email_verifications (email, otp, created_at, updated_at)
+       VALUES (:email, :otp, NOW(), NOW())
+       ON DUPLICATE KEY UPDATE otp = :otp, updated_at = NOW()`,
+      { replacements: { email: user.email, otp }, type: QueryTypes.INSERT },
     );
-    const resetUrl = `${process.env.CLIENT_URL || "http://localhost:5173"}/reset-password/${resetToken}`;
 
     const message = `
       <div style="font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px; background-color: #ffffff;">
@@ -618,16 +621,17 @@ class UserService {
           <h1 style="color: #333; margin: 0;">Mind Gym Book</h1>
         </div>
         <div style="padding: 20px; background-color: #f9f9f9; border-radius: 8px;">
-          <h2 style="color: #444; margin-top: 0;">Password Reset Request</h2>
+          <h2 style="color: #444; margin-top: 0;">Password Reset OTP</h2>
           <p style="color: #666; font-size: 16px; line-height: 1.5;">
-            Hello, <br><br>
-            We received a request to reset your password. Click the button below to set a new password:
+            Hello,<br><br>
+            We received a request to reset your password. Use the OTP below to proceed:
           </p>
           <div style="text-align: center; margin: 30px 0;">
-            <a href="${resetUrl}" style="background-color: #007bff; color: white; padding: 12px 25px; text-decoration: none; border-radius: 5px; font-weight: bold; font-size: 16px; display: inline-block;">Reset Password</a>
+            <span style="display: inline-block; background-color: #007bff; color: white; padding: 14px 40px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 8px;">${otp}</span>
           </div>
-          <p style="color: #888; font-size: 14px;">
-            This link will expire in 1 hour. If you didn't request this, you can safely ignore this email.
+          <p style="color: #888; font-size: 14px; text-align: center;">
+            This OTP is valid for <strong>2 minutes</strong>. Do not share it with anyone.<br>
+            If you didn't request this, you can safely ignore this email.
           </p>
         </div>
         <div style="text-align: center; padding-top: 20px; color: #999; font-size: 12px;">
@@ -636,22 +640,56 @@ class UserService {
       </div>
     `;
 
-    await sendEmail(user.email, "Password Reset Request", message);
+    await sendEmail(
+      user.email,
+      "Your Password Reset OTP - Mind Gym Book",
+      message,
+    );
     return true;
   }
 
-  // ─── Reset Password
+  // ─── Verify Forgot Password OTP
+  async verifyForgotPasswordOTP(email, otp) {
+    if (!otp) throw new Error("OTP is required.");
+
+    const [record] = await sequelize.query(
+      "SELECT * FROM email_verifications WHERE email = :email AND otp = :otp LIMIT 1",
+      { replacements: { email, otp }, type: QueryTypes.SELECT },
+    );
+    if (!record) throw new Error("Invalid OTP. Please check and try again.");
+
+    const expiryTime = new Date(record.updated_at).getTime() + 2 * 60 * 1000;
+    if (Date.now() > expiryTime)
+      throw new Error("OTP has expired. Please request a new one.");
+
+    // Generate a short-lived reset token
+    const resetToken = jwt.sign(
+      { email, type: "password_reset" },
+      process.env.JWT_SECRET || "secret",
+      { expiresIn: "15m" },
+    );
+
+    // Clear the OTP after successful verification
+    await sequelize.query(
+      "DELETE FROM email_verifications WHERE email = :email",
+      { replacements: { email }, type: QueryTypes.DELETE },
+    );
+
+    return resetToken;
+  }
+
+  // ─── Reset Password (OTP Flow)
   async resetPassword(token, newPassword) {
     try {
       const decoded = jwt.verify(token, process.env.JWT_SECRET || "secret");
-      if (!decoded || decoded.type !== "reset")
-        throw new Error("Invalid token type");
+      if (!decoded || decoded.type !== "password_reset")
+        throw new Error("Invalid or expired reset token.");
 
       const [user] = await sequelize.query(
         "SELECT id FROM users WHERE email = :email LIMIT 1",
         { replacements: { email: decoded.email }, type: QueryTypes.SELECT },
       );
-      if (!user) throw new Error("User associated with this token not found");
+      if (!user) throw new Error("User not found.");
 
       const hashedPassword = await bcrypt.hash(newPassword, 10);
       await sequelize.query(
@@ -665,7 +703,7 @@ class UserService {
     } catch (error) {
       console.error("Reset Password Error:", error.message);
       if (error.name === "TokenExpiredError")
-        throw new Error("Reset token has expired. Please request a new one.");
+        throw new Error("Reset token has expired. Please request a new OTP.");
       if (error.name === "JsonWebTokenError")
         throw new Error("Invalid reset token.");
       throw error;

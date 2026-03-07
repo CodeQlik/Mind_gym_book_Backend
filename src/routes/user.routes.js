@@ -7,6 +7,7 @@ import {
   updateProfile,
   changePassword,
   forgotPassword,
+  verifyForgotPasswordOTP,
   resetPassword,
   deleteAccount,
   getAllUsers,
@@ -57,6 +58,11 @@ router.post(
   "/forgot-password",
   validate(forgotPasswordValidation),
   forgotPassword,
+);
+router.post(
+  "/verify-forgot-password-otp",
+  validate(verifyEmailValidation),
+  verifyForgotPasswordOTP,
 );
 router.post(
   "/reset-password",

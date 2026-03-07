@@ -18,7 +18,7 @@ export const createSubscriptionOrder = async (req, res, next) => {
   }
 };
 
-//  WEBSITE: Physical Book Payment
+//  WEBSITE: Physical Book Payment (Online: UPI / Card / Prepaid)
 export const createPhysicalBookPayment = async (req, res, next) => {
   try {
     const { order_id } = req.body;
@@ -30,6 +30,29 @@ export const createPhysicalBookPayment = async (req, res, next) => {
       order_id,
     );
     return sendResponse(res, 201, true, "Payment order created", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+//  WEBSITE: COD — Record Cash on Delivery order
+export const confirmCodPayment = async (req, res, next) => {
+  try {
+    const { order_id } = req.body;
+    if (!order_id) {
+      return sendResponse(res, 400, false, "order_id is required");
+    }
+    const result = await paymentService.createCodPaymentRecord(
+      req.user.id,
+      order_id,
+    );
+    return sendResponse(
+      res,
+      201,
+      true,
+      "COD order confirmed. Pay on delivery.",
+      result,
+    );
   } catch (error) {
     next(error);
   }

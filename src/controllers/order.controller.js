@@ -1,6 +1,7 @@
 import orderService from "../services/order.service.js";
 import sendResponse from "../utils/responseHandler.js";
 
+// ─── USER: Place order from cart ───────────────────────────────────────────────
 export const checkoutFromCart = async (req, res, next) => {
   try {
     const order = await orderService.createOrderFromCart(req.user.id, req.body);
@@ -16,6 +17,7 @@ export const checkoutFromCart = async (req, res, next) => {
   }
 };
 
+// ─── USER: Get my orders ───────────────────────────────────────────────────────
 export const getMyOrders = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -27,6 +29,7 @@ export const getMyOrders = async (req, res, next) => {
   }
 };
 
+// ─── USER: Get single order ────────────────────────────────────────────────────
 export const getMyOrderById = async (req, res, next) => {
   try {
     const order = await orderService.getOrderById(
@@ -39,6 +42,7 @@ export const getMyOrderById = async (req, res, next) => {
   }
 };
 
+// ─── USER: Request refund ──────────────────────────────────────────────────────
 export const requestRefund = async (req, res, next) => {
   try {
     const { reason } = req.body;
@@ -53,7 +57,20 @@ export const requestRefund = async (req, res, next) => {
   }
 };
 
-//  ADMIN
+// ─── USER: Cancel order ────────────────────────────────────────────────────────
+export const cancelOrder = async (req, res, next) => {
+  try {
+    const order = await orderService.cancelOrder(
+      req.user.id,
+      req.params.orderId,
+    );
+    return sendResponse(res, 200, true, "Order cancelled successfully", order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── ADMIN: Get all orders (with filters + search + pagination) ────────────────
 export const getAllOrders = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -61,6 +78,7 @@ export const getAllOrders = async (req, res, next) => {
     const filters = {
       delivery_status: req.query.delivery_status || null,
       payment_status: req.query.payment_status || null,
+      search: req.query.search || null,
     };
     const result = await orderService.getAllOrders(filters, page, limit);
     return sendResponse(res, 200, true, "All orders fetched", result);
@@ -69,6 +87,7 @@ export const getAllOrders = async (req, res, next) => {
   }
 };
 
+// ─── ADMIN: Get single order detail ───────────────────────────────────────────
 export const getOrderByIdAdmin = async (req, res, next) => {
   try {
     const order = await orderService.getOrderById(req.params.orderId);
@@ -78,6 +97,31 @@ export const getOrderByIdAdmin = async (req, res, next) => {
   }
 };
 
+// ─── ADMIN: Get order stats (tab counts) ──────────────────────────────────────
+// Returns: { all, processing, shipped, delivered, cancelled, returned }
+export const getOrderStats = async (req, res, next) => {
+  try {
+    const stats = await orderService.getOrderStats();
+    return sendResponse(res, 200, true, "Order stats fetched", stats);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── ADMIN: Search orders ─────────────────────────────────────────────────────
+export const searchOrders = async (req, res, next) => {
+  try {
+    const query = req.query.q || req.query.query || "";
+    const page = parseInt(req.query.page) || 1;
+    const limit = parseInt(req.query.limit) || 10;
+    const result = await orderService.searchOrders(query, page, limit);
+    return sendResponse(res, 200, true, "Search results fetched", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── ADMIN: Dispatch order ────────────────────────────────────────────────────
 export const dispatchOrder = async (req, res, next) => {
   try {
     const order = await orderService.dispatchOrder(
@@ -90,6 +134,7 @@ export const dispatchOrder = async (req, res, next) => {
   }
 };
 
+// ─── ADMIN: Update order status ───────────────────────────────────────────────
 export const updateOrderStatus = async (req, res, next) => {
   try {
     const order = await orderService.updateOrderStatus(
@@ -97,6 +142,16 @@ export const updateOrderStatus = async (req, res, next) => {
       req.body,
     );
     return sendResponse(res, 200, true, "Order status updated", order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── ADMIN: Delete order ──────────────────────────────────────────────────────
+export const deleteOrder = async (req, res, next) => {
+  try {
+    await orderService.deleteOrder(req.params.orderId);
+    return sendResponse(res, 200, true, "Order deleted successfully");
   } catch (error) {
     next(error);
   }
