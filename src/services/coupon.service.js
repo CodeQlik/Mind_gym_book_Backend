@@ -2,11 +2,39 @@ import { Coupon } from "../models/index.js";
 import { Op } from "sequelize";
 
 class CouponService {
+  _sanitizeData(data) {
+    const sanitized = { ...data };
+    const decimalFields = [
+      "max_discount",
+      "min_order_amount",
+      "discount_value",
+    ];
+    const integerFields = ["usage_limit"];
+
+    decimalFields.forEach((field) => {
+      if (sanitized[field] === "") {
+        sanitized[field] = null;
+      }
+    });
+
+    integerFields.forEach((field) => {
+      if (sanitized[field] === "") {
+        sanitized[field] = null;
+      }
+    });
+
+    return sanitized;
+  }
+
   async createCoupon(data) {
-    if (new Date(data.end_date) <= new Date(data.start_date || Date.now())) {
+    const sanitizedData = this._sanitizeData(data);
+    if (
+      new Date(sanitizedData.end_date) <=
+      new Date(sanitizedData.start_date || Date.now())
+    ) {
       throw new Error("End date must be after start date");
     }
-    return await Coupon.create(data);
+    return await Coupon.create(sanitizedData);
   }
 
   async getAllCoupons(filters = {}) {
@@ -32,16 +60,17 @@ class CouponService {
   }
 
   async updateCoupon(id, updates) {
+    const sanitizedUpdates = this._sanitizeData(updates);
     const coupon = await this.getCouponById(id);
 
     // If updating dates, validate them
-    const startDate = updates.start_date || coupon.start_date;
-    const endDate = updates.end_date || coupon.end_date;
+    const startDate = sanitizedUpdates.start_date || coupon.start_date;
+    const endDate = sanitizedUpdates.end_date || coupon.end_date;
     if (new Date(endDate) <= new Date(startDate)) {
       throw new Error("End date must be after start date");
     }
 
-    return await coupon.update(updates);
+    return await coupon.update(sanitizedUpdates);
   }
 
   async deleteCoupon(id) {
