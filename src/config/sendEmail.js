@@ -3,7 +3,13 @@ import dotenv from "dotenv";
 
 dotenv.config();
 
-const sendEmail = async (recipientEmail, subject, message, company) => {
+const sendEmail = async (
+  recipientEmail,
+  subject,
+  message,
+  company,
+  attachments,
+) => {
   let email = process.env.EMAIL_ID;
   let appPass = process.env.APP_PASS;
 
@@ -55,10 +61,12 @@ const sendEmail = async (recipientEmail, subject, message, company) => {
       to: recipientEmail,
       subject: subject,
       html: message,
+      attachments: attachments || [],
     });
 
     return true;
   } catch (error) {
+    console.error(`[NODEMAILER ERROR]: ${error.message}`);
     return false;
   }
 };

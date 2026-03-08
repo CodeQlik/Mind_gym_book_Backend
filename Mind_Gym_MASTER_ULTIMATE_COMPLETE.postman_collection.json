@@ -133,7 +133,8 @@
 					"item": [
 						{ "name": "Create Physical Order", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"book_id\": 36, \"quantity\": 1, \"shipping_address\": \"Noida\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/orders/create" } },
 						{ "name": "My Orders", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/orders/my-orders" } },
-						{ "name": "Request Refund", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"reason\": \"Damaged\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/orders/refund/1" } }
+						{ "name": "Request Refund", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"reason\": \"Damaged\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/orders/refund/1" } },
+						{ "name": "Download Invoice PDF", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/orders/invoice/1" } }
 					]
 				}
 			]
@@ -209,6 +210,14 @@
 					"item": [
 						{ "name": "Send Push Notification", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"target\": \"all\", \"message\": \"Alert\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/notifications/admin/send" } }
 					]
+				},
+				{
+					"name": "Support Admin",
+					"item": [
+						{ "name": "Support Dashboard Stats", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/support/admin/stats" } },
+						{ "name": "All Tickets (Filter/Search)", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/support/admin/tickets?search=TKT&status=open" } },
+						{ "name": "Update Ticket Status", "request": { "method": "PATCH", "body": { "mode": "raw", "raw": "{\"status\": \"resolved\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/support/admin/tickets/1/status" } }
+					]
 				}
 			]
 		},
@@ -243,6 +252,15 @@
 						{ "name": "Delete Note", "request": { "method": "DELETE", "url": "{{baseUrl}}/api/v1/note/deleteNote/1" } }
 					]
 				}
+			]
+		},
+		{
+			"name": "10. Support & Feedback",
+			"item": [
+				{ "name": "Create Support Ticket", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"subject\": \"Issue with Order\", \"description\": \"My book hasn't arrived\", \"order_id\": 18, \"priority\": \"medium\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/support/tickets" } },
+				{ "name": "Get My Tickets", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/support/tickets/my" } },
+				{ "name": "Get Ticket Details", "request": { "method": "GET", "url": "{{baseUrl}}/api/v1/support/tickets/1" } },
+				{ "name": "Add Message/Reply", "request": { "method": "POST", "body": { "mode": "raw", "raw": "{\"message\": \"Please update soon\"}", "options": {"raw":{"language":"json"}} }, "url": "{{baseUrl}}/api/v1/support/tickets/1/messages" } }
 			]
 		}
 	],

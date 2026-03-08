@@ -20,6 +20,9 @@ import Seller from "./seller.model.js";
 import UsedBookListing from "./usedBookListing.model.js";
 import Order from "./order.model.js";
 import OrderItem from "./orderItem.model.js";
+import Coupon from "./coupon.model.js";
+import SupportTicket from "./supportTicket.model.js";
+import SupportMessage from "./supportMessage.model.js";
 
 // Associations
 
@@ -137,6 +140,32 @@ OrderItem.belongsTo(Order, { foreignKey: "order_id", as: "order" });
 Book.hasMany(OrderItem, { foreignKey: "book_id", as: "order_items" });
 OrderItem.belongsTo(Book, { foreignKey: "book_id", as: "book" });
 
+// Coupon Associations
+Coupon.hasMany(Order, { foreignKey: "coupon_id", as: "orders" });
+Order.belongsTo(Coupon, { foreignKey: "coupon_id", as: "coupon" });
+
+// Support Associations
+User.hasMany(SupportTicket, { foreignKey: "user_id", as: "support_tickets" });
+SupportTicket.belongsTo(User, { foreignKey: "user_id", as: "user" });
+
+Order.hasMany(SupportTicket, { foreignKey: "order_id", as: "support_tickets" });
+SupportTicket.belongsTo(Order, { foreignKey: "order_id", as: "order" });
+
+SupportTicket.hasMany(SupportMessage, {
+  foreignKey: "ticket_id",
+  as: "messages",
+});
+SupportMessage.belongsTo(SupportTicket, {
+  foreignKey: "ticket_id",
+  as: "ticket",
+});
+
+User.hasMany(SupportMessage, {
+  foreignKey: "sender_id",
+  as: "support_messages",
+});
+SupportMessage.belongsTo(User, { foreignKey: "sender_id", as: "sender" });
+
 export {
   User,
   Address,
@@ -160,4 +189,7 @@ export {
   UsedBookListing,
   Order,
   OrderItem,
+  Coupon,
+  SupportTicket,
+  SupportMessage,
 };

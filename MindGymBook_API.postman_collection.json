@@ -378,6 +378,24 @@
             "url": "{{base_url}}/book/readBook/{{book_id}}",
             "description": "Returns signed Cloudinary PDF URL.\n- Subscriber/Admin → Full PDF\n- Others → Pages 1-5 preview"
           }
+        },
+        {
+          "name": "🎙️ Audio — Extract Full Text",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/book/readText/{{book_id}}",
+            "description": "Extracts full text content from PDF for TTS."
+          }
+        },
+        {
+          "name": "🎙️ Audio — Extract Page Text",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/book/readText/{{book_id}}/page/1",
+            "description": "Extracts text from a specific page for TTS. Change /page/1 to any page number."
+          }
         }
       ]
     },
@@ -622,6 +640,15 @@
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/orders/refund/{{order_id}}",
             "body": { "mode": "raw", "raw": "{\n  \"reason\": \"Item damaged on delivery\"\n}" }
+          }
+        },
+        {
+          "name": "Download Invoice PDF",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/orders/invoice/{{order_id}}",
+            "description": "Downloads professional PDF invoice for the given order."
           }
         },
         {
@@ -1238,6 +1265,172 @@
           }
         }
       ]
+    },
+    {
+      "name": "🎟️ Coupons",
+      "item": [
+        {
+          "name": "Validate Coupon (USER)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/coupons/validate",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"WELCOME20\",\n  \"amount\": 1000\n}"
+            },
+            "description": "Used by users during checkout to check if a coupon is valid and how much discount they get."
+          }
+        },
+        {
+          "name": "Admin — Create Coupon",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/coupons/admin/create",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"code\": \"FLAT100\",\n  \"description\": \"Flat 100 off on first order\",\n  \"discount_type\": \"fixed\",\n  \"discount_value\": 100,\n  \"min_order_amount\": 500,\n  \"start_date\": \"2024-03-07\",\n  \"end_date\": \"2024-12-31\",\n  \"usage_limit\": 100,\n  \"is_active\": true\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin — Get All Coupons",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/coupons/admin/all"
+          }
+        },
+        {
+          "name": "Admin — Get Coupon By ID",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/coupons/admin/1"
+          }
+        },
+        {
+          "name": "Admin — Update Coupon",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/coupons/admin/update/1",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"is_active\": false\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin — Delete Coupon",
+          "request": {
+            "method": "DELETE",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/coupons/admin/delete/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎧 Support & Tickets",
+      "item": [
+        {
+          "name": "User — Create Ticket",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/support/tickets",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"subject\": \"Issue with Order\",\n  \"description\": \"I have not received my book yet.\",\n  \"order_id\": 1,\n  \"priority\": \"medium\"\n}"
+            }
+          }
+        },
+        {
+          "name": "User — My Tickets",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/support/tickets/my"
+          }
+        },
+        {
+          "name": "Shared — Get Ticket Details",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/support/tickets/1"
+          }
+        },
+        {
+          "name": "Shared — Add Message",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/support/tickets/1/messages",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"message\": \"Please look into this urgently.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin — All Tickets",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": {
+              "raw": "{{base_url}}/support/admin/tickets?page=1&limit=10",
+              "query": [
+                { "key": "status", "value": "open", "disabled": true },
+                { "key": "priority", "value": "high", "disabled": true },
+                { "key": "page", "value": "1" },
+                { "key": "limit", "value": "10" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Update Status",
+          "request": {
+            "method": "PATCH",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/support/admin/tickets/1/status",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"status\": \"resolved\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin — Support Stats",
+          "request": {
+            "method": "GET",
+            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "url": "{{base_url}}/support/admin/stats"
+          }
+        }
+      ]
     }
   ]
+
 }

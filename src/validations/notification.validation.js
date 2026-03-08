@@ -39,6 +39,8 @@ export const sendNotificationValidation = Joi.object({
     .valid("SENT", "PENDING", "RECURRING", "FAILED")
     .optional(),
   scheduled_at: Joi.date().iso().optional().allow(null),
+  send_push: Joi.boolean().optional(),
+  send_email: Joi.boolean().optional(),
 });
 
 // ─── Add Favorite Category

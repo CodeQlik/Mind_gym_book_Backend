@@ -16,10 +16,7 @@ const startServer = async () => {
     // 1. Ensure DB exists and authenticate
     await connectDB();
 
-    // 2. Sync models (Create/Alter tables)
-    // We only alter Notification to add its new columns, avoiding global FK issues
-    const { Notification } = await import("./src/models/index.js");
-    await Notification.sync({ alter: true });
+    // 2. Sync models (Create tables if not exist)
     await sequelize.sync();
 
     // 3. Seed admin user

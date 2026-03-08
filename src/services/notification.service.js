@@ -5,6 +5,8 @@ import UserFavoriteCategory from "../models/userFavoriteCategory.model.js";
 import { Op } from "sequelize";
 import sequelize from "../config/db.js";
 import { emitNotification } from "../utils/socket.js";
+import sendEmail from "../config/sendEmail.js";
+import invoiceService from "./invoice.service.js";
 
 class NotificationService {
   // Usage: formatMessage("Hello {user_name}, {book_title} is available!", user, metadata)
@@ -172,14 +174,21 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     const user = await User.findByPk(userId, {
-      attributes: ["id", "name", "fcm_token"],
+      attributes: ["id", "name", "email", "fcm_token", "user_type"],
     });
     if (!user) throw new Error("User not found");
 
     // Replace placeholders like {user_name}
     const formattedMessage = this.formatMessage(message, user, metadata || {});
+
+    const meta =
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
 
     // Save to DB
     const notification = await this.saveNotification(
@@ -187,20 +196,68 @@ class NotificationService {
       type,
       title,
       formattedMessage,
-      metadata,
+      meta,
       status,
       scheduledAt,
       senderId,
     );
 
-    // Send FCM push ONLY IF status is SENT
-    if (status === "SENT" && user.fcm_token) {
-      await this.sendFCM(
-        user.fcm_token,
-        title,
-        formattedMessage,
-        metadata || {},
-      );
+    // Send FCM push ONLY IF status is SENT and user is NOT an admin
+    const finalSendPush = send_push !== null ? send_push : true;
+    if (
+      status === "SENT" &&
+      finalSendPush &&
+      user.fcm_token &&
+      user.user_type !== "admin"
+    ) {
+      await this.sendFCM(user.fcm_token, title, formattedMessage, meta);
+    }
+
+    // Send EMAIL if type matches or explicitly requested
+    const emailTypes = [
+      "ORDER",
+      "RENEWAL",
+      "APPROVAL",
+      "SUBSCRIPTION",
+      "REFUND",
+    ];
+    const isEmailRequired = emailTypes.some((t) =>
+      type.toUpperCase().includes(t),
+    );
+    const finalSendEmail = send_email !== null ? send_email : isEmailRequired;
+
+    if (status === "SENT" && finalSendEmail && user.email) {
+      try {
+        const emailTemplate = `
+          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+            <h2 style="color: #333;">${title}</h2>
+            <p style="font-size: 16px; color: #555; line-height: 1.5;">${formattedMessage}</p>
+            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
+            <p style="font-size: 12px; color: #999;">This is an automated notification from Mind Gym Book. Please do not reply to this email.</p>
+          </div>
+        `;
+        let attachments = [];
+        if (type.includes("ORDER") && metadata?.order_id) {
+          try {
+            const pdfBuffer = await invoiceService.generateOrderInvoice(
+              metadata.order_id,
+            );
+            attachments.push({
+              filename: `Invoice_${metadata.order_no || metadata.order_id}.pdf`,
+              content: pdfBuffer,
+            });
+          } catch (pdfErr) {
+            console.error("Invoice PDF generation failed:", pdfErr.message);
+          }
+        }
+
+        await sendEmail(user.email, title, emailTemplate, null, attachments);
+      } catch (emailErr) {
+        console.error(
+          "[NOTIFICATION SERVICE] Email send error:",
+          emailErr.message,
+        );
+      }
     }
 
     return notification;
@@ -215,23 +272,29 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save only ONE notification for the entire system (Broadcast)
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "ALL";
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null, // Master record
       type,
       title,
       message,
-      { ...meta, target: "ALL" },
+      meta,
       status,
       scheduledAt,
       senderId,
     );
 
     const users = await User.findAll({
-      where: { is_active: true },
+      where: { is_active: true, user_type: { [Op.ne]: "admin" } },
       attributes: ["id", "fcm_token"],
     });
 
@@ -256,16 +319,23 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save only ONE notification for this category broadcast
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "CATEGORY";
+    meta.category_id = categoryId;
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null,
       type,
       title,
       message,
-      { ...meta, target: "CATEGORY", category_id: categoryId },
+      meta,
       status,
       scheduledAt,
       senderId,
@@ -303,16 +373,22 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save ONE master notification
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "SUBSCRIBED";
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null,
       type,
       title,
       message,
-      { ...meta, target: "SUBSCRIBED" },
+      meta,
       status,
       scheduledAt,
       senderId,
@@ -350,16 +426,22 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save ONE master notification
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "WISHLIST";
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null,
       type,
       title,
       message,
-      { ...meta, target: "WISHLIST" },
+      meta,
       status,
       scheduledAt,
       senderId,
@@ -397,16 +479,22 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save ONE master notification
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "EXPIRING";
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null,
       type,
       title,
       message,
-      { ...meta, target: "EXPIRING" },
+      meta,
       status,
       scheduledAt,
       senderId,
@@ -650,6 +738,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         } else if (target === "CATEGORY") {
           await this.sendToCategory(
@@ -658,6 +751,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         } else if (target === "SUBSCRIBED") {
           await this.sendToSubscribed(
@@ -665,6 +763,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         } else if (target === "WISHLIST") {
           await this.sendToWishlist(
@@ -672,6 +775,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         } else if (target === "EXPIRING") {
           await this.sendToExpiring(
@@ -679,6 +787,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         }
       } catch (err) {

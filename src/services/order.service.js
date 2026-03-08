@@ -1,12 +1,13 @@
 import sequelize from "../config/db.js";
 import { QueryTypes, Op } from "sequelize";
-import { Order, OrderItem, Book, User, Cart } from "../models/index.js";
+import { Order, OrderItem, Book, User, Cart, Coupon } from "../models/index.js";
 import notificationService from "./notification.service.js";
+import couponService from "./coupon.service.js";
 
 class OrderService {
   async createOrderFromCart(
     userId,
-    { address_id, payment_method = "prepaid" },
+    { address_id, payment_method = "prepaid", coupon_code },
   ) {
     if (!address_id) throw new Error("address_id is required");
 
@@ -33,15 +34,17 @@ class OrderService {
       throw new Error("Cart is empty. Add books before placing an order.");
     }
 
-    // 2. Validate stock and activity for all items
+    // 2. Validate stock (available quantity) and activity for all items
     for (const item of cartItems) {
       if (!item.book)
         throw new Error(`Book not found for cart item ${item.id}`);
       if (!item.book.is_active)
         throw new Error(`Book "${item.book.title}" is currently unavailable`);
-      if (item.book.stock < item.quantity) {
+
+      const available = (item.book.stock || 0) - (item.book.reserved || 0);
+      if (available < item.quantity) {
         throw new Error(
-          `Insufficient stock for "${item.book.title}". Available: ${item.book.stock}, Requested: ${item.quantity}`,
+          `Insufficient available stock for "${item.book.title}". Total: ${item.book.stock}, Reserved: ${item.book.reserved}, Available: ${available}, Requested: ${item.quantity}`,
         );
       }
     }
@@ -65,9 +68,24 @@ class OrderService {
     ].join("");
 
     // 4. Calculate total
-    const totalAmount = cartItems.reduce((sum, item) => {
+    const subtotal = cartItems.reduce((sum, item) => {
       return sum + parseFloat(item.book.price) * item.quantity;
     }, 0);
+
+    let totalAmount = subtotal;
+    let discountAmount = 0;
+    let couponId = null;
+
+    // Validate coupon if provided
+    if (coupon_code) {
+      const validation = await couponService.validateCoupon(
+        coupon_code,
+        subtotal,
+      );
+      couponId = validation.coupon_id;
+      discountAmount = validation.discount_amount;
+      totalAmount = validation.total_amount;
+    }
 
     // 5. Create Order + OrderItems in a transaction
     const order = await sequelize.transaction(async (t) => {
@@ -76,17 +94,25 @@ class OrderService {
           user_id: userId,
           address_id,
           shipping_address: addressSnapshot,
+          subtotal_amount: subtotal.toFixed(2),
+          discount_amount: discountAmount.toFixed(2),
           total_amount: totalAmount.toFixed(2),
+          coupon_id: couponId,
           order_type: "physical_book",
           payment_method,
-          // Both COD and Online start as pending
-          // Online stays pending until Razorpay confirms
-          // COD stays pending until delivery/manual confirmation
           payment_status: "pending",
           delivery_status: "processing",
         },
         { transaction: t },
       );
+
+      // If coupon used, increment usage count
+      if (couponId) {
+        await Coupon.update(
+          { used_count: sequelize.literal("used_count + 1") },
+          { where: { id: couponId }, transaction: t },
+        );
+      }
 
       // Create order items
       const itemsPayload = cartItems.map((item) => ({
@@ -101,10 +127,10 @@ class OrderService {
 
       await OrderItem.bulkCreate(itemsPayload, { transaction: t });
 
-      // Deduct stock
+      // Mark items as Reserved (do not deduct total stock yet)
       for (const item of cartItems) {
         await Book.update(
-          { stock: sequelize.literal(`stock - ${item.quantity}`) },
+          { reserved: sequelize.literal(`reserved + ${item.quantity}`) },
           { where: { id: item.book_id }, transaction: t },
         );
       }
@@ -271,6 +297,11 @@ class OrderService {
             },
           ],
         },
+        {
+          model: Coupon,
+          as: "coupon",
+          attributes: ["id", "code"],
+        },
       ],
       order: [["created_at", "DESC"]],
       distinct: true,
@@ -352,11 +383,28 @@ class OrderService {
       throw new Error(`Order already ${order.delivery_status}`);
     }
 
-    await order.update({
-      delivery_status: "shipped",
-      tracking_id: tracking_id || null,
-      courier_name: courier_name || null,
-      tracking_url: tracking_url || null,
+    await sequelize.transaction(async (t) => {
+      await order.update(
+        {
+          delivery_status: "shipped",
+          tracking_id: tracking_id || null,
+          courier_name: courier_name || null,
+          tracking_url: tracking_url || null,
+        },
+        { transaction: t },
+      );
+
+      // Finalize inventory: Deduct total stock AND clear reservation
+      const items = await OrderItem.findAll({ where: { order_id: order.id } });
+      for (const item of items) {
+        await Book.update(
+          {
+            stock: sequelize.literal(`stock - ${item.quantity}`),
+            reserved: sequelize.literal(`reserved - ${item.quantity}`),
+          },
+          { where: { id: item.book_id }, transaction: t },
+        );
+      }
     });
 
     // Notify user about dispatch
@@ -400,6 +448,15 @@ class OrderService {
       if (statusData[key] !== undefined) updates[key] = statusData[key];
     }
 
+    // Automatic Payment Status for COD: Mark as PAID when DELIVERED
+    if (
+      newStatus === "delivered" &&
+      order.payment_method === "cod" &&
+      order.payment_status === "pending"
+    ) {
+      updates.payment_status = "paid";
+    }
+
     // Handle restocking if status changes to 'returned'
     // Only restock if the previous status was NOT 'returned' or 'cancelled'
     const needsRestock =
@@ -411,10 +468,21 @@ class OrderService {
       await sequelize.transaction(async (t) => {
         await order.update(updates, { transaction: t });
 
-        // Restock items
+        // Restock items (Return to STOCK)
         for (const item of order.items) {
           await Book.update(
             { stock: sequelize.literal(`stock + ${item.quantity}`) },
+            { where: { id: item.book_id }, transaction: t },
+          );
+        }
+      });
+    } else if (newStatus === "cancelled" && oldStatus === "processing") {
+      // Manual/Admin cancel from processing: Clear reservation
+      await sequelize.transaction(async (t) => {
+        await order.update(updates, { transaction: t });
+        for (const item of order.items) {
+          await Book.update(
+            { reserved: sequelize.literal(`reserved - ${item.quantity}`) },
             { where: { id: item.book_id }, transaction: t },
           );
         }
@@ -523,10 +591,10 @@ class OrderService {
     await sequelize.transaction(async (t) => {
       await order.update({ delivery_status: "cancelled" }, { transaction: t });
 
-      // Restock items
+      // Clear reserved stock
       for (const item of order.items) {
         await Book.update(
-          { stock: sequelize.literal(`stock + ${item.quantity}`) },
+          { reserved: sequelize.literal(`reserved - ${item.quantity}`) },
           { where: { id: item.book_id }, transaction: t },
         );
       }
@@ -576,6 +644,11 @@ class OrderService {
               ],
             },
           ],
+        },
+        {
+          model: Coupon,
+          as: "coupon",
+          attributes: ["id", "code", "discount_type", "discount_value"],
         },
       ],
     });

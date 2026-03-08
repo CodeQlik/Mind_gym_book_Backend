@@ -162,6 +162,8 @@ export const sendNotificationToUser = async (req, res, next) => {
       metadata,
       status,
       scheduled_at,
+      send_push,
+      send_email,
     } = req.body;
 
     let result;
@@ -176,6 +178,8 @@ export const sendNotificationToUser = async (req, res, next) => {
         status,
         scheduled_at,
         senderId,
+        send_push,
+        send_email,
       );
     } else if (target === "CATEGORY") {
       if (!category_id)
@@ -189,6 +193,8 @@ export const sendNotificationToUser = async (req, res, next) => {
         status,
         scheduled_at,
         senderId,
+        send_push,
+        send_email,
       );
     } else if (target === "SUBSCRIBED") {
       result = await notificationService.sendToSubscribed(
@@ -199,6 +205,8 @@ export const sendNotificationToUser = async (req, res, next) => {
         status,
         scheduled_at,
         senderId,
+        send_push,
+        send_email,
       );
     } else if (target === "WISHLIST") {
       result = await notificationService.sendToWishlist(
@@ -209,6 +217,8 @@ export const sendNotificationToUser = async (req, res, next) => {
         status,
         scheduled_at,
         senderId,
+        send_push,
+        send_email,
       );
     } else if (target === "EXPIRING") {
       result = await notificationService.sendToExpiring(
@@ -219,6 +229,8 @@ export const sendNotificationToUser = async (req, res, next) => {
         status,
         scheduled_at,
         senderId,
+        send_push,
+        send_email,
       );
     } else {
       // Default: Single User targeting (USER)
@@ -233,6 +245,8 @@ export const sendNotificationToUser = async (req, res, next) => {
         status,
         scheduled_at,
         senderId,
+        send_push,
+        send_email,
       );
     }
 

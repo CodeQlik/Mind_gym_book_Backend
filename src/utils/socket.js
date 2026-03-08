@@ -49,10 +49,11 @@ export const emitNotification = (userId, data, senderId = null) => {
       io.to(`user_${userId}`).emit("notification", data);
     }
 
-    // 2. Alert admins (excluding the sender)
-    const adminDest = senderRoom
-      ? io.to("admins").except(senderRoom)
-      : io.to("admins");
+    // 2. Alert admins (excluding the sender AND the targeted user to avoid double-notify)
+    let adminDest = io.to("admins");
+    if (senderRoom) adminDest = adminDest.except(senderRoom);
+    adminDest = adminDest.except(`user_${userId}`); // Exclude the target user who already got it above
+
     adminDest.emit("notification", data);
   } else {
     // 3. Broadcast to all (excluding the sender)

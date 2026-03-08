@@ -1,4 +1,5 @@
 import orderService from "../services/order.service.js";
+import invoiceService from "../services/invoice.service.js";
 import sendResponse from "../utils/responseHandler.js";
 
 // ─── USER: Place order from cart ───────────────────────────────────────────────
@@ -152,6 +153,32 @@ export const deleteOrder = async (req, res, next) => {
   try {
     await orderService.deleteOrder(req.params.orderId);
     return sendResponse(res, 200, true, "Order deleted successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+// ─── SHARED: Download Invoice ──────────────────────────────────────────────────
+export const downloadInvoice = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await orderService.getOrderById(orderId);
+
+    // Security: Only owner or admin can download
+    if (
+      req.user.user_type !== "admin" &&
+      String(order.user_id) !== String(req.user.id)
+    ) {
+      return sendResponse(res, 403, false, "Unauthorized to view this invoice");
+    }
+
+    const pdfBuffer = await invoiceService.generateOrderInvoice(orderId);
+
+    res.setHeader("Content-Type", "application/pdf");
+    res.setHeader(
+      "Content-Disposition",
+      `attachment; filename=Invoice_${order.order_no}.pdf`,
+    );
+    return res.end(pdfBuffer);
   } catch (error) {
     next(error);
   }
