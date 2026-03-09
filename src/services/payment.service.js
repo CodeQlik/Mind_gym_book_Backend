@@ -127,7 +127,13 @@ class PaymentService {
 
     // 3. Prevent double processing
     if (payment.status === "captured") {
-      return { payment, message: "Already processed" };
+      const existingSub = await Subscription.findOne({
+        where: { payment_id: razorpay_payment_id },
+      });
+
+      if (existingSub) {
+        return { payment, message: "Already processed" };
+      }
     }
 
     // 4. Update payment record — save payment_method from Razorpay response
@@ -174,6 +180,8 @@ class PaymentService {
         plan_type: payment.plan_name,
         amount: payment.amount,
         payment_id: razorpay_payment_id,
+        payment_record_id: payment.id,
+        razorpay_order_id: razorpay_order_id,
         start_date: startDate,
         end_date: endDate,
         status: "active",
