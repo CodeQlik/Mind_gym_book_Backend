@@ -2185,3 +2185,70 @@
 [2026-03-09T19:20:06.281Z] [WARN] GET /api/v1/book/readBook/24 404 (8ms) {"method":"GET","url":"/api/v1/book/readBook/24","status":404,"duration":"8ms","ip":"::1","user":"Guest"}
 [2026-03-09T19:22:07.468Z] [INFO] Redis Client Connected 
 [2026-03-09T19:22:53.705Z] [INFO] Redis Client Connected 
+[2026-03-09T19:28:16.385Z] [WARN] GET /api/v1/book/readBook/24 404 (88ms) {"method":"GET","url":"/api/v1/book/readBook/24","status":404,"duration":"88ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:28:37.741Z] [WARN] GET /api/v1/book/readBook/24 404 (17ms) {"method":"GET","url":"/api/v1/book/readBook/24","status":404,"duration":"17ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:29:28.860Z] [WARN] GET /api/v1/book/readBook/18 404 (16ms) {"method":"GET","url":"/api/v1/book/readBook/18","status":404,"duration":"16ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:06.365Z] [WARN] GET /api/v1/book/readBook/26 404 (7ms) {"method":"GET","url":"/api/v1/book/readBook/26","status":404,"duration":"7ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:27.251Z] [WARN] GET /api/v1/notifications 401 (26ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"26ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:27.615Z] [WARN] GET /api/v1/notifications/admin/stats 401 (355ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"355ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:27.746Z] [ERROR] GET /api/v1/book/atomic-habits {"message":"Book not found","stack":"Error: Book not found\n    at BookService.getBookBySlug (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/book.service.js:248:22)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/book.controller.js:115:16","body":{},"params":{},"query":{},"user":"Guest"}
+[2026-03-09T19:31:27.784Z] [WARN] GET /api/v1/book/atomic-habits 500 (520ms) {"method":"GET","url":"/api/v1/book/atomic-habits","status":500,"duration":"520ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:27.880Z] [WARN] GET /api/v1/notifications 401 (74ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"74ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:27.903Z] [WARN] GET /api/v1/notifications/admin/stats 401 (88ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"88ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:27.915Z] [WARN] GET /api/v1/users/profile 401 (92ms) {"method":"GET","url":"/api/v1/users/profile","status":401,"duration":"92ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:27.934Z] [ERROR] GET /api/v1/book/atomic-habits {"message":"Book not found","stack":"Error: Book not found\n    at BookService.getBookBySlug (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/book.service.js:248:22)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/book.controller.js:115:16","body":{},"params":{},"query":{},"user":"Guest"}
+[2026-03-09T19:31:27.939Z] [WARN] GET /api/v1/book/atomic-habits 500 (117ms) {"method":"GET","url":"/api/v1/book/atomic-habits","status":500,"duration":"117ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:27.999Z] [WARN] GET /api/v1/users/profile 401 (42ms) {"method":"GET","url":"/api/v1/users/profile","status":401,"duration":"42ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:28.224Z] [WARN] GET /api/v1/notifications 401 (1ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"1ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:28.237Z] [WARN] GET /api/v1/notifications/admin/stats 401 (2ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"2ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:28.323Z] [WARN] GET /api/v1/notifications 401 (1ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"1ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:28.397Z] [WARN] GET /api/v1/notifications/admin/stats 401 (13ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"13ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:28.416Z] [ERROR] GET /api/v1/book/atomic-habits {"message":"Book not found","stack":"Error: Book not found\n    at BookService.getBookBySlug (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/book.service.js:248:22)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/book.controller.js:115:16","body":{},"params":{},"query":{},"user":"Guest"}
+[2026-03-09T19:31:28.490Z] [WARN] GET /api/v1/book/atomic-habits 500 (195ms) {"method":"GET","url":"/api/v1/book/atomic-habits","status":500,"duration":"195ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:36.630Z] [INFO] POST /api/v1/users/login 200 (213ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"213ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:31:36.716Z] [INFO] GET /api/v1/users/profile 304 (47ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"47ms","ip":"::1","user":26}
+[2026-03-09T19:31:36.837Z] [INFO] GET /api/v1/notifications 304 (50ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"50ms","ip":"::1","user":26}
+[2026-03-09T19:31:36.841Z] [INFO] GET /api/v1/users/profile 304 (26ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"26ms","ip":"::1","user":26}
+[2026-03-09T19:31:36.891Z] [INFO] GET /api/v1/notifications 304 (41ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"41ms","ip":"::1","user":26}
+[2026-03-09T19:31:36.922Z] [INFO] GET /api/v1/analytics/dashboard 304 (126ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"126ms","ip":"::1","user":26}
+[2026-03-09T19:31:36.931Z] [INFO] GET /api/v1/notifications 304 (30ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"30ms","ip":"::1","user":26}
+[2026-03-09T19:31:36.940Z] [INFO] GET /api/v1/notifications/admin/stats 200 (148ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"148ms","ip":"::1","user":26}
+[2026-03-09T19:31:36.968Z] [INFO] GET /api/v1/notifications 304 (20ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"20ms","ip":"::1","user":26}
+[2026-03-09T19:31:36.983Z] [INFO] GET /api/v1/analytics/dashboard 304 (48ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"48ms","ip":"::1","user":26}
+[2026-03-09T19:31:37.005Z] [INFO] GET /api/v1/notifications/admin/stats 304 (53ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"53ms","ip":"::1","user":26}
+[2026-03-09T19:31:37.031Z] [INFO] GET /api/v1/analytics/dashboard 304 (44ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"44ms","ip":"::1","user":26}
+[2026-03-09T19:31:37.057Z] [INFO] GET /api/v1/notifications/admin/stats 304 (42ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"42ms","ip":"::1","user":26}
+[2026-03-09T19:31:37.090Z] [INFO] GET /api/v1/analytics/dashboard 304 (42ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"42ms","ip":"::1","user":26}
+[2026-03-09T19:31:37.134Z] [INFO] GET /api/v1/notifications/admin/stats 304 (65ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"65ms","ip":"::1","user":26}
+[2026-03-09T19:31:40.234Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (969ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"969ms","ip":"::1","user":26}
+[2026-03-09T19:31:40.898Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (657ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"657ms","ip":"::1","user":26}
+[2026-03-09T19:31:42.747Z] [INFO] GET /api/v1/book/a-molestias-nostrum 200 (14ms) {"method":"GET","url":"/api/v1/book/a-molestias-nostrum","status":200,"duration":"14ms","ip":"::1","user":26}
+[2026-03-09T19:31:42.772Z] [INFO] GET /api/v1/book/a-molestias-nostrum 304 (14ms) {"method":"GET","url":"/api/v1/book/a-molestias-nostrum","status":304,"duration":"14ms","ip":"::1","user":26}
+[2026-03-09T19:31:46.802Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (580ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"580ms","ip":"::1","user":26}
+[2026-03-09T19:31:47.134Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (328ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"328ms","ip":"::1","user":26}
+[2026-03-09T19:31:49.190Z] [INFO] GET /api/v1/book/gdhjskjsks 200 (7ms) {"method":"GET","url":"/api/v1/book/gdhjskjsks","status":200,"duration":"7ms","ip":"::1","user":26}
+[2026-03-09T19:31:49.235Z] [INFO] GET /api/v1/book/gdhjskjsks 304 (12ms) {"method":"GET","url":"/api/v1/book/gdhjskjsks","status":304,"duration":"12ms","ip":"::1","user":26}
+[2026-03-09T19:33:12.259Z] [INFO] Redis Client Connected 
+[2026-03-09T19:34:16.432Z] [INFO] Redis Client Connected 
+[2026-03-09T19:34:18.342Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (771ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"771ms","ip":"::1","user":26}
+[2026-03-09T19:34:18.665Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (305ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"305ms","ip":"::1","user":26}
+[2026-03-09T19:34:20.636Z] [INFO] GET /api/v1/book/sit-veniam-aut-aut 200 (26ms) {"method":"GET","url":"/api/v1/book/sit-veniam-aut-aut","status":200,"duration":"26ms","ip":"::1","user":26}
+[2026-03-09T19:34:20.659Z] [INFO] GET /api/v1/book/sit-veniam-aut-aut 304 (19ms) {"method":"GET","url":"/api/v1/book/sit-veniam-aut-aut","status":304,"duration":"19ms","ip":"::1","user":26}
+[2026-03-09T19:34:24.574Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (722ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"722ms","ip":"::1","user":26}
+[2026-03-09T19:34:24.899Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (317ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"317ms","ip":"::1","user":26}
+[2026-03-09T19:34:26.376Z] [INFO] GET /api/v1/book/gdhjskjsks 200 (11ms) {"method":"GET","url":"/api/v1/book/gdhjskjsks","status":200,"duration":"11ms","ip":"::1","user":26}
+[2026-03-09T19:34:26.402Z] [INFO] GET /api/v1/book/gdhjskjsks 304 (14ms) {"method":"GET","url":"/api/v1/book/gdhjskjsks","status":304,"duration":"14ms","ip":"::1","user":26}
+[2026-03-09T19:34:28.351Z] [INFO] GET /api/v1/book/readBook/81 304 (25ms) {"method":"GET","url":"/api/v1/book/readBook/81","status":304,"duration":"25ms","ip":"::1","user":26}
+[2026-03-09T19:38:38.979Z] [INFO] Redis Client Connected 
+[2026-03-09T19:39:20.920Z] [INFO] Redis Client Connected 
+[2026-03-09T19:39:34.008Z] [INFO] Redis Client Connected 
+[2026-03-09T19:40:40.721Z] [INFO] Redis Client Connected 
+[2026-03-09T19:40:48.892Z] [INFO] Redis Client Connected 
+[2026-03-09T19:44:39.765Z] [INFO] GET /api/v1/book/readBook/81 304 (77ms) {"method":"GET","url":"/api/v1/book/readBook/81","status":304,"duration":"77ms","ip":"::1","user":26}
+[2026-03-09T19:44:44.793Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (543ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"543ms","ip":"::1","user":26}
+[2026-03-09T19:44:45.208Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (410ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"410ms","ip":"::1","user":26}
+[2026-03-09T19:44:45.695Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (247ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"247ms","ip":"::1","user":26}
+[2026-03-09T19:44:45.999Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (297ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"297ms","ip":"::1","user":26}
+[2026-03-09T19:44:48.683Z] [INFO] GET /api/v1/book/gdhjskjsks 304 (22ms) {"method":"GET","url":"/api/v1/book/gdhjskjsks","status":304,"duration":"22ms","ip":"::1","user":26}
+[2026-03-09T19:44:48.704Z] [INFO] GET /api/v1/book/gdhjskjsks 304 (14ms) {"method":"GET","url":"/api/v1/book/gdhjskjsks","status":304,"duration":"14ms","ip":"::1","user":26}
+[2026-03-09T19:44:50.874Z] [INFO] GET /api/v1/book/readBook/81 304 (11ms) {"method":"GET","url":"/api/v1/book/readBook/81","status":304,"duration":"11ms","ip":"::1","user":26}

@@ -537,8 +537,9 @@ class BookService {
     if (!book.file_data?.url) throw new Error("Book file not found");
 
     const hasAccess = await this.hasFullAccess(user, book);
-    const baseUrl =
-      process.env.BASE_URL || "https://mindgymbook.ductfabrication.in";
+    const baseUrl = (process.env.BASE_URL || "http://localhost:5000")
+      .replace(/\/+$/, "")
+      .replace(/\/api\/v1$/, "");
     const finalUrl = `${baseUrl}/api/v1/book/readBook/${bookId}`;
 
     return {
