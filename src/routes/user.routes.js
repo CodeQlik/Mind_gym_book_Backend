@@ -21,6 +21,11 @@ import {
   googleLogin,
   updateTTSPreferences,
   toggleUserStatus,
+  getUserSessions,
+  terminateSession,
+  terminateAllOtherSessions,
+  adminGetUserSessions,
+  adminTerminateSession,
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -102,6 +107,9 @@ router.delete(
   deleteAccount,
 );
 router.patch("/update-tts-preferences", verifyJWT, updateTTSPreferences);
+router.get("/sessions", verifyJWT, getUserSessions);
+router.delete("/sessions/other", verifyJWT, terminateAllOtherSessions);
+router.delete("/sessions/:sessionId", verifyJWT, terminateSession);
 
 // Admin Only Routes (Admin Panel)
 router.get("/all-users", verifyJWT, isAdmin, getAllUsers);
@@ -117,5 +125,12 @@ router.put(
 );
 router.delete("/delete/:id", verifyJWT, isAdmin, deleteUser);
 router.patch("/toggle-status/:id", verifyJWT, isAdmin, toggleUserStatus);
+router.get("/admin/sessions/:id", verifyJWT, isAdmin, adminGetUserSessions);
+router.delete(
+  "/admin/terminate-session/:id/:sessionId",
+  verifyJWT,
+  isAdmin,
+  adminTerminateSession,
+);
 
 export default router;

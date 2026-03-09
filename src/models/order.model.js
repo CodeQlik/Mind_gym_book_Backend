@@ -82,6 +82,10 @@ const Order = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    delivered_at: {
+      type: DataTypes.DATE,
+      allowNull: true,
+    },
     refund_requested: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,

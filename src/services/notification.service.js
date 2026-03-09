@@ -1,6 +1,11 @@
 import { getMessaging } from "../config/firebase.js";
-import Notification from "../models/notification.model.js";
-import { User, Category, Subscription, Wishlist } from "../models/index.js";
+import {
+  User,
+  Category,
+  Subscription,
+  Wishlist,
+  Notification,
+} from "../models/index.js";
 import UserFavoriteCategory from "../models/userFavoriteCategory.model.js";
 import { Op } from "sequelize";
 import sequelize from "../config/db.js";
@@ -229,12 +234,46 @@ class NotificationService {
     if (status === "SENT" && finalSendEmail && user.email) {
       try {
         const emailTemplate = `
-          <div style="font-family: sans-serif; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-            <h2 style="color: #333;">${title}</h2>
-            <p style="font-size: 16px; color: #555; line-height: 1.5;">${formattedMessage}</p>
-            <hr style="border: none; border-top: 1px solid #eee; margin: 20px 0;" />
-            <p style="font-size: 12px; color: #999;">This is an automated notification from Mind Gym Book. Please do not reply to this email.</p>
-          </div>
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+                .wrapper { width: 100%; table-layout: fixed; padding: 40px 10px; }
+                .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+                .header { background-color: #6366f1; padding: 30px; text-align: center; }
+                .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
+                .content { padding: 40px 30px; }
+                .content h2 { color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 700; }
+                .content p { color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px; }
+                .footer { background-color: #f1f5f9; padding: 30px; text-align: center; }
+                .footer p { margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5; }
+                .footer .brand { font-weight: 700; color: #64748b; margin-bottom: 10px; display: block; }
+                .button { display: inline-block; padding: 12px 24px; background-color: #6366f1; color: #ffffff !important; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; }
+              </style>
+            </head>
+            <body>
+              <div class="wrapper">
+                <div class="container">
+                  <div class="header">
+                    <h1>MIND GYM BOOK</h1>
+                  </div>
+                  <div class="content">
+                    <h2>${title}</h2>
+                    <p>${formattedMessage}</p>
+                    ${metadata?.order_id ? `<a href="#" class="button">Track Your Order</a>` : ""}
+                  </div>
+                  <div class="footer">
+                    <span class="brand">Mind Gym Book Publication</span>
+                    <p>You received this email because of your recent activity on our platform.</p>
+                    <p>&copy; ${new Date().getFullYear()} Mind Gym Book. All rights reserved.</p>
+                  </div>
+                </div>
+              </div>
+            </body>
+          </html>
         `;
         let attachments = [];
         if (type.includes("ORDER") && metadata?.order_id) {
@@ -538,7 +577,8 @@ class NotificationService {
 
     const { count, rows } = await Notification.findAndCountAll({
       where: {
-        [Op.or]: [{ userId: userId }, { userId: null }],
+        userId: { [Op.or]: [userId, null] },
+        status: "SENT",
       },
       order: [["createdAt", "DESC"]],
       limit,
@@ -855,6 +895,30 @@ class NotificationService {
         recurringCount: 0,
         failedCount: 0,
       };
+    }
+  }
+
+  // Auto-Cleanup: Delete notifications older than 30 days
+  async cleanupOldNotifications() {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const deletedCount = await Notification.destroy({
+        where: {
+          createdAt: { [Op.lt]: thirtyDaysAgo },
+        },
+      });
+
+      if (deletedCount > 0) {
+        console.log(
+          `[CLEANUP] 🧹 Deleted ${deletedCount} notifications older than 30 days.`,
+        );
+      }
+      return deletedCount;
+    } catch (error) {
+      console.error("[CLEANUP] ❌ Notification cleanup failed:", error.message);
+      return 0;
     }
   }
 }

@@ -1,4 +1,5 @@
 import { Subscription, Plan, User } from "../models/index.js";
+import notificationService from "./notification.service.js";
 
 class SubscriptionService {
   async subscribeUser(data) {
@@ -45,6 +46,23 @@ class SubscriptionService {
       },
       { where: { id: user_id } },
     );
+
+    // 🏆 Notify user about active subscription
+    try {
+      await notificationService.sendToUser(
+        user_id,
+        "SUBSCRIPTION_PURCHASED",
+        "🎉 Membership Activated!",
+        `Congratulations! You've successfully subscribed to the ${plan.name} plan. Enjoy unlimited access until ${new Date(end_date).toLocaleDateString()}.`,
+        {
+          subscription_id: String(newSubscription.id),
+          end_date: end_date.toISOString(),
+          plan_name: plan.name,
+        },
+      );
+    } catch (notifErr) {
+      console.error("[SUBSCRIPTION NOTIFICATION ERROR]:", notifErr.message);
+    }
 
     return newSubscription;
   }

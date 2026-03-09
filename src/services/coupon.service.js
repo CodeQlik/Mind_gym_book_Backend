@@ -1,5 +1,6 @@
 import { Coupon } from "../models/index.js";
 import { Op } from "sequelize";
+import notificationService from "./notification.service.js";
 
 class CouponService {
   _sanitizeData(data) {
@@ -34,7 +35,26 @@ class CouponService {
     ) {
       throw new Error("End date must be after start date");
     }
-    return await Coupon.create(sanitizedData);
+    const coupon = await Coupon.create(sanitizedData);
+
+    // 🏆 Notify all users about the NEW Special Offer (Coupon)
+    try {
+      const discountText =
+        coupon.discount_type === "percentage"
+          ? `${coupon.discount_value}% OFF`
+          : `Flat ₹${coupon.discount_value} OFF`;
+
+      await notificationService.sendToAll(
+        "SPECIAL_OFFER",
+        "🎁 New Special Offer!",
+        `Good news! Use code ${coupon.code} to get ${discountText} on your next order. Limited time offer, shop now!`,
+        { coupon_code: coupon.code, discount: discountText },
+      );
+    } catch (notifErr) {
+      console.error("[COUPON NOTIFICATION ERROR]:", notifErr.message);
+    }
+
+    return coupon;
   }
 
   async getAllCoupons(filters = {}) {

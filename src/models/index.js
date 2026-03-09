@@ -16,18 +16,22 @@ import UserFavoriteCategory from "./userFavoriteCategory.model.js";
 import Plan from "./plan.model.js";
 import ReadingProgress from "./readingProgress.model.js";
 import Highlight from "./highlight.model.js";
-import Seller from "./seller.model.js";
-import UsedBookListing from "./usedBookListing.model.js";
 import Order from "./order.model.js";
 import OrderItem from "./orderItem.model.js";
 import Coupon from "./coupon.model.js";
 import SupportTicket from "./supportTicket.model.js";
 import SupportMessage from "./supportMessage.model.js";
+import UserSession from "./userSession.model.js";
+import CMSPage from "./cmsPage.model.js";
 
 // Associations
 
 Category.hasMany(Book, { foreignKey: "category_id", as: "books" });
 Book.belongsTo(Category, { foreignKey: "category_id", as: "category" });
+
+// Session Associations
+User.hasMany(UserSession, { foreignKey: "user_id", as: "sessions" });
+UserSession.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
 // Cart Associations
 User.hasMany(Cart, { foreignKey: "user_id", as: "cart_items" });
@@ -122,13 +126,6 @@ Highlight.belongsTo(User, { foreignKey: "user_id", as: "user" });
 Book.hasMany(Highlight, { foreignKey: "book_id", as: "user_highlights" });
 Highlight.belongsTo(Book, { foreignKey: "book_id", as: "book" });
 
-// Marketplace & Seller Associations
-User.hasOne(Seller, { foreignKey: "user_id", as: "seller_profile" });
-Seller.belongsTo(User, { foreignKey: "user_id", as: "user" });
-
-Seller.hasMany(UsedBookListing, { foreignKey: "seller_id", as: "listings" });
-UsedBookListing.belongsTo(Seller, { foreignKey: "seller_id", as: "seller" });
-
 // Order Associations
 User.hasMany(Order, { foreignKey: "user_id", as: "orders" });
 Order.belongsTo(User, { foreignKey: "user_id", as: "user" });
@@ -185,11 +182,11 @@ export {
   Plan,
   ReadingProgress,
   Highlight,
-  Seller,
-  UsedBookListing,
   Order,
   OrderItem,
   Coupon,
   SupportTicket,
   SupportMessage,
+  UserSession,
+  CMSPage,
 };

@@ -156,8 +156,11 @@ class UserService {
     return verificationToken;
   }
 
-  //  Register User
-  async registerUser(data, files, verificationToken) {
+  //  Register User (Session Aware)
+  async registerUser(data, files, verificationToken, deviceInfo = {}) {
+    const { device_id } = deviceInfo;
+    if (!device_id) throw new Error("device_id is required for registration");
+
     const { email, password, name, phone, additional_phone, user_type } = data;
 
     if (!verificationToken) {
@@ -217,7 +220,7 @@ class UserService {
       }
     }
 
-    const [, meta] = await sequelize.query(
+    const [userId] = await sequelize.query(
       `INSERT INTO users (name, email, password, phone, additional_phone, user_type, profile, is_active, created_at, updated_at)
        VALUES (:name, :email, :password, :phone, :additional_phone, :user_type, :profile, 1, NOW(), NOW())`,
       {
@@ -234,8 +237,6 @@ class UserService {
       },
     );
 
-    const userId = meta;
-
     // Clear OTP
     await sequelize.query(
       "DELETE FROM email_verifications WHERE email = :email",
@@ -245,6 +246,10 @@ class UserService {
     const accessToken = generateAccessToken(userId);
     const refreshToken = generateRefreshToken(userId);
 
+    // Track Session
+    await this.upsertSession(userId, deviceInfo, refreshToken);
+
+    // Backward compatibility
     await sequelize.query(
       "UPDATE users SET refresh_token = :refreshToken WHERE id = :id",
       { replacements: { refreshToken, id: userId }, type: QueryTypes.UPDATE },
@@ -270,8 +275,93 @@ class UserService {
     };
   }
 
+  // ─── Enforce Device Limit Helper
+  async enforceSessionLimit(userId, deviceId) {
+    // 1. Get user's device limit from current active plan
+    const [planData] = await sequelize.query(
+      `SELECT p.device_limit FROM plans p
+       JOIN subscriptions s ON s.plan_id = p.id
+       WHERE s.user_id = :userId AND s.status = 'active' AND s.end_date >= NOW()
+       ORDER BY s.end_date DESC LIMIT 1`,
+      { replacements: { userId }, type: QueryTypes.SELECT },
+    );
+
+    // Default limit if no active premium plan found
+    const deviceLimit = planData?.device_limit || 1; // Default 1 for free/unsubscribed users
+
+    // 2. Count current active sessions for this user (excluding CURRENT device if it already exists)
+    const sessions = await sequelize.query(
+      `SELECT id FROM user_sessions WHERE user_id = :userId AND is_active = 1 AND device_id != :deviceId`,
+      { replacements: { userId, deviceId }, type: QueryTypes.SELECT },
+    );
+
+    if (sessions.length >= deviceLimit) {
+      throw new Error(
+        `Device limit reached. Your plan allows max ${deviceLimit} device(s). Please log out from other devices.`,
+      );
+    }
+
+    return true;
+  }
+
+  // ─── Upsert Session Helper
+  async upsertSession(userId, deviceInfo, refreshToken) {
+    const { device_id, device_name, ip_address } = deviceInfo;
+
+    // Check if session exists for this device
+    const [existingSession] = await sequelize.query(
+      "SELECT id FROM user_sessions WHERE user_id = :userId AND device_id = :device_id LIMIT 1",
+      {
+        replacements: { userId, device_id },
+        type: QueryTypes.SELECT,
+      },
+    );
+
+    if (existingSession) {
+      // Update existing session
+      await sequelize.query(
+        `UPDATE user_sessions SET 
+         refresh_token = :refreshToken, 
+         device_name = :device_name, 
+         ip_address = :ip_address, 
+         is_active = 1,
+         last_active = NOW(),
+         updated_at = NOW() 
+         WHERE id = :id`,
+        {
+          replacements: {
+            refreshToken,
+            device_name: device_name || "Unknown Device",
+            ip_address: ip_address || null,
+            id: existingSession.id,
+          },
+          type: QueryTypes.UPDATE,
+        },
+      );
+    } else {
+      // Create new session
+      await sequelize.query(
+        `INSERT INTO user_sessions (user_id, device_id, device_name, ip_address, refresh_token, is_active, last_active, created_at, updated_at)
+         VALUES (:userId, :device_id, :device_name, :ip_address, :refreshToken, 1, NOW(), NOW(), NOW())`,
+        {
+          replacements: {
+            userId,
+            device_id,
+            device_name: device_name || "Unknown Device",
+            ip_address: ip_address || null,
+            refreshToken,
+          },
+          type: QueryTypes.INSERT,
+        },
+      );
+    }
+  }
+
   // ─── Login
-  async login(email, password) {
+  async login(email, password, deviceInfo = {}) {
+    const { device_id } = deviceInfo;
+    if (!device_id) throw new Error("device_id is required for login");
+
     const [user] = await sequelize.query(
       "SELECT * FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
@@ -283,9 +373,16 @@ class UserService {
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Invalid email or password");
 
+    // Enforce Device Limit
+    await this.enforceSessionLimit(user.id, device_id);
+
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
+    // Track Session
+    await this.upsertSession(user.id, deviceInfo, refreshToken);
+
+    // Backward compatibility for old single-session logic
     await sequelize.query(
       "UPDATE users SET refresh_token = :refreshToken WHERE id = :id",
       { replacements: { refreshToken, id: user.id }, type: QueryTypes.UPDATE },
@@ -300,7 +397,10 @@ class UserService {
   }
 
   // ─── Google Login
-  async googleLogin(idToken) {
+  async googleLogin(idToken, deviceInfo = {}) {
+    const { device_id } = deviceInfo;
+    if (!device_id) throw new Error("device_id is required for login");
+
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
     const ticket = await client.verifyIdToken({
       idToken,
@@ -328,7 +428,7 @@ class UserService {
         initials: this.buildInitials(name),
       };
 
-      const [, meta] = await sequelize.query(
+      const [insertId] = await sequelize.query(
         `INSERT INTO users (name, email, password, user_type, profile, is_active, is_verified, created_at, updated_at)
          VALUES (:name, :email, :password, 'user', :profile, 1, 1, NOW(), NOW())`,
         {
@@ -344,7 +444,7 @@ class UserService {
 
       const [newUser] = await sequelize.query(
         "SELECT * FROM users WHERE id = :id LIMIT 1",
-        { replacements: { id: meta }, type: QueryTypes.SELECT },
+        { replacements: { id: insertId }, type: QueryTypes.SELECT },
       );
       user = newUser;
     }
@@ -352,9 +452,16 @@ class UserService {
     if (!user.is_active)
       throw new Error("Your account is deactivated. Please contact support.");
 
+    // Enforce Device Limit
+    await this.enforceSessionLimit(user.id, device_id);
+
     const accessToken = generateAccessToken(user.id);
     const refreshToken = generateRefreshToken(user.id);
 
+    // Track Session
+    await this.upsertSession(user.id, deviceInfo, refreshToken);
+
+    // Backward compatibility
     await sequelize.query(
       "UPDATE users SET refresh_token = :refreshToken WHERE id = :id",
       { replacements: { refreshToken, id: user.id }, type: QueryTypes.UPDATE },
@@ -382,8 +489,8 @@ class UserService {
     };
   }
 
-  // ─── Refresh Access Token
-  async refreshAccessToken(incomingRefreshToken) {
+  // ─── Refresh Access Token (Session Aware)
+  async refreshAccessToken(incomingRefreshToken, deviceId) {
     if (!incomingRefreshToken) {
       throw new Error("Unauthorized request. Refresh token is missing.");
     }
@@ -394,25 +501,50 @@ class UserService {
         process.env.REFRESH_TOKEN_SECRET || "refresh_secret",
       );
 
+      // 1. Verify token exists in active session
+      const [session] = await sequelize.query(
+        "SELECT * FROM user_sessions WHERE user_id = :userId AND refresh_token = :refreshToken AND is_active = 1 LIMIT 1",
+        {
+          replacements: {
+            userId: decodedToken.id,
+            refreshToken: incomingRefreshToken,
+          },
+          type: QueryTypes.SELECT,
+        },
+      );
+
+      if (!session) {
+        throw new Error("Invalid or expired session. Please login again.");
+      }
+
+      // 2. Validate user status
       const [user] = await sequelize.query(
-        "SELECT id, refresh_token, is_active FROM users WHERE id = :id LIMIT 1",
+        "SELECT id, is_active FROM users WHERE id = :id LIMIT 1",
         { replacements: { id: decodedToken.id }, type: QueryTypes.SELECT },
       );
 
-      if (!user) throw new Error("Invalid refresh token.");
+      if (!user) throw new Error("User not found.");
       if (!user.is_active)
         throw new Error("Your account is deactivated. Please contact support.");
-      if (incomingRefreshToken !== user.refresh_token) {
-        throw new Error("Refresh token is expired or used.");
-      }
 
+      // 3. Generate new tokens
       const accessToken = generateAccessToken(user.id);
       const newRefreshToken = generateRefreshToken(user.id);
 
+      // 4. Update session
       await sequelize.query(
-        "UPDATE users SET refresh_token = :refreshToken WHERE id = :id",
+        "UPDATE user_sessions SET refresh_token = :newRefreshToken, last_active = NOW() WHERE id = :id",
         {
-          replacements: { refreshToken: newRefreshToken, id: user.id },
+          replacements: { newRefreshToken, id: session.id },
+          type: QueryTypes.UPDATE,
+        },
+      );
+
+      // Backward compatibility update for User model
+      await sequelize.query(
+        "UPDATE users SET refresh_token = :newRefreshToken WHERE id = :id",
+        {
+          replacements: { newRefreshToken, id: user.id },
           type: QueryTypes.UPDATE,
         },
       );
@@ -421,6 +553,57 @@ class UserService {
     } catch (error) {
       throw new Error(error?.message || "Invalid refresh token");
     }
+  }
+
+  // ─── Logout (Session Aware)
+  async logout(userId, deviceId) {
+    if (deviceId) {
+      await sequelize.query(
+        "UPDATE user_sessions SET is_active = 0, refresh_token = NULL WHERE user_id = :userId AND device_id = :deviceId",
+        { replacements: { userId, deviceId }, type: QueryTypes.UPDATE },
+      );
+    } else {
+      // Logout from all devices if no deviceId provided
+      await sequelize.query(
+        "UPDATE user_sessions SET is_active = 0, refresh_token = NULL WHERE user_id = :userId",
+        { replacements: { userId }, type: QueryTypes.UPDATE },
+      );
+    }
+
+    // Clear main user refresh token for safety
+    await sequelize.query(
+      "UPDATE users SET refresh_token = NULL WHERE id = :userId",
+      { replacements: { userId }, type: QueryTypes.UPDATE },
+    );
+
+    return true;
+  }
+
+  // ─── Get User Sessions
+  async getUserSessions(userId) {
+    const sessions = await sequelize.query(
+      "SELECT id, device_id, device_name, ip_address, last_active, created_at FROM user_sessions WHERE user_id = :userId AND is_active = 1 ORDER BY last_active DESC",
+      { replacements: { userId }, type: QueryTypes.SELECT },
+    );
+    return sessions;
+  }
+
+  // ─── Terminate Specific Session
+  async terminateSession(userId, sessionId) {
+    await sequelize.query(
+      "UPDATE user_sessions SET is_active = 0, refresh_token = NULL WHERE user_id = :userId AND id = :sessionId",
+      { replacements: { userId, sessionId }, type: QueryTypes.UPDATE },
+    );
+    return true;
+  }
+
+  // ─── Terminate All Other Sessions
+  async terminateAllOtherSessions(userId, currentDeviceId) {
+    await sequelize.query(
+      "UPDATE user_sessions SET is_active = 0, refresh_token = NULL WHERE user_id = :userId AND device_id != :currentDeviceId",
+      { replacements: { userId, currentDeviceId }, type: QueryTypes.UPDATE },
+    );
+    return true;
   }
 
   // ─── Get User Profile

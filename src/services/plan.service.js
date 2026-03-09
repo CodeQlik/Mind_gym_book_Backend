@@ -2,8 +2,15 @@ import { Plan } from "../models/index.js";
 
 class PlanService {
   async createPlan(data) {
-    const { name, price, plan_type, description, duration_months, features } =
-      data;
+    const {
+      name,
+      price,
+      plan_type,
+      description,
+      duration_months,
+      features,
+      device_limit,
+    } = data;
 
     let duration = duration_months;
     if (!duration) {
@@ -20,6 +27,7 @@ class PlanService {
       description,
       duration_months: duration,
       features,
+      device_limit: device_limit || 1,
     });
 
     return newPlan;

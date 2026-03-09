@@ -457,6 +457,10 @@ class OrderService {
       updates.payment_status = "paid";
     }
 
+    if (newStatus === "delivered" && oldStatus !== "delivered") {
+      updates.delivered_at = new Date();
+    }
+
     // Handle restocking if status changes to 'returned'
     // Only restock if the previous status was NOT 'returned' or 'cancelled'
     const needsRestock =
@@ -542,14 +546,21 @@ class OrderService {
       throw new Error("Refund already requested for this order");
     }
 
-    const orderDate = new Date(order.created_at);
+    if (!order.delivered_at) {
+      throw new Error(
+        "Refund can only be requested after the order is delivered. Please use 'Cancel Order' if it is still processing.",
+      );
+    }
+
+    const deliveryDate = new Date(order.delivered_at);
     const now = new Date();
-    const diffDays = Math.ceil(
-      Math.abs(now - orderDate) / (1000 * 60 * 60 * 24),
-    );
+    const diffTime = Math.abs(now - deliveryDate);
+    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
     if (diffDays > 7) {
-      throw new Error("Refund request window (7 days) has expired");
+      throw new Error(
+        "Refund request window (7 days from delivery) has expired",
+      );
     }
 
     await order.update({ refund_requested: true, refund_reason: reason });

@@ -7,6 +7,7 @@ import initCronJobs from "./src/utils/cronJobs.js";
 
 import { createServer } from "http";
 import { initSocket } from "./src/utils/socket.js";
+import { connectRedis } from "./src/config/redis.js";
 
 const PORT = process.env.PORT || 5000;
 const server = createServer(app);
@@ -15,6 +16,9 @@ const startServer = async () => {
   try {
     // 1. Ensure DB exists and authenticate
     await connectDB();
+
+    // 2. Connect Redis
+    await connectRedis();
 
     // 2. Sync models (Create tables if not exist)
     await sequelize.sync();

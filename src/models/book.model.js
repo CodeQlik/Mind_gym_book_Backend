@@ -150,10 +150,6 @@ const Book = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 5, // Default 5 pages free preview
     },
-    otherdescription: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
     dimensions: {
       type: DataTypes.STRING, // e.g. "8 x 5 x 1 inches"
       allowNull: true,

@@ -40,6 +40,16 @@ export const verifyRegistrationOTP = async (req, res, next) => {
   }
 };
 
+const getDeviceInfo = (req) => ({
+  device_id: req.headers["x-device-id"] || "unknown_device",
+  device_name:
+    req.headers["x-device-name"] ||
+    req.headers["user-agent"] ||
+    "Unknown Device",
+  ip_address:
+    req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+});
+
 export const registerUser = async (req, res, next) => {
   try {
     const verificationToken =
@@ -48,6 +58,7 @@ export const registerUser = async (req, res, next) => {
       req.body,
       req.files,
       verificationToken,
+      getDeviceInfo(req),
     );
 
     // Clear verification token after successful registration
@@ -89,7 +100,7 @@ export const registerUser = async (req, res, next) => {
 export const login = async (req, res, next) => {
   try {
     const { email, password } = req.body;
-    const result = await userService.login(email, password);
+    const result = await userService.login(email, password, getDeviceInfo(req));
 
     const accessTokenOptions = {
       expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
@@ -121,7 +132,7 @@ export const googleLogin = async (req, res, next) => {
       return sendResponse(res, 400, false, "Google ID Token is required");
     }
 
-    const result = await userService.googleLogin(idToken);
+    const result = await userService.googleLogin(idToken, getDeviceInfo(req));
 
     const accessTokenOptions = {
       expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
@@ -148,6 +159,9 @@ export const googleLogin = async (req, res, next) => {
 
 export const logout = async (req, res, next) => {
   try {
+    const deviceId = req.headers["x-device-id"] || "unknown_device";
+    await userService.logout(req.user.id, deviceId);
+
     const options = {
       httpOnly: true,
       secure: process.env.NODE_ENV === "production",
@@ -166,8 +180,12 @@ export const refreshAccessToken = async (req, res, next) => {
   try {
     const incomingRefreshToken =
       req.cookies?.refreshToken || req.body.refreshToken;
+    const deviceId = req.headers["x-device-id"] || "unknown_device";
 
-    const result = await userService.refreshAccessToken(incomingRefreshToken);
+    const result = await userService.refreshAccessToken(
+      incomingRefreshToken,
+      deviceId,
+    );
 
     const accessTokenOptions = {
       expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day
@@ -382,6 +400,53 @@ export const updateTTSPreferences = async (req, res, next) => {
     next(error);
   }
 };
+
+export const getUserSessions = async (req, res, next) => {
+  try {
+    const sessions = await userService.getUserSessions(req.user.id);
+    const currentDeviceId = req.headers["x-device-id"] || "unknown_device";
+
+    const formattedSessions = sessions.map((s) => ({
+      ...s,
+      is_current: s.device_id === currentDeviceId,
+    }));
+
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Active sessions fetched",
+      formattedSessions,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const terminateSession = async (req, res, next) => {
+  try {
+    const { sessionId } = req.params;
+    await userService.terminateSession(req.user.id, sessionId);
+    return sendResponse(res, 200, true, "Session terminated successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const terminateAllOtherSessions = async (req, res, next) => {
+  try {
+    const deviceId = req.headers["x-device-id"] || "unknown_device";
+    await userService.terminateAllOtherSessions(req.user.id, deviceId);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "All other sessions terminated successfully",
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 export const toggleUserStatus = async (req, res, next) => {
   try {
     const { id } = req.params;
@@ -392,6 +457,37 @@ export const toggleUserStatus = async (req, res, next) => {
       true,
       `User ${result.is_active ? "activated" : "deactivated"} successfully`,
       result,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const adminGetUserSessions = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const sessions = await userService.getUserSessions(id);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "User sessions fetched by admin",
+      sessions,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const adminTerminateSession = async (req, res, next) => {
+  try {
+    const { id, sessionId } = req.params;
+    await userService.terminateSession(id, sessionId);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Session terminated by admin successfully",
     );
   } catch (error) {
     next(error);

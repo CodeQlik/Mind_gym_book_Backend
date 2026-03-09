@@ -48,10 +48,13 @@ export const getAllBooks = asyncHandler(async (req, res) => {
   const result = await bookService.getBooks(filters, page, limit);
 
   const baseUrl = process.env.BASE_URL || "http://localhost:5000";
-  const booksWithReadUrl = result.books.map((book) => ({
-    ...book.toJSON(),
-    read_url: `${baseUrl}/api/v1/book/readBook/${book.id}`,
-  }));
+  const booksWithReadUrl = result.books.map((book) => {
+    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    return {
+      ...bookData,
+      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
+    };
+  });
 
   return sendResponse(res, 200, true, "Books fetched successfully", {
     ...result,
@@ -67,10 +70,13 @@ export const getAdminBooks = asyncHandler(async (req, res) => {
   const result = await bookService.getBooks({}, page, limit);
 
   const baseUrl = process.env.BASE_URL || "http://localhost:5000";
-  const booksWithReadUrl = result.books.map((book) => ({
-    ...book.toJSON(),
-    read_url: `${baseUrl}/api/v1/book/readBook/${book.id}`,
-  }));
+  const booksWithReadUrl = result.books.map((book) => {
+    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    return {
+      ...bookData,
+      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
+    };
+  });
 
   return sendResponse(res, 200, true, "Admin books fetched successfully", {
     ...result,
@@ -93,8 +99,9 @@ export const getBookById = asyncHandler(async (req, res) => {
   const baseUrl = process.env.BASE_URL || "http://localhost:5000";
   const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
 
+  const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
   return sendResponse(res, 200, true, "Book fetched successfully", {
-    ...book.toJSON(),
+    ...bookData,
     isBookmarked,
     read_url,
   });
@@ -118,8 +125,9 @@ export const getBookBySlug = asyncHandler(async (req, res) => {
   const baseUrl = process.env.BASE_URL || "http://localhost:5000";
   const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
 
+  const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
   return sendResponse(res, 200, true, "Book fetched successfully", {
-    ...book.toJSON(),
+    ...bookData,
     isBookmarked,
     read_url,
   });
@@ -138,10 +146,13 @@ export const getBooksByCategory = asyncHandler(async (req, res) => {
   );
 
   const baseUrl = process.env.BASE_URL || "http://localhost:5000";
-  const booksWithReadUrl = result.books.map((book) => ({
-    ...book.toJSON(),
-    read_url: `${baseUrl}/api/v1/book/readBook/${book.id}`,
-  }));
+  const booksWithReadUrl = result.books.map((book) => {
+    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    return {
+      ...bookData,
+      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
+    };
+  });
 
   return sendResponse(res, 200, true, "Category books fetched successfully", {
     ...result,
@@ -152,8 +163,9 @@ export const getBooksByCategory = asyncHandler(async (req, res) => {
 export const updateBook = asyncHandler(async (req, res) => {
   const book = await bookService.updateBook(req.params.id, req.body, req.files);
 
+  const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
   return sendResponse(res, 200, true, "Book updated successfully", {
-    ...book.toJSON(),
+    ...bookData,
   });
 });
 
@@ -188,10 +200,13 @@ export const searchBooks = asyncHandler(async (req, res) => {
   );
 
   const baseUrl = process.env.BASE_URL || "http://localhost:5000";
-  const booksWithReadUrl = result.books.map((book) => ({
-    ...book.toJSON(),
-    read_url: `${baseUrl}/api/v1/book/readBook/${book.id}`,
-  }));
+  const booksWithReadUrl = result.books.map((book) => {
+    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    return {
+      ...bookData,
+      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
+    };
+  });
 
   return sendResponse(res, 200, true, "Search results fetched", {
     ...result,
