@@ -2176,3 +2176,12 @@
 [2026-03-09T18:02:55.286Z] [INFO] GET /api/v1/book/gdhjskjsks 304 (11ms) {"method":"GET","url":"/api/v1/book/gdhjskjsks","status":304,"duration":"11ms","ip":"::1","user":26}
 [2026-03-09T18:02:55.346Z] [INFO] GET /api/v1/book/gdhjskjsks 304 (38ms) {"method":"GET","url":"/api/v1/book/gdhjskjsks","status":304,"duration":"38ms","ip":"::1","user":26}
 [2026-03-09T18:02:57.860Z] [INFO] GET /api/v1/book/readBook/81 304 (101ms) {"method":"GET","url":"/api/v1/book/readBook/81","status":304,"duration":"101ms","ip":"::1","user":26}
+[2026-03-09T19:10:20.762Z] [INFO] Redis Client Connected 
+[2026-03-09T19:12:03.746Z] [INFO] Redis Client Connected 
+[2026-03-09T19:12:24.804Z] [INFO] Redis Client Connected 
+[2026-03-09T19:18:31.259Z] [WARN] GET /api/v1/book/readBook/24 404 (75ms) {"method":"GET","url":"/api/v1/book/readBook/24","status":404,"duration":"75ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:19:08.875Z] [WARN] GET /api/v1/book/readBook/24 404 (20ms) {"method":"GET","url":"/api/v1/book/readBook/24","status":404,"duration":"20ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:19:27.058Z] [WARN] GET /api/v1/book/readBook/24 404 (15ms) {"method":"GET","url":"/api/v1/book/readBook/24","status":404,"duration":"15ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:20:06.281Z] [WARN] GET /api/v1/book/readBook/24 404 (8ms) {"method":"GET","url":"/api/v1/book/readBook/24","status":404,"duration":"8ms","ip":"::1","user":"Guest"}
+[2026-03-09T19:22:07.468Z] [INFO] Redis Client Connected 
+[2026-03-09T19:22:53.705Z] [INFO] Redis Client Connected 

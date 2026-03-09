@@ -196,6 +196,24 @@ class PaymentService {
         { where: { id: payment.user_id } },
       );
 
+      // Notify user about subscription activation
+      try {
+        const notificationService = (await import("./notification.service.js"))
+          .default;
+        await notificationService.sendToUser(
+          payment.user_id,
+          "SUBSCRIPTION_ACTIVATED",
+          "🎊 Subscription Activated!",
+          `Congratulations! Your ${payment.plan_name.toUpperCase()} subscription is now active until ${endDate.toLocaleDateString()}. Enjoy unlimited reading!`,
+          {
+            plan: payment.plan_name,
+            expiry_date: endDate.toISOString(),
+          },
+        );
+      } catch (notifErr) {
+        console.error("Failed to send subscription notification:", notifErr);
+      }
+
       return { payment, message: "Subscription activated" };
     } else if (payment.payment_type === "book_purchase") {
       // ── WEBSITE: Mark physical order as paid ──

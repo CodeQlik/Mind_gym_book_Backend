@@ -225,6 +225,10 @@ class NotificationService {
       "APPROVAL",
       "SUBSCRIPTION",
       "REFUND",
+      "PAYMENT",
+      "EXPIRED",
+      "EXPIRY",
+      "EXPIRING",
     ];
     const isEmailRequired = emailTypes.some((t) =>
       type.toUpperCase().includes(t),

@@ -47,7 +47,8 @@ export const getAllBooks = asyncHandler(async (req, res) => {
 
   const result = await bookService.getBooks(filters, page, limit);
 
-  const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+  const baseUrl =
+    process.env.BASE_URL || "https://mindgymbook.ductfabrication.in";
   const booksWithReadUrl = result.books.map((book) => {
     const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
     return {
@@ -69,7 +70,8 @@ export const getAdminBooks = asyncHandler(async (req, res) => {
 
   const result = await bookService.getBooks({}, page, limit);
 
-  const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+  const baseUrl =
+    process.env.BASE_URL || "https://mindgymbook.ductfabrication.in";
   const booksWithReadUrl = result.books.map((book) => {
     const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
     return {
@@ -96,7 +98,8 @@ export const getBookById = asyncHandler(async (req, res) => {
     isBookmarked = !!bookmark;
   }
 
-  const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+  const baseUrl =
+    process.env.BASE_URL || "https://mindgymbook.ductfabrication.in";
   const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
 
   const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
@@ -122,7 +125,8 @@ export const getBookBySlug = asyncHandler(async (req, res) => {
     isBookmarked = !!bookmark;
   }
 
-  const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+  const baseUrl =
+    process.env.BASE_URL || "https://mindgymbook.ductfabrication.in";
   const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
 
   const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
@@ -145,7 +149,8 @@ export const getBooksByCategory = asyncHandler(async (req, res) => {
     limit,
   );
 
-  const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+  const baseUrl =
+    process.env.BASE_URL || "https://mindgymbook.ductfabrication.in";
   const booksWithReadUrl = result.books.map((book) => {
     const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
     return {
@@ -199,7 +204,8 @@ export const searchBooks = asyncHandler(async (req, res) => {
     status,
   );
 
-  const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+  const baseUrl =
+    process.env.BASE_URL || "https://mindgymbook.ductfabrication.in";
   const booksWithReadUrl = result.books.map((book) => {
     const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
     return {
