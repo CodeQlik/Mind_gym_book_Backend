@@ -21,6 +21,7 @@ import orderRoutes from "./routes/order.routes.js";
 import couponRoutes from "./routes/coupon.routes.js";
 import supportRoutes from "./routes/support.routes.js";
 
+import requestLogger from "./middlewares/requestLogger.middleware.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 
 const app = express();
@@ -57,6 +58,8 @@ app.use(
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
+
+app.use(requestLogger);
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/user/addresses", addressRoutes);
