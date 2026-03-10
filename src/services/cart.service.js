@@ -39,14 +39,14 @@ class CartService {
       return updated;
     }
 
-    const [, meta] = await sequelize.query(
+    const [insertId] = await sequelize.query(
       "INSERT INTO carts (user_id, book_id, quantity, created_at, updated_at) VALUES (:userId, :book_id, :quantity, NOW(), NOW())",
       { replacements: { userId, book_id, quantity }, type: QueryTypes.INSERT },
     );
 
     const [newItem] = await sequelize.query(
       "SELECT * FROM carts WHERE id = :id LIMIT 1",
-      { replacements: { id: meta }, type: QueryTypes.SELECT },
+      { replacements: { id: insertId }, type: QueryTypes.SELECT },
     );
     return newItem;
   }
@@ -54,7 +54,7 @@ class CartService {
   async getCart(userId) {
     return await sequelize.query(
       `SELECT c.*, 
-        b.id AS book_id, b.title, b.slug, b.price, b.thumbnail,
+        b.id AS book_id, b.title, b.author, b.slug, b.price, b.thumbnail,
         cat.name AS category_name
        FROM carts c
        LEFT JOIN books b ON c.book_id = b.id

@@ -45,7 +45,7 @@ export const getAllBooks = asyncHandler(async (req, res) => {
     if (status === "inactive") filters.is_active = false;
   }
 
-  const result = await bookService.getBooks(filters, page, limit);
+  const result = await bookService.getBooks(filters, page, limit, req.user?.id);
 
   if (result.books.length === 0) {
     return sendResponse(res, 200, true, "No books found", {
@@ -131,6 +131,7 @@ export const getBooksByCategory = asyncHandler(async (req, res) => {
     !isAdminRequest,
     page,
     limit,
+    req.user?.id,
   );
 
   if (result.books.length === 0) {
@@ -186,6 +187,7 @@ export const searchBooks = asyncHandler(async (req, res) => {
     page,
     limit,
     status,
+    req.user?.id,
   );
 
   if (result.books.length === 0) {

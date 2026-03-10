@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import path from "path";
-import { Book, Category, User, UserBook } from "../models/index.js";
+import { Book, Category, User, UserBook, Bookmark } from "../models/index.js";
 import {
   deleteFromCloudinary,
   uploadOnCloudinary,
@@ -67,10 +67,10 @@ class BookService {
       const res = await uploadOnCloudinary(fileArray[0].path, folder);
       return res
         ? {
-            url: res.secure_url,
-            public_id: res.public_id,
-            local_path: fileArray[0].path,
-          }
+          url: res.secure_url,
+          public_id: res.public_id,
+          local_path: fileArray[0].path,
+        }
         : null;
     };
 
@@ -168,7 +168,7 @@ class BookService {
     return createdBook;
   }
 
-  async getBooks(filters = {}, page = 1, limit = 10) {
+  async getBooks(filters = {}, page = 1, limit = 10, userId = null) {
     const offset = (page - 1) * limit;
     const where = {};
 
@@ -185,17 +185,43 @@ class BookService {
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
       ],
-      order: [["created_at", "DESC"]],
+      order: [["createdAt", "DESC"]],
       limit,
       offset,
     });
+
+    const books = userId
+      ? await this.injectBookmarkStatus(rows, userId)
+      : rows;
 
     return {
       totalItems: count,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
-      books: rows,
+      books,
     };
+  }
+
+  async injectBookmarkStatus(books, userId) {
+    if (!userId || !books?.length) return books;
+
+    const bookIds = books.map((b) => b.id);
+    const bookmarks = await Bookmark.findAll({
+      where: {
+        user_id: userId,
+        book_id: { [Op.in]: bookIds },
+      },
+    });
+
+    const bookmarkedSet = new Set(bookmarks.map((bm) => bm.book_id));
+
+    return books.map((book) => {
+      const bookData = book.toJSON();
+      return {
+        ...bookData,
+        isBookmarked: bookmarkedSet.has(book.id),
+      };
+    });
   }
 
   async getBooksByCategoryId(
@@ -203,6 +229,7 @@ class BookService {
     activeOnly = true,
     page = 1,
     limit = 10,
+    userId = null,
   ) {
     const offset = (page - 1) * limit;
     const where = { category_id };
@@ -213,16 +240,20 @@ class BookService {
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
       ],
-      order: [["created_at", "DESC"]],
+      order: [["createdAt", "DESC"]],
       limit,
       offset,
     });
+
+    const books = userId
+      ? await this.injectBookmarkStatus(rows, userId)
+      : rows;
 
     return {
       totalItems: count,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
-      books: rows,
+      books,
     };
   }
 
@@ -433,6 +464,7 @@ class BookService {
     page = 1,
     limit = 10,
     status = "",
+    userId = null,
   ) {
     const offset = (page - 1) * limit;
     const searchTerm = `%${query}%`;
@@ -455,16 +487,20 @@ class BookService {
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
       ],
-      order: [["created_at", "DESC"]],
+      order: [["createdAt", "DESC"]],
       limit,
       offset,
     });
+
+    const books = userId
+      ? await this.injectBookmarkStatus(rows, userId)
+      : rows;
 
     return {
       totalItems: count,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
-      books: rows,
+      books,
     };
   }
 

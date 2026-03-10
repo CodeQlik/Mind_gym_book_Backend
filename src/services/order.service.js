@@ -162,7 +162,7 @@ class OrderService {
         `We have received the payment for your order ${order.order_no}. We'll start processing it soon.`,
         { order_id: String(order.id), order_no: order.order_no },
       );
-    } catch (notifError) {}
+    } catch (notifError) { }
 
     return order;
   }
@@ -187,7 +187,7 @@ class OrderService {
           ],
         },
       ],
-      order: [["created_at", "DESC"]],
+      order: [["createdAt", "DESC"]],
       limit,
       offset,
     });
@@ -272,7 +272,7 @@ class OrderService {
           ],
         },
       ],
-      order: [["created_at", "DESC"]],
+      order: [["createdAt", "DESC"]],
       distinct: true,
       limit,
       offset,
@@ -373,7 +373,7 @@ class OrderService {
           tracking_url: tracking_url || "",
         },
       );
-    } catch (notifError) {}
+    } catch (notifError) { }
 
     return await this._getOrderWithDetails(order.id);
   }
@@ -445,7 +445,7 @@ class OrderService {
             status: newStatus,
           },
         );
-      } catch (notifError) {}
+      } catch (notifError) { }
     }
 
     return await this._getOrderWithDetails(order.id);
@@ -474,7 +474,7 @@ class OrderService {
       throw new Error("Refund already requested for this order");
     }
 
-    const orderDate = new Date(order.created_at);
+    const orderDate = new Date(order.createdAt);
     const now = new Date();
     const diffDays = Math.ceil(
       Math.abs(now - orderDate) / (1000 * 60 * 60 * 24),
