@@ -108,6 +108,7 @@ class SubscriptionService {
     // mapping agar frontend se different value aaye
     if (status === "approved") status = "active";
     if (status === "cancelled") status = "failed";
+    if (status === "inactive" || status === "deactivated") status = "expired";
 
     if (!allowedStatus.includes(status)) {
       throw new Error(`Invalid status value: ${status}`);
