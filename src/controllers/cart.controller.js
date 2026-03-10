@@ -16,6 +16,7 @@ export const addToCart = async (req, res, next) => {
   }
 };
 
+
 export const getCart = async (req, res, next) => {
   try {
     const cart = await cartService.getCart(req.user.id);
