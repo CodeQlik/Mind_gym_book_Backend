@@ -2836,3 +2836,7 @@
 [2026-03-10T11:51:16.848Z] [INFO] GET /api/v1/subscriptions/admin/all 304 (50ms) {"method":"GET","url":"/api/v1/subscriptions/admin/all","status":304,"duration":"50ms","ip":"::1","user":26}
 [2026-03-10T11:51:16.891Z] [INFO] GET /api/v1/subscriptions/admin/all 304 (26ms) {"method":"GET","url":"/api/v1/subscriptions/admin/all","status":304,"duration":"26ms","ip":"::1","user":26}
 [2026-03-10T11:51:21.975Z] [INFO] PATCH /api/v1/subscriptions/admin/status/11 200 (49ms) {"method":"PATCH","url":"/api/v1/subscriptions/admin/status/11","status":200,"duration":"49ms","ip":"::1","user":26}
+[2026-03-10T12:37:10.574Z] [INFO] Redis Client Connected 
+[2026-03-10T15:32:28.098Z] [ERROR] Redis Client Error {"errno":-4077,"code":"ECONNRESET","syscall":"read"}
+[2026-03-10T15:32:28.682Z] [INFO] Redis Client Connected 
+[2026-03-10T15:44:00.778Z] [INFO] Redis Client Connected 
