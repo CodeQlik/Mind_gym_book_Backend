@@ -20,6 +20,14 @@ class PlanService {
       else if (plan_type === "free") duration = 0;
     }
 
+    let dLimit = device_limit;
+    if (!dLimit) {
+      if (plan_type === "one_month") dLimit = 2;
+      else if (plan_type === "three_month") dLimit = 3;
+      else if (plan_type === "one_year") dLimit = 4;
+      else dLimit = 1;
+    }
+
     const newPlan = await Plan.create({
       name,
       price,
@@ -27,7 +35,8 @@ class PlanService {
       description,
       duration_months: duration,
       features,
-      device_limit: device_limit || 1,
+      device_limit: dLimit,
+      is_ad_free: plan_type !== "free",
     });
 
     return newPlan;

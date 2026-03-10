@@ -110,6 +110,22 @@ class SubscriptionService {
         },
         { where: { id: subscription.user_id } },
       );
+
+      // 🏆 Notify user about activation
+      try {
+        await notificationService.sendToUser(
+          subscription.user_id,
+          "SUBSCRIPTION_APPROVED",
+          "🎊 Membership Activated!",
+          "Your subscription has been manually approved by the admin. Happy reading!",
+          {
+            subscription_id: String(subscription.id),
+            status: "active",
+          },
+        );
+      } catch (notifErr) {
+        console.error("[ADMIN_SUB_NOTIF_ERROR]:", notifErr.message);
+      }
     } else {
       await User.update(
         { subscription_status: status },

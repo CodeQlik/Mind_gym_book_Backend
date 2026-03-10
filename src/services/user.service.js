@@ -34,6 +34,11 @@ class UserService {
       }
     }
 
+    // Ad-free logic (Paid active plans)
+    user.is_ad_free =
+      user.subscription_status === "active" &&
+      user.subscription_plan !== "free";
+
     delete user.password;
     delete user.refresh_token;
     return user;
@@ -279,7 +284,14 @@ class UserService {
   async enforceSessionLimit(userId, deviceId) {
     // 1. Get user's device limit from current active plan
     const [planData] = await sequelize.query(
-      `SELECT p.device_limit FROM plans p
+      `SELECT 
+        CASE 
+          WHEN p.plan_type = 'one_month' THEN 2
+          WHEN p.plan_type = 'three_month' THEN 3
+          WHEN p.plan_type = 'one_year' THEN 4
+          ELSE p.device_limit
+        END as device_limit 
+       FROM plans p
        JOIN subscriptions s ON s.plan_id = p.id
        WHERE s.user_id = :userId AND s.status = 'active' AND s.end_date >= NOW()
        ORDER BY s.end_date DESC LIMIT 1`,

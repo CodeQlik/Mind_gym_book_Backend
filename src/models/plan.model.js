@@ -42,6 +42,10 @@ const Plan = sequelize.define(
       type: DataTypes.ENUM("active", "inactive"),
       defaultValue: "active",
     },
+    is_ad_free: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     timestamps: true,
