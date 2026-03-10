@@ -2902,3 +2902,13 @@
 [2026-03-10T18:02:06.209Z] [INFO] GET /api/v1/users/admin/sessions/51 304 (7ms) {"method":"GET","url":"/api/v1/users/admin/sessions/51","status":304,"duration":"7ms","ip":"::1","user":26}
 [2026-03-10T18:02:11.647Z] [INFO] GET /api/v1/users/admin/sessions/29 304 (10ms) {"method":"GET","url":"/api/v1/users/admin/sessions/29","status":304,"duration":"10ms","ip":"::1","user":26}
 [2026-03-10T18:06:12.731Z] [INFO] GET /api/v1/notifications/ 200 (14ms) {"method":"GET","url":"/api/v1/notifications/","status":200,"duration":"14ms","ip":"::1","user":29}
+[2026-03-10T18:46:45.129Z] [INFO] Redis Client Connected 
+[2026-03-10T18:57:20.534Z] [INFO] POST /api/v1/users/login 200 (193ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"193ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:57:20.667Z] [INFO] GET /api/v1/users/profile 200 (29ms) {"method":"GET","url":"/api/v1/users/profile","status":200,"duration":"29ms","ip":"::1","user":26}
+[2026-03-10T18:57:20.941Z] [INFO] GET /api/v1/notifications 200 (187ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"187ms","ip":"::1","user":26}
+[2026-03-10T18:57:21.021Z] [INFO] GET /api/v1/users/profile 200 (182ms) {"method":"GET","url":"/api/v1/users/profile","status":200,"duration":"182ms","ip":"::1","user":26}
+[2026-03-10T18:57:21.210Z] [INFO] GET /api/v1/notifications 200 (63ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"63ms","ip":"::1","user":26}
+[2026-03-10T18:57:21.217Z] [INFO] GET /api/v1/analytics/dashboard 200 (453ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":200,"duration":"453ms","ip":"::1","user":26}
+[2026-03-10T18:57:21.292Z] [INFO] GET /api/v1/notifications/admin/stats 200 (469ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"469ms","ip":"::1","user":26}
+[2026-03-10T18:57:21.316Z] [INFO] GET /api/v1/notifications/admin/stats 200 (227ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"227ms","ip":"::1","user":26}
+[2026-03-10T18:57:21.346Z] [INFO] GET /api/v1/analytics/dashboard 200 (165ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":200,"duration":"165ms","ip":"::1","user":26}
