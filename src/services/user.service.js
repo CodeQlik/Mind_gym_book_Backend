@@ -226,8 +226,8 @@ class UserService {
     }
 
     const [userId] = await sequelize.query(
-      `INSERT INTO users (name, email, password, phone, additional_phone, user_type, profile, is_active, created_at, updated_at)
-       VALUES (:name, :email, :password, :phone, :additional_phone, :user_type, :profile, 1, NOW(), NOW())`,
+      `INSERT INTO users (name, email, password, phone, additional_phone, user_type, profile, fcm_token, is_active, created_at, updated_at)
+       VALUES (:name, :email, :password, :phone, :additional_phone, :user_type, :profile, :fcm_token, 1, NOW(), NOW())`,
       {
         replacements: {
           name,
@@ -237,6 +237,7 @@ class UserService {
           additional_phone: additional_phone || null,
           user_type: user_type || "user",
           profile: JSON.stringify(profileObj),
+          fcm_token: deviceInfo.fcm_token || null,
         },
         type: QueryTypes.INSERT,
       },
@@ -394,10 +395,17 @@ class UserService {
     // Track Session
     await this.upsertSession(user.id, deviceInfo, refreshToken);
 
-    // Backward compatibility for old single-session logic
+    // Update FCM Token and Refresh Token for backward compatibility
     await sequelize.query(
-      "UPDATE users SET refresh_token = :refreshToken WHERE id = :id",
-      { replacements: { refreshToken, id: user.id }, type: QueryTypes.UPDATE },
+      "UPDATE users SET refresh_token = :refreshToken, fcm_token = COALESCE(:fcmToken, fcm_token) WHERE id = :id",
+      {
+        replacements: {
+          refreshToken,
+          fcmToken: deviceInfo.fcm_token || null,
+          id: user.id,
+        },
+        type: QueryTypes.UPDATE,
+      },
     );
 
     return {
@@ -441,14 +449,15 @@ class UserService {
       };
 
       const [insertId] = await sequelize.query(
-        `INSERT INTO users (name, email, password, user_type, profile, is_active, is_verified, created_at, updated_at)
-         VALUES (:name, :email, :password, 'user', :profile, 1, 1, NOW(), NOW())`,
+        `INSERT INTO users (name, email, password, user_type, profile, fcm_token, is_active, is_verified, created_at, updated_at)
+         VALUES (:name, :email, :password, 'user', :profile, :fcmToken, 1, 1, NOW(), NOW())`,
         {
           replacements: {
             name,
             email,
             password: randomPassword,
             profile: JSON.stringify(profileObj),
+            fcmToken: deviceInfo.fcm_token || null,
           },
           type: QueryTypes.INSERT,
         },
@@ -473,10 +482,17 @@ class UserService {
     // Track Session
     await this.upsertSession(user.id, deviceInfo, refreshToken);
 
-    // Backward compatibility
+    // Update FCM Token and Refresh Token
     await sequelize.query(
-      "UPDATE users SET refresh_token = :refreshToken WHERE id = :id",
-      { replacements: { refreshToken, id: user.id }, type: QueryTypes.UPDATE },
+      "UPDATE users SET refresh_token = :refreshToken, fcm_token = COALESCE(:fcmToken, fcm_token) WHERE id = :id",
+      {
+        replacements: {
+          refreshToken,
+          fcmToken: deviceInfo.fcm_token || null,
+          id: user.id,
+        },
+        type: QueryTypes.UPDATE,
+      },
     );
 
     // 🏆 Send Welcome Notification for NEW Google Users

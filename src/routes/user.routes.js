@@ -36,6 +36,7 @@ import {
   verifyEmailValidation,
   sendOTPValidation,
   adminUpdateUserValidation,
+  googleLoginValidation,
 } from "../validations/user.validation.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
@@ -52,7 +53,7 @@ router.post(
 );
 
 router.post("/login", validate(loginValidation), login);
-router.post("/google-login", googleLogin);
+router.post("/google-login", validate(googleLoginValidation), googleLogin);
 router.post("/refresh-token", refreshAccessToken);
 router.post(
   "/forgot-password",

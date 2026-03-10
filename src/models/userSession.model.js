@@ -27,6 +27,11 @@ const UserSession = sequelize.define(
       allowNull: true,
       defaultValue: "Unknown Device",
     },
+    platform: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      defaultValue: "android",
+    },
     ip_address: {
       type: DataTypes.STRING,
       allowNull: true,

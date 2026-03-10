@@ -37,6 +37,9 @@ export const registerValidation = Joi.object({
   verificationToken: Joi.string().optional().allow(null, "").messages({
     "string.empty": "Verification token is optional",
   }),
+  fcm_token: Joi.string().optional().allow(null, ""),
+  device_id: Joi.string().optional().allow(null, ""),
+  platform: Joi.string().valid("android", "ios").optional().allow(null, ""),
 });
 
 export const loginValidation = Joi.object({
@@ -49,6 +52,19 @@ export const loginValidation = Joi.object({
     "string.empty": "Password is required",
     "any.required": "Password is required",
   }),
+  fcm_token: Joi.string().optional().allow(null, ""),
+  device_id: Joi.string().optional().allow(null, ""),
+  platform: Joi.string().valid("android", "ios").optional().allow(null, ""),
+});
+
+export const googleLoginValidation = Joi.object({
+  id_token: Joi.string().required().messages({
+    "string.empty": "ID Token is required",
+    "any.required": "ID Token is required",
+  }),
+  fcm_token: Joi.string().optional().allow(null, ""),
+  device_id: Joi.string().optional().allow(null, ""),
+  platform: Joi.string().valid("android", "ios").optional().allow(null, ""),
 });
 
 export const updateProfileValidation = Joi.object({

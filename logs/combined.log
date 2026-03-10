@@ -2842,3 +2842,63 @@
 [2026-03-10T15:44:00.778Z] [INFO] Redis Client Connected 
 [2026-03-10T16:32:07.398Z] [INFO] Redis Client Connected 
 [2026-03-10T16:38:47.912Z] [INFO] Redis Client Connected 
+[2026-03-10T17:14:54.663Z] [INFO] POST /api/v1/users/login 200 (459ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"459ms","ip":"::1","user":"Guest"}
+[2026-03-10T17:15:13.079Z] [WARN] POST /api/v1/users/login 400 (4ms) {"method":"POST","url":"/api/v1/users/login","status":400,"duration":"4ms","ip":"::1","user":"Guest"}
+[2026-03-10T17:15:22.229Z] [ERROR] POST /api/v1/users/login {"message":"Expected double-quoted property name in JSON at position 68 (line 5 column 1)","stack":"SyntaxError: Expected double-quoted property name in JSON at position 68 (line 5 column 1)\n    at JSON.parse (<anonymous>)\n    at parse (E:\\Mind_gym_book_Backend-main\\Mind_gym_book_Backend-main\\node_modules\\body-parser\\lib\\types\\json.js:92:19)\n    at E:\\Mind_gym_book_Backend-main\\Mind_gym_book_Backend-main\\node_modules\\body-parser\\lib\\read.js:128:18\n    at AsyncResource.runInAsyncScope (node:async_hooks:214:14)\n    at invokeCallback (E:\\Mind_gym_book_Backend-main\\Mind_gym_book_Backend-main\\node_modules\\raw-body\\index.js:238:16)\n    at done (E:\\Mind_gym_book_Backend-main\\Mind_gym_book_Backend-main\\node_modules\\raw-body\\index.js:227:7)\n    at IncomingMessage.onEnd (E:\\Mind_gym_book_Backend-main\\Mind_gym_book_Backend-main\\node_modules\\raw-body\\index.js:287:7)\n    at IncomingMessage.emit (node:events:519:28)\n    at endReadableNT (node:internal/streams/readable:1698:12)\n    at process.processTicksAndRejections (node:internal/process/task_queues:90:21)","body":{},"params":{},"query":{},"user":"Guest"}
+[2026-03-10T17:15:27.879Z] [INFO] POST /api/v1/users/login 200 (114ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"114ms","ip":"::1","user":"Guest"}
+[2026-03-10T17:18:44.441Z] [INFO] Redis Client Connected 
+[2026-03-10T17:25:59.069Z] [INFO] Redis Client Connected 
+[2026-03-10T17:26:54.483Z] [INFO] Redis Client Connected 
+[2026-03-10T17:28:09.197Z] [INFO] Redis Client Connected 
+[2026-03-10T17:32:34.752Z] [INFO] Redis Client Connected 
+[2026-03-10T17:34:27.332Z] [ERROR] Redis Client Error {"errno":-4077,"code":"ECONNRESET","syscall":"read"}
+[2026-03-10T17:34:31.110Z] [INFO] Redis Client Connected 
+[2026-03-10T17:35:14.680Z] [INFO] Redis Client Connected 
+[2026-03-10T17:43:33.217Z] [INFO] Redis Client Connected 
+[2026-03-10T17:43:50.552Z] [INFO] Redis Client Connected 
+[2026-03-10T17:46:26.350Z] [WARN] POST /api/v1/users/login 400 (10ms) {"method":"POST","url":"/api/v1/users/login","status":400,"duration":"10ms","ip":"::1","user":"Guest"}
+[2026-03-10T17:47:11.325Z] [WARN] POST /api/v1/users/login 400 (1ms) {"method":"POST","url":"/api/v1/users/login","status":400,"duration":"1ms","ip":"::1","user":"Guest"}
+[2026-03-10T17:47:57.538Z] [INFO] Redis Client Connected 
+[2026-03-10T17:48:12.632Z] [INFO] Redis Client Connected 
+[2026-03-10T17:48:21.019Z] [INFO] Redis Client Connected 
+[2026-03-10T17:48:34.299Z] [INFO] POST /api/v1/users/login 200 (241ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"241ms","ip":"::1","user":"Guest"}
+[2026-03-10T17:54:44.103Z] [INFO] Redis Client Connected 
+[2026-03-10T17:58:31.991Z] [INFO] POST /api/v1/users/login 200 (211ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"211ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:00:21.091Z] [WARN] GET /api/v1/notifications 401 (64ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"64ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:00:21.115Z] [WARN] GET /api/v1/notifications/admin/stats 401 (79ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"79ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:00:21.285Z] [WARN] GET /api/v1/users/profile 401 (57ms) {"method":"GET","url":"/api/v1/users/profile","status":401,"duration":"57ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:00:21.555Z] [WARN] GET /api/v1/notifications 401 (309ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"309ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:00:21.624Z] [WARN] GET /api/v1/subscriptions/admin/all 401 (514ms) {"method":"GET","url":"/api/v1/subscriptions/admin/all","status":401,"duration":"514ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:00:29.889Z] [INFO] POST /api/v1/users/login 200 (118ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"118ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:00:29.962Z] [INFO] GET /api/v1/users/profile 200 (30ms) {"method":"GET","url":"/api/v1/users/profile","status":200,"duration":"30ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.061Z] [INFO] GET /api/v1/notifications 200 (57ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"57ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.065Z] [INFO] GET /api/v1/users/profile 304 (52ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"52ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.108Z] [INFO] GET /api/v1/notifications 304 (29ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"29ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.146Z] [INFO] GET /api/v1/notifications 304 (25ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"25ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.158Z] [INFO] GET /api/v1/notifications/admin/stats 200 (125ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"125ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.165Z] [INFO] GET /api/v1/analytics/dashboard 200 (117ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":200,"duration":"117ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.239Z] [INFO] GET /api/v1/notifications 304 (66ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"66ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.298Z] [INFO] GET /api/v1/notifications/admin/stats 304 (124ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"124ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.311Z] [INFO] GET /api/v1/analytics/dashboard 304 (102ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"102ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.366Z] [INFO] GET /api/v1/notifications/admin/stats 304 (51ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"51ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.372Z] [INFO] GET /api/v1/analytics/dashboard 304 (52ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"52ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.410Z] [INFO] GET /api/v1/notifications/admin/stats 304 (35ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"35ms","ip":"::1","user":26}
+[2026-03-10T18:00:30.416Z] [INFO] GET /api/v1/analytics/dashboard 304 (38ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"38ms","ip":"::1","user":26}
+[2026-03-10T18:00:33.528Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (962ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"962ms","ip":"::1","user":26}
+[2026-03-10T18:00:34.128Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (594ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"594ms","ip":"::1","user":26}
+[2026-03-10T18:00:35.501Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 200 (10ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":200,"duration":"10ms","ip":"::1","user":26}
+[2026-03-10T18:00:35.517Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (9ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"9ms","ip":"::1","user":26}
+[2026-03-10T18:00:36.000Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (5ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"5ms","ip":"::1","user":26}
+[2026-03-10T18:00:39.594Z] [INFO] GET /api/v1/users/admin/sessions/29 200 (12ms) {"method":"GET","url":"/api/v1/users/admin/sessions/29","status":200,"duration":"12ms","ip":"::1","user":26}
+[2026-03-10T18:01:12.733Z] [INFO] POST /api/v1/users/login 200 (129ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"129ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:01:18.454Z] [INFO] GET /api/v1/users/admin/sessions/29 200 (9ms) {"method":"GET","url":"/api/v1/users/admin/sessions/29","status":200,"duration":"9ms","ip":"::1","user":26}
+[2026-03-10T18:01:33.554Z] [INFO] DELETE /api/v1/users/admin/terminate-session/29/6 200 (13ms) {"method":"DELETE","url":"/api/v1/users/admin/terminate-session/29/6","status":200,"duration":"13ms","ip":"::1","user":26}
+[2026-03-10T18:01:33.575Z] [INFO] GET /api/v1/users/admin/sessions/29 200 (7ms) {"method":"GET","url":"/api/v1/users/admin/sessions/29","status":200,"duration":"7ms","ip":"::1","user":26}
+[2026-03-10T18:01:36.972Z] [INFO] DELETE /api/v1/users/admin/terminate-session/29/7 200 (34ms) {"method":"DELETE","url":"/api/v1/users/admin/terminate-session/29/7","status":200,"duration":"34ms","ip":"::1","user":26}
+[2026-03-10T18:01:37.005Z] [INFO] GET /api/v1/users/admin/sessions/29 200 (12ms) {"method":"GET","url":"/api/v1/users/admin/sessions/29","status":200,"duration":"12ms","ip":"::1","user":26}
+[2026-03-10T18:01:44.305Z] [INFO] POST /api/v1/users/login 200 (126ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"126ms","ip":"::1","user":"Guest"}
+[2026-03-10T18:01:49.126Z] [INFO] GET /api/v1/users/admin/sessions/29 200 (10ms) {"method":"GET","url":"/api/v1/users/admin/sessions/29","status":200,"duration":"10ms","ip":"::1","user":26}
+[2026-03-10T18:02:00.105Z] [INFO] GET /api/v1/users/admin/sessions/2 200 (9ms) {"method":"GET","url":"/api/v1/users/admin/sessions/2","status":200,"duration":"9ms","ip":"::1","user":26}
+[2026-03-10T18:02:06.209Z] [INFO] GET /api/v1/users/admin/sessions/51 304 (7ms) {"method":"GET","url":"/api/v1/users/admin/sessions/51","status":304,"duration":"7ms","ip":"::1","user":26}
+[2026-03-10T18:02:11.647Z] [INFO] GET /api/v1/users/admin/sessions/29 304 (10ms) {"method":"GET","url":"/api/v1/users/admin/sessions/29","status":304,"duration":"10ms","ip":"::1","user":26}
+[2026-03-10T18:06:12.731Z] [INFO] GET /api/v1/notifications/ 200 (14ms) {"method":"GET","url":"/api/v1/notifications/","status":200,"duration":"14ms","ip":"::1","user":29}

@@ -183,6 +183,40 @@
       ]
     },
     {
+      "name": "🔐 Authentication & Token Sync",
+      "item": [
+        {
+          "name": "Login User (Updates FCM Token)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/users/login",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password@123\",\n  \"fcm_token\": \"APA91bEfG_YOUR_ACTUAL_FCM_TOKEN_HERE\",\n  \"device_id\": \"UNIQUE_DEVICE_ID\",\n  \"platform\": \"android\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Sync FCM Token (Standalone)",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" },
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/notifications/tokens",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"fcm_token\": \"APA91bEfG_YOUR_ACTUAL_FCM_TOKEN_HERE\",\n  \"device_id\": \"UNIQUE_DEVICE_ID\",\n  \"platform\": \"android\"\n}"
+            }
+          }
+        }
+      ]
+    },
+    {
       "name": "👤 User Triggers",
       "item": [
         {
@@ -198,6 +232,8 @@
                 { "key": "password", "value": "Password@123", "type": "text" },
                 { "key": "phone", "value": "9876543210", "type": "text" },
                 { "key": "device_id", "value": "DEVICE-ID-SOCKET-TEST", "type": "text" },
+                { "key": "fcm_token", "value": "APA91b...", "type": "text" },
+                { "key": "platform", "value": "android", "type": "text" },
                 { "key": "verificationToken", "value": "PASTE_TOKEN_HERE", "type": "text" }
               ]
             }

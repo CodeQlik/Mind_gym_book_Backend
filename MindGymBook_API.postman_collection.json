@@ -49,7 +49,10 @@
                 { "key": "name", "value": "Test User", "type": "text" },
                 { "key": "email", "value": "user@example.com", "type": "text" },
                 { "key": "password", "value": "Password@123", "type": "text" },
-                { "key": "phone", "value": "9999999999", "type": "text" }
+                { "key": "phone", "value": "9999999999", "type": "text" },
+                { "key": "device_id", "value": "DEVICE-ID-123", "type": "text" },
+                { "key": "fcm_token", "value": "APA91b...", "type": "text" },
+                { "key": "platform", "value": "android", "type": "text" }
               ]
             }
           }
@@ -73,7 +76,7 @@
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/users/login",
-            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password@123\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"email\": \"user@example.com\",\n  \"password\": \"Password@123\",\n  \"fcm_token\": \"APA91b...\",\n  \"device_id\": \"DEVICE-ID-123\",\n  \"platform\": \"android\"\n}" }
           }
         },
         {
@@ -82,7 +85,7 @@
             "method": "POST",
             "header": [{ "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/users/google-login",
-            "body": { "mode": "raw", "raw": "{\n  \"id_token\": \"GOOGLE_ID_TOKEN_HERE\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"id_token\": \"GOOGLE_ID_TOKEN_HERE\",\n  \"fcm_token\": \"APA91b...\",\n  \"device_id\": \"DEVICE-ID-123\",\n  \"platform\": \"android\"\n}" }
           }
         },
         {
@@ -1065,7 +1068,7 @@
             "method": "POST",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/notifications/fcm-token",
-            "body": { "mode": "raw", "raw": "{\n  \"fcm_token\": \"FCM_TOKEN_FROM_DEVICE\"\n}" }
+            "body": { "mode": "raw", "raw": "{\n  \"fcm_token\": \"FCM_TOKEN_FROM_DEVICE\",\n  \"device_id\": \"DEVICE-ID-123\",\n  \"platform\": \"android\"\n}" }
           }
         },
         {

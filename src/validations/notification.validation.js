@@ -17,6 +17,14 @@ export const registerFCMTokenValidation = Joi.object({
     "string.empty": "FCM token cannot be empty",
     "any.required": "FCM token is required",
   }),
+  device_id: Joi.string().required().trim().messages({
+    "string.empty": "Device ID cannot be empty",
+    "any.required": "Device ID is required",
+  }),
+  platform: Joi.string().valid("android", "ios").required().messages({
+    "any.only": "Platform must be either android or ios",
+    "any.required": "Platform is required",
+  }),
 });
 
 export const sendNotificationValidation = Joi.object({

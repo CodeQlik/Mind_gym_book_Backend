@@ -41,13 +41,17 @@ export const verifyRegistrationOTP = async (req, res, next) => {
 };
 
 const getDeviceInfo = (req) => ({
-  device_id: req.headers["x-device-id"] || "unknown_device",
+  device_id:
+    req.body.device_id || req.headers["x-device-id"] || "unknown_device",
   device_name:
+    req.body.device_name ||
     req.headers["x-device-name"] ||
     req.headers["user-agent"] ||
     "Unknown Device",
   ip_address:
     req.ip || req.headers["x-forwarded-for"] || req.socket.remoteAddress,
+  fcm_token: req.body.fcm_token || null,
+  platform: req.body.platform || req.headers["x-platform"] || "android",
 });
 
 export const registerUser = async (req, res, next) => {
