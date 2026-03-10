@@ -97,9 +97,22 @@ class SubscriptionService {
 
   async updateSubscriptionStatus(id, status) {
     const subscription = await Subscription.findByPk(id);
+
     if (!subscription) {
       throw new Error("Subscription not found");
     }
+
+    // allowed ENUM values
+    const allowedStatus = ["pending", "active", "expired", "failed"];
+
+    // mapping agar frontend se different value aaye
+    if (status === "approved") status = "active";
+    if (status === "cancelled") status = "failed";
+
+    if (!allowedStatus.includes(status)) {
+      throw new Error(`Invalid status value: ${status}`);
+    }
+
     await subscription.update({ status });
 
     if (status === "active") {
@@ -111,7 +124,6 @@ class SubscriptionService {
         { where: { id: subscription.user_id } },
       );
 
-      // 🏆 Notify user about activation
       try {
         await notificationService.sendToUser(
           subscription.user_id,
