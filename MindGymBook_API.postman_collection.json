@@ -11,7 +11,10 @@
     { "key": "reset_token", "value": "", "type": "string" },
     { "key": "book_id", "value": "1", "type": "string" },
     { "key": "order_id", "value": "1", "type": "string" },
-    { "key": "category_id", "value": "1", "type": "string" }
+    { "key": "category_id", "value": "1", "type": "string" },
+    { "key": "blog_id", "value": "1", "type": "string" },
+    { "key": "blog_slug", "value": "test-blog", "type": "string" },
+    { "key": "testimonial_id", "value": "1", "type": "string" }
   ],
   "item": [
     {
@@ -1405,6 +1408,140 @@
             "method": "DELETE",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
             "url": "{{base_url}}/cms/admin/delete/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "📰 Blogs",
+      "item": [
+        {
+          "name": "Get All Blogs",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/blogs",
+            "description": "Public route to fetch all published blogs."
+          }
+        },
+        {
+          "name": "Get Blog By Slug",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/blogs/{{blog_slug}}",
+            "description": "Public route to fetch a single blog by its URL slug."
+          }
+        },
+        {
+          "name": "Admin — Add Blog",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/blogs",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "How to Improve Mental Focus", "type": "text" },
+                { "key": "excerpt", "value": "Short summary of the blog post.", "type": "text" },
+                { "key": "content", "value": "<h1>The Importance of Focus</h1><p>Content goes here...</p>", "type": "text" },
+                { "key": "category_id", "value": "{{category_id}}", "type": "text" },
+                { "key": "author", "value": "Admin", "type": "text" },
+                { "key": "is_published", "value": "true", "type": "text" },
+                { "key": "meta_title", "value": "SEO Title", "type": "text" },
+                { "key": "meta_description", "value": "SEO Description", "type": "text" },
+                { "key": "meta_keywords", "value": "focus, mental gym, productivity", "type": "text" },
+                { "key": "image", "value": "", "type": "file", "description": "Featured Image" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Update Blog",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/blogs/{{blog_id}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "title", "value": "Updated Blog Title", "type": "text" },
+                { "key": "is_published", "value": "true", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Delete Blog",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/blogs/{{blog_id}}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "💬 Testimonials",
+      "item": [
+        {
+          "name": "Get All Testimonials",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/testimonials",
+            "description": "Public route to fetch all active testimonials."
+          }
+        },
+        {
+          "name": "Admin — Add Testimonial",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/testimonials",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "John Doe", "type": "text" },
+                { "key": "designation", "value": "CEO at TechCorp", "type": "text" },
+                { "key": "content", "value": "Mind Gym Book transformed my reading habit!", "type": "text" },
+                { "key": "rating", "value": "5", "type": "text" },
+                { "key": "is_active", "value": "true", "type": "text" },
+                { "key": "image", "value": "", "type": "file", "description": "User Avatar" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Update Testimonial",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/testimonials/{{testimonial_id}}",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "name", "value": "Jane Smith", "type": "text" },
+                { "key": "rating", "value": "5", "type": "text" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Delete Testimonial",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/testimonials/{{testimonial_id}}"
           }
         }
       ]

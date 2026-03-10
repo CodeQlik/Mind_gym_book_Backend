@@ -9,11 +9,9 @@ import {
   forgotPassword,
   verifyForgotPasswordOTP,
   resetPassword,
-  deleteAccount,
   getAllUsers,
   updateUser,
   getUserById,
-  deleteUser,
   searchUsers,
   refreshAccessToken,
   sendRegistrationOTP,
@@ -35,7 +33,6 @@ import {
   changePasswordValidation,
   forgotPasswordValidation,
   resetPasswordValidation,
-  deleteAccountValidation,
   verifyEmailValidation,
   sendOTPValidation,
   adminUpdateUserValidation,
@@ -100,12 +97,6 @@ router.post(
   validate(changePasswordValidation),
   changePassword,
 );
-router.delete(
-  "/delete-account",
-  verifyJWT,
-  validate(deleteAccountValidation),
-  deleteAccount,
-);
 router.patch("/update-tts-preferences", verifyJWT, updateTTSPreferences);
 router.get("/sessions", verifyJWT, getUserSessions);
 router.delete("/sessions/other", verifyJWT, terminateAllOtherSessions);
@@ -123,7 +114,6 @@ router.put(
   validate(adminUpdateUserValidation),
   updateUser,
 );
-router.delete("/delete/:id", verifyJWT, isAdmin, deleteUser);
 router.patch("/toggle-status/:id", verifyJWT, isAdmin, toggleUserStatus);
 router.get("/admin/sessions/:id", verifyJWT, isAdmin, adminGetUserSessions);
 router.delete(

@@ -893,24 +893,6 @@ class UserService {
     }
   }
 
-  // ─── Delete Account
-  async deleteAccount(userId, password) {
-    const [user] = await sequelize.query(
-      "SELECT id, password FROM users WHERE id = :id LIMIT 1",
-      { replacements: { id: userId }, type: QueryTypes.SELECT },
-    );
-    if (!user) throw new Error("User not found");
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new Error("Invalid password");
-
-    await sequelize.query("DELETE FROM users WHERE id = :id", {
-      replacements: { id: userId },
-      type: QueryTypes.DELETE,
-    });
-    return true;
-  }
-
   // ─── Get All Users (Paginated)
   async getAllUsers(page = 1, limit = 10) {
     const offset = (page - 1) * limit;
@@ -937,21 +919,6 @@ class UserService {
   // ─── Get User By ID
   async getUserById(userId) {
     return await this.getUserProfile(userId);
-  }
-
-  // ─── Delete User (Admin)
-  async deleteUser(userId) {
-    const [user] = await sequelize.query(
-      "SELECT id FROM users WHERE id = :id LIMIT 1",
-      { replacements: { id: userId }, type: QueryTypes.SELECT },
-    );
-    if (!user) throw new Error("User not found");
-
-    await sequelize.query("DELETE FROM users WHERE id = :id", {
-      replacements: { id: userId },
-      type: QueryTypes.DELETE,
-    });
-    return true;
   }
 
   async updateTTSPreferences(userId, prefs) {

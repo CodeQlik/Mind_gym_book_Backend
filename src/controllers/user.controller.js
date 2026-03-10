@@ -291,23 +291,6 @@ export const resetPassword = async (req, res, next) => {
   }
 };
 
-export const deleteAccount = async (req, res, next) => {
-  try {
-    const { password } = req.body;
-    await userService.deleteAccount(req.user.id, password);
-
-    res.clearCookie("token", {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "None",
-    });
-
-    return sendResponse(res, 200, true, "Account deleted successfully");
-  } catch (error) {
-    next(error);
-  }
-};
-
 export const getAllUsers = async (req, res, next) => {
   try {
     const page = parseInt(req.query.page) || 1;
@@ -372,15 +355,6 @@ export const searchUsers = async (req, res, next) => {
       );
     }
     return sendResponse(res, 200, true, "Search results fetched", result);
-  } catch (error) {
-    next(error);
-  }
-};
-export const deleteUser = async (req, res, next) => {
-  try {
-    const { id } = req.params;
-    await userService.deleteUser(id);
-    return sendResponse(res, 200, true, "User deleted successfully");
   } catch (error) {
     next(error);
   }

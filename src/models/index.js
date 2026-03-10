@@ -23,6 +23,8 @@ import SupportTicket from "./supportTicket.model.js";
 import SupportMessage from "./supportMessage.model.js";
 import UserSession from "./userSession.model.js";
 import CMSPage from "./cmsPage.model.js";
+import Blog from "./blog.model.js";
+import Testimonial from "./testimonial.model.js";
 
 // Associations
 
@@ -163,6 +165,10 @@ User.hasMany(SupportMessage, {
 });
 SupportMessage.belongsTo(User, { foreignKey: "sender_id", as: "sender" });
 
+// Blog Associations
+Category.hasMany(Blog, { foreignKey: "category_id", as: "blogs" });
+Blog.belongsTo(Category, { foreignKey: "category_id", as: "category" });
+
 export {
   User,
   Address,
@@ -189,4 +195,6 @@ export {
   SupportMessage,
   UserSession,
   CMSPage,
+  Blog,
+  Testimonial,
 };

@@ -147,13 +147,6 @@ export const resetPasswordValidation = Joi.object({
     }),
 });
 
-export const deleteAccountValidation = Joi.object({
-  password: Joi.string().required().messages({
-    "string.empty": "Password is required to delete account",
-    "any.required": "Password is required to delete account",
-  }),
-});
-
 export const verifyEmailValidation = Joi.object({
   email: Joi.string().email().required().messages({
     "string.email": "Please provide a valid email",
