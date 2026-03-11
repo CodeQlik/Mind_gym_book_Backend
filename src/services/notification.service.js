@@ -1,10 +1,17 @@
 import { getMessaging } from "../config/firebase.js";
-import Notification from "../models/notification.model.js";
-import { User, Category, Subscription, Wishlist } from "../models/index.js";
+import {
+  User,
+  Category,
+  Subscription,
+  Wishlist,
+  Notification,
+} from "../models/index.js";
 import UserFavoriteCategory from "../models/userFavoriteCategory.model.js";
 import { Op } from "sequelize";
 import sequelize from "../config/db.js";
 import { emitNotification } from "../utils/socket.js";
+import sendEmail from "../config/sendEmail.js";
+import invoiceService from "./invoice.service.js";
 
 class NotificationService {
   // Usage: formatMessage("Hello {user_name}, {book_title} is available!", user, metadata)
@@ -172,14 +179,21 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     const user = await User.findByPk(userId, {
-      attributes: ["id", "name", "fcm_token"],
+      attributes: ["id", "name", "email", "fcm_token", "user_type"],
     });
     if (!user) throw new Error("User not found");
 
     // Replace placeholders like {user_name}
     const formattedMessage = this.formatMessage(message, user, metadata || {});
+
+    const meta =
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
 
     // Save to DB
     const notification = await this.saveNotification(
@@ -187,20 +201,106 @@ class NotificationService {
       type,
       title,
       formattedMessage,
-      metadata,
+      meta,
       status,
       scheduledAt,
       senderId,
     );
 
-    // Send FCM push ONLY IF status is SENT
-    if (status === "SENT" && user.fcm_token) {
-      await this.sendFCM(
-        user.fcm_token,
-        title,
-        formattedMessage,
-        metadata || {},
-      );
+    // Send FCM push ONLY IF status is SENT and user is NOT an admin
+    const finalSendPush = send_push !== null ? send_push : true;
+    if (
+      status === "SENT" &&
+      finalSendPush &&
+      user.fcm_token &&
+      user.user_type !== "admin"
+    ) {
+      await this.sendFCM(user.fcm_token, title, formattedMessage, meta);
+    }
+
+    // Send EMAIL if type matches or explicitly requested
+    const emailTypes = [
+      "ORDER",
+      "RENEWAL",
+      "APPROVAL",
+      "SUBSCRIPTION",
+      "REFUND",
+      "PAYMENT",
+      "EXPIRED",
+      "EXPIRY",
+      "EXPIRING",
+    ];
+    const isEmailRequired = emailTypes.some((t) =>
+      type.toUpperCase().includes(t),
+    );
+    const finalSendEmail = send_email !== null ? send_email : isEmailRequired;
+
+    if (status === "SENT" && finalSendEmail && user.email) {
+      try {
+        const emailTemplate = `
+          <!DOCTYPE html>
+          <html>
+            <head>
+              <meta charset="utf-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <style>
+                body { margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; }
+                .wrapper { width: 100%; table-layout: fixed; padding: 40px 10px; }
+                .container { max-width: 600px; margin: 0 auto; background-color: #ffffff; border-radius: 16px; overflow: hidden; border: 1px solid #e2e8f0; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
+                .header { background-color: #6366f1; padding: 30px; text-align: center; }
+                .header h1 { color: #ffffff; margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -0.025em; }
+                .content { padding: 40px 30px; }
+                .content h2 { color: #0f172a; margin-top: 0; font-size: 20px; font-weight: 700; }
+                .content p { color: #475569; font-size: 16px; line-height: 1.6; margin-bottom: 25px; }
+                .footer { background-color: #f1f5f9; padding: 30px; text-align: center; }
+                .footer p { margin: 0; font-size: 12px; color: #94a3b8; line-height: 1.5; }
+                .footer .brand { font-weight: 700; color: #64748b; margin-bottom: 10px; display: block; }
+                .button { display: inline-block; padding: 12px 24px; background-color: #6366f1; color: #ffffff !important; text-decoration: none; border-radius: 8px; font-weight: 700; font-size: 14px; }
+              </style>
+            </head>
+            <body>
+              <div class="wrapper">
+                <div class="container">
+                  <div class="header">
+                    <h1>MIND GYM BOOK</h1>
+                  </div>
+                  <div class="content">
+                    <h2>${title}</h2>
+                    <p>${formattedMessage}</p>
+                    ${metadata?.order_id ? `<a href="#" class="button">Track Your Order</a>` : ""}
+                  </div>
+                  <div class="footer">
+                    <span class="brand">Mind Gym Book Publication</span>
+                    <p>You received this email because of your recent activity on our platform.</p>
+                    <p>&copy; ${new Date().getFullYear()} Mind Gym Book. All rights reserved.</p>
+                  </div>
+                </div>
+              </div>
+            </body>
+          </html>
+        `;
+        let attachments = [];
+        if (type.includes("ORDER") && metadata?.order_id) {
+          try {
+            const pdfBuffer = await invoiceService.generateOrderInvoice(
+              metadata.order_id,
+            );
+            attachments.push({
+              filename: `Invoice_${metadata.order_no || metadata.order_id}.pdf`,
+              content: pdfBuffer,
+            });
+          } catch (pdfErr) {
+            console.error("Invoice PDF generation failed:", pdfErr.message);
+          }
+        }
+
+        await sendEmail(user.email, title, emailTemplate, null, attachments);
+      } catch (emailErr) {
+        console.error(
+          "[NOTIFICATION SERVICE] Email send error:",
+          emailErr.message,
+        );
+      }
     }
 
     return notification;
@@ -215,23 +315,29 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save only ONE notification for the entire system (Broadcast)
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "ALL";
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null, // Master record
       type,
       title,
       message,
-      { ...meta, target: "ALL" },
+      meta,
       status,
       scheduledAt,
       senderId,
     );
 
     const users = await User.findAll({
-      where: { is_active: true },
+      where: { is_active: true, user_type: { [Op.ne]: "admin" } },
       attributes: ["id", "fcm_token"],
     });
 
@@ -256,16 +362,23 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save only ONE notification for this category broadcast
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "CATEGORY";
+    meta.category_id = categoryId;
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null,
       type,
       title,
       message,
-      { ...meta, target: "CATEGORY", category_id: categoryId },
+      meta,
       status,
       scheduledAt,
       senderId,
@@ -303,16 +416,22 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save ONE master notification
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "SUBSCRIBED";
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null,
       type,
       title,
       message,
-      { ...meta, target: "SUBSCRIBED" },
+      meta,
       status,
       scheduledAt,
       senderId,
@@ -350,16 +469,22 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save ONE master notification
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "WISHLIST";
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null,
       type,
       title,
       message,
-      { ...meta, target: "WISHLIST" },
+      meta,
       status,
       scheduledAt,
       senderId,
@@ -397,16 +522,22 @@ class NotificationService {
     status = "SENT",
     scheduledAt = null,
     senderId = null,
+    send_push = null,
+    send_email = null,
   ) {
     // Save ONE master notification
     const meta =
-      typeof metadata === "object" && metadata !== null ? metadata : {};
+      typeof metadata === "object" && metadata !== null ? { ...metadata } : {};
+    meta.target = "EXPIRING";
+    if (send_push !== null) meta.send_push = send_push;
+    if (send_email !== null) meta.send_email = send_email;
+
     await this.saveNotification(
       null,
       type,
       title,
       message,
-      { ...meta, target: "EXPIRING" },
+      meta,
       status,
       scheduledAt,
       senderId,
@@ -450,7 +581,8 @@ class NotificationService {
 
     const { count, rows } = await Notification.findAndCountAll({
       where: {
-        [Op.or]: [{ userId: userId }, { userId: null }],
+        userId: { [Op.or]: [userId, null] },
+        status: "SENT",
       },
       order: [["createdAt", "DESC"]],
       limit,
@@ -650,6 +782,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         } else if (target === "CATEGORY") {
           await this.sendToCategory(
@@ -658,6 +795,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         } else if (target === "SUBSCRIBED") {
           await this.sendToSubscribed(
@@ -665,6 +807,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         } else if (target === "WISHLIST") {
           await this.sendToWishlist(
@@ -672,6 +819,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         } else if (target === "EXPIRING") {
           await this.sendToExpiring(
@@ -679,6 +831,11 @@ class NotificationService {
             notif.title,
             notif.message,
             notif.metadata,
+            notif.status,
+            notif.scheduled_at,
+            null,
+            notif.metadata?.send_push,
+            notif.metadata?.send_email,
           );
         }
       } catch (err) {
@@ -742,6 +899,30 @@ class NotificationService {
         recurringCount: 0,
         failedCount: 0,
       };
+    }
+  }
+
+  // Auto-Cleanup: Delete notifications older than 30 days
+  async cleanupOldNotifications() {
+    try {
+      const thirtyDaysAgo = new Date();
+      thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+
+      const deletedCount = await Notification.destroy({
+        where: {
+          createdAt: { [Op.lt]: thirtyDaysAgo },
+        },
+      });
+
+      if (deletedCount > 0) {
+        console.log(
+          `[CLEANUP] 🧹 Deleted ${deletedCount} notifications older than 30 days.`,
+        );
+      }
+      return deletedCount;
+    } catch (error) {
+      console.error("[CLEANUP] ❌ Notification cleanup failed:", error.message);
+      return 0;
     }
   }
 }

@@ -7,6 +7,7 @@ import {
 } from "../config/cloudinary.js";
 import notificationService from "./notification.service.js";
 import sequelize from "../config/db.js";
+import { getCache, setCache, clearCachePattern } from "../utils/redisCache.js";
 
 class BookService {
   generateSlug(title) {
@@ -36,7 +37,6 @@ class BookService {
       highlights,
       isbn,
       language,
-      otherdescription,
       previewPages,
       dimensions,
       weight,
@@ -143,7 +143,6 @@ class BookService {
       isbn: isbn || null,
       language: language || null,
       page_count: 0,
-      otherdescription: otherdescription || null,
       previewPages: parseInt(previewPages) || 5,
       dimensions: dimensions || null,
       weight: weight ? parseFloat(weight) : null,
@@ -165,10 +164,17 @@ class BookService {
         console.error("[FCM] Background notification error:", err.message),
       );
 
+    // Clear books cache
+    await clearCachePattern("books:*");
+
     return createdBook;
   }
 
-  async getBooks(filters = {}, page = 1, limit = 10, userId = null) {
+  async getBooks(filters = {}, page = 1, limit = 10) {
+    const cacheKey = `books:list:${JSON.stringify(filters)}:${page}:${limit}`;
+    const cachedData = await getCache(cacheKey);
+    if (cachedData) return cachedData;
+
     const offset = (page - 1) * limit;
     const where = {};
 
@@ -190,38 +196,15 @@ class BookService {
       offset,
     });
 
-    const books = userId
-      ? await this.injectBookmarkStatus(rows, userId)
-      : rows;
-
-    return {
+    const result = {
       totalItems: count,
       totalPages: Math.ceil(count / limit),
       currentPage: page,
-      books,
+      books: rows,
     };
-  }
 
-  async injectBookmarkStatus(books, userId) {
-    if (!userId || !books?.length) return books;
-
-    const bookIds = books.map((b) => b.id);
-    const bookmarks = await Bookmark.findAll({
-      where: {
-        user_id: userId,
-        book_id: { [Op.in]: bookIds },
-      },
-    });
-
-    const bookmarkedSet = new Set(bookmarks.map((bm) => bm.book_id));
-
-    return books.map((book) => {
-      const bookData = book.toJSON();
-      return {
-        ...bookData,
-        isBookmarked: bookmarkedSet.has(book.id),
-      };
-    });
+    await setCache(cacheKey, result);
+    return result;
   }
 
   async getBooksByCategoryId(
@@ -387,13 +370,25 @@ class BookService {
       }
     }
 
-    if (files?.images?.length > 0) {
-      if (Array.isArray(book.images)) {
-        for (const img of book.images) {
-          if (img.public_id) await deleteFromCloudinary(img.public_id);
-        }
+    // Handle Gallery Images (Multiple)
+    let gallery = [];
+
+    // 1. If existing images are passed as JSON string or array in req.body.images, keep them
+    if (data.images) {
+      try {
+        gallery =
+          typeof data.images === "string"
+            ? JSON.parse(data.images)
+            : data.images;
+      } catch (e) {
+        gallery = book.images || [];
       }
-      const gallery = [];
+    } else {
+      gallery = book.images || [];
+    }
+
+    // 2. If new images are uploaded, add them to the gallery
+    if (files?.images?.length > 0) {
       for (const file of files.images) {
         const res = await uploadOnCloudinary(
           file.path,
@@ -402,8 +397,19 @@ class BookService {
         if (res)
           gallery.push({ url: res.secure_url, public_id: res.public_id });
       }
-      book.images = gallery;
     }
+
+    // 3. If there were images removed (not present in the new set), delete them from Cloudinary
+    if (Array.isArray(book.images)) {
+      const currentPublicIds = gallery.map((img) => img.public_id);
+      for (const oldImg of book.images) {
+        if (oldImg.public_id && !currentPublicIds.includes(oldImg.public_id)) {
+          await deleteFromCloudinary(oldImg.public_id);
+        }
+      }
+    }
+
+    book.images = gallery;
 
     // Scalar fields
     const scalarFields = [
@@ -417,7 +423,6 @@ class BookService {
       "isbn",
       "language",
       "highlights",
-      "otherdescription",
       "previewPages",
       "dimensions",
       "weight",
@@ -438,6 +443,9 @@ class BookService {
 
     await book.save();
 
+    // Clear books cache
+    await clearCachePattern("books:*");
+
     return await Book.findByPk(book.id, {
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
@@ -455,6 +463,10 @@ class BookService {
       await deleteFromCloudinary(book.file_data.public_id);
 
     await book.destroy();
+
+    // Clear books cache
+    await clearCachePattern("books:*");
+
     return true;
   }
 
@@ -473,7 +485,6 @@ class BookService {
         { title: { [Op.like]: searchTerm } },
         { author: { [Op.like]: searchTerm } },
         { description: { [Op.like]: searchTerm } },
-        { otherdescription: { [Op.like]: searchTerm } },
         { isbn: { [Op.like]: searchTerm } },
       ],
     };
@@ -536,7 +547,9 @@ class BookService {
     if (!book.file_data?.url) throw new Error("Book file not found");
 
     const hasAccess = await this.hasFullAccess(user, book);
-    const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+    const baseUrl = (process.env.BASE_URL || "http://localhost:5000")
+      .replace(/\/+$/, "")
+      .replace(/\/api\/v1$/, "");
     const finalUrl = `${baseUrl}/api/v1/book/readBook/${bookId}`;
 
     return {

@@ -15,10 +15,15 @@ import notificationRoutes from "./routes/notification.routes.js";
 import planRoutes from "./routes/plan.routes.js";
 import subscriptionRoutes from "./routes/subscription.routes.js";
 import analyticsRoutes from "./routes/analytics.routes.js";
-import marketplaceRoutes from "./routes/marketplace.routes.js";
 import readingSyncRoutes from "./routes/readingSync.routes.js";
 import orderRoutes from "./routes/order.routes.js";
+import couponRoutes from "./routes/coupon.routes.js";
+import supportRoutes from "./routes/support.routes.js";
+import cmsRoutes from "./routes/cms.routes.js";
+import blogRoutes from "./routes/blog.routes.js";
+import testimonialRoutes from "./routes/testimonial.routes.js";
 
+import requestLogger from "./middlewares/requestLogger.middleware.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 
 const app = express();
@@ -60,6 +65,8 @@ app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
 
+app.use(requestLogger);
+
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/user/addresses", addressRoutes);
 app.use("/api/v1/category", categoryRoutes);
@@ -74,9 +81,13 @@ app.use("/api/v1/notifications", notificationRoutes);
 app.use("/api/v1/plans", planRoutes);
 app.use("/api/v1/subscriptions", subscriptionRoutes);
 app.use("/api/v1/analytics", analyticsRoutes);
-app.use("/api/v1/marketplace", marketplaceRoutes);
 app.use("/api/v1/reading-sync", readingSyncRoutes);
 app.use("/api/v1/orders", orderRoutes);
+app.use("/api/v1/coupons", couponRoutes);
+app.use("/api/v1/support", supportRoutes);
+app.use("/api/v1/cms", cmsRoutes);
+app.use("/api/v1/blogs", blogRoutes);
+app.use("/api/v1/testimonials", testimonialRoutes);
 
 app.get("/", (req, res) => {
   res.send("Welcome to Mind Gym Book API (Restructured Edition)");

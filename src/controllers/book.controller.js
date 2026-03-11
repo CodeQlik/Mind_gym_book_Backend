@@ -12,6 +12,12 @@ import path from "path";
 import axios from "axios";
 import { cloudinary } from "../config/cloudinary.js";
 
+const getCleanBaseUrl = () => {
+  return (process.env.BASE_URL || "http://localhost:5000")
+    .replace(/\/+$/, "")
+    .replace(/\/api\/v1$/, "");
+};
+
 // ULTRA PREMIUM: Rate limit for PDF streaming (10 requests per minute)
 export const pdfLimiter = rateLimit({
   windowMs: 1 * 60 * 1000,
@@ -47,15 +53,19 @@ export const getAllBooks = asyncHandler(async (req, res) => {
 
   const result = await bookService.getBooks(filters, page, limit, req.user?.id);
 
-  if (result.books.length === 0) {
-    return sendResponse(res, 200, true, "No books found", {
-      books: [],
-      totalItems: 0,
-      totalPages: 0,
-      currentPage: page,
-    });
-  }
-  return sendResponse(res, 200, true, "Books fetched successfully", result);
+  const baseUrl = getCleanBaseUrl();
+  const booksWithReadUrl = result.books.map((book) => {
+    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    return {
+      ...bookData,
+      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
+    };
+  });
+
+  return sendResponse(res, 200, true, "Books fetched successfully", {
+    ...result,
+    books: booksWithReadUrl,
+  });
 });
 
 // Admin: All books including inactive
@@ -65,21 +75,19 @@ export const getAdminBooks = asyncHandler(async (req, res) => {
 
   const result = await bookService.getBooks({}, page, limit);
 
-  if (result.books.length === 0) {
-    return sendResponse(res, 200, true, "No books found in inventory", {
-      books: [],
-      totalItems: 0,
-      totalPages: 0,
-      currentPage: page,
-    });
-  }
-  return sendResponse(
-    res,
-    200,
-    true,
-    "Admin books fetched successfully",
-    result,
-  );
+  const baseUrl = getCleanBaseUrl();
+  const booksWithReadUrl = result.books.map((book) => {
+    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    return {
+      ...bookData,
+      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
+    };
+  });
+
+  return sendResponse(res, 200, true, "Admin books fetched successfully", {
+    ...result,
+    books: booksWithReadUrl,
+  });
 });
 
 export const getBookById = asyncHandler(async (req, res) => {
@@ -94,9 +102,14 @@ export const getBookById = asyncHandler(async (req, res) => {
     isBookmarked = !!bookmark;
   }
 
+  const baseUrl = getCleanBaseUrl();
+  const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
+
+  const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
   return sendResponse(res, 200, true, "Book fetched successfully", {
-    ...book.toJSON(),
+    ...bookData,
     isBookmarked,
+    read_url,
   });
 });
 
@@ -115,9 +128,14 @@ export const getBookBySlug = asyncHandler(async (req, res) => {
     isBookmarked = !!bookmark;
   }
 
+  const baseUrl = getCleanBaseUrl();
+  const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
+
+  const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
   return sendResponse(res, 200, true, "Book fetched successfully", {
-    ...book.toJSON(),
+    ...bookData,
     isBookmarked,
+    read_url,
   });
 });
 
@@ -134,28 +152,27 @@ export const getBooksByCategory = asyncHandler(async (req, res) => {
     req.user?.id,
   );
 
-  if (result.books.length === 0) {
-    return sendResponse(res, 200, true, "No books found for this category", {
-      books: [],
-      totalItems: 0,
-      totalPages: 0,
-      currentPage: page,
-    });
-  }
-  return sendResponse(
-    res,
-    200,
-    true,
-    "Category books fetched successfully",
-    result,
-  );
+  const baseUrl = getCleanBaseUrl();
+  const booksWithReadUrl = result.books.map((book) => {
+    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    return {
+      ...bookData,
+      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
+    };
+  });
+
+  return sendResponse(res, 200, true, "Category books fetched successfully", {
+    ...result,
+    books: booksWithReadUrl,
+  });
 });
 
 export const updateBook = asyncHandler(async (req, res) => {
   const book = await bookService.updateBook(req.params.id, req.body, req.files);
 
+  const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
   return sendResponse(res, 200, true, "Book updated successfully", {
-    ...book.toJSON(),
+    ...bookData,
   });
 });
 
@@ -190,15 +207,19 @@ export const searchBooks = asyncHandler(async (req, res) => {
     req.user?.id,
   );
 
-  if (result.books.length === 0) {
-    return sendResponse(res, 200, true, "No books found matches your search", {
-      books: [],
-      totalItems: 0,
-      totalPages: 0,
-      currentPage: page,
-    });
-  }
-  return sendResponse(res, 200, true, "Search results fetched", result);
+  const baseUrl = getCleanBaseUrl();
+  const booksWithReadUrl = result.books.map((book) => {
+    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    return {
+      ...bookData,
+      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
+    };
+  });
+
+  return sendResponse(res, 200, true, "Search results fetched", {
+    ...result,
+    books: booksWithReadUrl,
+  });
 });
 
 export const readBookPdf = asyncHandler(async (req, res) => {
@@ -221,45 +242,51 @@ export const readBookPdf = asyncHandler(async (req, res) => {
   // ─── EPUB Handling
   if (fileType === "epub") {
     if (!fullAccess) {
-      return res.status(403).json({
-        success: false,
-        message:
-          "Is book ko padhne ke liye subscription ya purchase zaruri hai.",
-        isPreview: true,
-      });
+      try {
+        const previewText = await pdfService.extractTextFromEpubUrl(
+          fileInfo.url,
+          bookId,
+          book,
+          book.previewPages || 5, // preview pages/chapters free
+        );
+        return res.status(200).json({
+          success: true,
+          message: "Is book ko padhne ke liye subscription zaruri hai ",
+          isPreview: true,
+          file_type: "epub",
+          data: previewText,
+        });
+      } catch (error) {
+        return res.status(500).json({
+          message: "EPUB preview generate karne mein error hua",
+          error: error.message,
+        });
+      }
     }
-    // EPUB ke liye direct Cloudinary URL redirect karo
+    // EPUB ke liye Signed Cloudinary URL generate karo agar possible ho
+    let finalUrl = fileInfo.url;
+    if (fileInfo.url.includes("cloudinary.com") && fileInfo.public_id) {
+      try {
+        finalUrl = pdfService.getSignedCloudinaryUrl(fileInfo.public_id);
+      } catch (e) {
+        console.warn("EPUB URL sign nahi ho payi:", e.message);
+      }
+    }
     res.setHeader("X-File-Type", "epub");
     res.setHeader("X-Is-Preview", "false");
-    return res.redirect(fileInfo.url);
+    return res.redirect(finalUrl);
   }
 
   // ─── PDF Handling ─────────────────────────────────────────────────────────────
   let existingPdfBytes;
-
-  // 1. Local File se lo (agar available hai)
-  if (fileInfo?.local_path) {
-    const fullLocalPath = path.resolve(fileInfo.local_path);
-    if (fs.existsSync(fullLocalPath)) {
-      existingPdfBytes = fs.readFileSync(fullLocalPath);
-    }
-  }
-
-  // 2. Cloudinary se download karo
-  if (!existingPdfBytes && fileInfo?.url?.startsWith("http")) {
-    try {
-      const response = await axios.get(fileInfo.url, {
-        responseType: "arraybuffer",
-        timeout: 15000,
-      });
-      existingPdfBytes = response.data;
-      console.log("PDF fetched from Cloudinary successfully!");
-    } catch (error) {
-      return res.status(500).json({
-        message: "Cloudinary se PDF fetch karne mein error hua",
-        debug: error.message,
-      });
-    }
+  try {
+    existingPdfBytes = await pdfService.getPdfBuffer(fileInfo.url, book);
+  } catch (error) {
+    console.error("PDF Fetch Error:", error.message);
+    return res.status(500).json({
+      message: "PDF file fetch karne mein error hua",
+      error: error.message,
+    });
   }
 
   if (!existingPdfBytes) {
@@ -321,20 +348,9 @@ export const extractBookText = asyncHandler(async (req, res) => {
   }
 
   const user = req.user;
-  const isAdmin = user?.user_type === "admin";
-  const hasSubscription =
-    user?.subscription_status === "active" &&
-    user?.subscription_end_date &&
-    new Date(user.subscription_end_date) > new Date();
-
-  if (!isAdmin && !hasSubscription) {
-    return sendResponse(
-      res,
-      403,
-      false,
-      "Full book extraction ke liye please subscribe karein.",
-    );
-  }
+  const fullAccess = await bookService.hasFullAccess(user, book);
+  const isPreview = !fullAccess;
+  const maxPages = isPreview ? book.previewPages || 5 : null;
 
   try {
     let text;
@@ -343,20 +359,29 @@ export const extractBookText = asyncHandler(async (req, res) => {
         fileData.url,
         bookId,
         book,
+        maxPages,
       );
     } else {
-      text = await pdfService.extractTextFromPdfUrl(fileData.url, bookId, book);
+      text = await pdfService.extractTextFromPdfUrl(
+        fileData.url,
+        bookId,
+        book,
+        maxPages,
+      );
     }
 
     return sendResponse(
       res,
       200,
       true,
-      "Text extracted successfully for TTS.",
+      isPreview
+        ? "Is book ko padhne ke liye subscription zaruri hai "
+        : "Text extracted successfully for TTS.",
       {
         book_id: bookId,
         title: book.title,
         file_type: fileData.type || "pdf",
+        isPreview,
         text,
       },
     );
@@ -383,43 +408,23 @@ export const extractBookPageText = asyncHandler(async (req, res) => {
   }
 
   const user = req.user;
-  const isAdmin = user?.user_type === "admin";
-  const hasSubscription =
-    user?.subscription_status === "active" &&
-    user?.subscription_end_date &&
-    new Date(user.subscription_end_date) > new Date();
+  // ── Access Control: Use unified service logic ───
+  const fullAccess = await bookService.hasFullAccess(user, book);
+  const FREE_LIMIT = book.previewPages || 5;
 
-  const fileType = fileData.type || "pdf";
-
-  // ── EPUB: Full subscription required (no free pages) ──────────────────────
-  if (fileType === "epub") {
-    if (!isAdmin && !hasSubscription) {
-      return sendResponse(
-        res,
-        403,
-        false,
-        "Is EPUB book ko padhne ke liye subscription zaruri hai. Please subscribe karein.",
-        { requires_subscription: true, file_type: "epub" },
-      );
-    }
-  }
-
-  // ── PDF: First 5 pages free, rest needs subscription ─────────────────────
-  if (fileType === "pdf") {
-    const FREE_LIMIT = 5;
-    if (!isAdmin && !hasSubscription && pageNum > FREE_LIMIT) {
-      return sendResponse(
-        res,
-        403,
-        false,
-        `PDF ke pehle ${FREE_LIMIT} pages free hain. Aage sunne ke liye please subscribe karein.`,
-        {
-          requires_subscription: true,
-          file_type: "pdf",
-          free_pages: FREE_LIMIT,
-        },
-      );
-    }
+  if (!fullAccess && pageNum > FREE_LIMIT) {
+    const fileType = fileData.type || "pdf";
+    return sendResponse(
+      res,
+      403,
+      false,
+      "Is book ko padhne ke liye subscription zaruri hai ",
+      {
+        requires_subscription: true,
+        file_type: fileType,
+        free_pages: FREE_LIMIT,
+      },
+    );
   }
 
   try {

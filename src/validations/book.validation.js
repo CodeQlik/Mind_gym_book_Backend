@@ -50,7 +50,6 @@ export const bookValidation = Joi.object({
     .try(Joi.boolean(), Joi.string().valid("true", "false"))
     .optional(),
   highlights: Joi.string().optional().trim().allow(null, ""),
-  otherdescription: Joi.string().optional().trim().allow(null, ""),
   dimensions: Joi.string().optional().trim().allow(null, ""),
   weight: Joi.number().optional().allow(null),
 }).unknown(true);
@@ -98,7 +97,6 @@ export const updateBookValidation = Joi.object({
     .try(Joi.boolean(), Joi.string().valid("true", "false"))
     .optional(),
   highlights: Joi.string().optional().trim().allow(null, ""),
-  otherdescription: Joi.string().optional().trim().allow(null, ""),
   dimensions: Joi.string().optional().trim().allow(null, ""),
   weight: Joi.number().optional().allow(null),
 }).unknown(true);

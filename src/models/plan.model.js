@@ -33,9 +33,18 @@ const Plan = sequelize.define(
       type: DataTypes.JSON,
       allowNull: true,
     },
+    device_limit: {
+      type: DataTypes.INTEGER,
+      defaultValue: 1,
+      allowNull: false,
+    },
     status: {
       type: DataTypes.ENUM("active", "inactive"),
       defaultValue: "active",
+    },
+    is_ad_free: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
     },
   },
   {

@@ -25,6 +25,12 @@ router.get("/my-orders", verifyJWT, getMyOrders);
 router.get("/my-orders/:orderId", verifyJWT, getMyOrderById);
 router.post("/refund/:orderId", verifyJWT, requestRefund);
 router.post("/cancel/:orderId", verifyJWT, cancelOrder);
+router.get("/invoice/:orderId", verifyJWT, (req, res, next) => {
+  // We'll define downloadInvoice in controller next
+  import("../controllers/order.controller.js").then((ctrl) =>
+    ctrl.downloadInvoice(req, res, next),
+  );
+});
 
 // ─── ADMIN Routes ───
 router.get("/admin/stats", verifyJWT, isAdmin, getOrderStats);

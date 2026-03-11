@@ -1,4 +1,5 @@
 import { Subscription, Plan, User } from "../models/index.js";
+import notificationService from "./notification.service.js";
 
 class SubscriptionService {
   async subscribeUser(data) {
@@ -46,6 +47,23 @@ class SubscriptionService {
       { where: { id: user_id } },
     );
 
+    // 🏆 Notify user about active subscription
+    try {
+      await notificationService.sendToUser(
+        user_id,
+        "SUBSCRIPTION_PURCHASED",
+        "🎉 Membership Activated!",
+        `Congratulations! You've successfully subscribed to the ${plan.name} plan. Enjoy unlimited access until ${new Date(end_date).toLocaleDateString()}.`,
+        {
+          subscription_id: String(newSubscription.id),
+          end_date: end_date.toISOString(),
+          plan_name: plan.name,
+        },
+      );
+    } catch (notifErr) {
+      console.error("[SUBSCRIPTION NOTIFICATION ERROR]:", notifErr.message);
+    }
+
     return newSubscription;
   }
 
@@ -79,9 +97,23 @@ class SubscriptionService {
 
   async updateSubscriptionStatus(id, status) {
     const subscription = await Subscription.findByPk(id);
+
     if (!subscription) {
       throw new Error("Subscription not found");
     }
+
+    // allowed ENUM values
+    const allowedStatus = ["pending", "active", "expired", "failed"];
+
+    // mapping agar frontend se different value aaye
+    if (status === "approved") status = "active";
+    if (status === "cancelled") status = "failed";
+    if (status === "inactive" || status === "deactivated") status = "expired";
+
+    if (!allowedStatus.includes(status)) {
+      throw new Error(`Invalid status value: ${status}`);
+    }
+
     await subscription.update({ status });
 
     if (status === "active") {
@@ -92,6 +124,21 @@ class SubscriptionService {
         },
         { where: { id: subscription.user_id } },
       );
+
+      try {
+        await notificationService.sendToUser(
+          subscription.user_id,
+          "SUBSCRIPTION_APPROVED",
+          "🎊 Membership Activated!",
+          "Your subscription has been manually approved by the admin. Happy reading!",
+          {
+            subscription_id: String(subscription.id),
+            status: "active",
+          },
+        );
+      } catch (notifErr) {
+        console.error("[ADMIN_SUB_NOTIF_ERROR]:", notifErr.message);
+      }
     } else {
       await User.update(
         { subscription_status: status },

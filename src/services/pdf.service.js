@@ -148,38 +148,51 @@ class PdfService {
     } catch (e) {}
 
     // 6. Smart page splitting:
-    //    If EPUB has very few chapters, split the combined text into ~2000 char pages
-    //    so frontend can paginate naturally (like PDF pages)
+    // Always split into ~2000 char pages so frontend can paginate naturally (like PDF pages)
+    // and access control (5 pages) is consistent.
     const PAGE_SIZE = 2000;
-    const combinedText = chapterTexts.join("\n\n");
     const pages = [];
 
-    if (chapterTexts.length <= 2) {
-      // Split into fixed-size pages by sentence boundary
-      let remaining = combinedText;
+    for (const chapterText of chapterTexts) {
+      let remaining = chapterText;
       while (remaining.length > 0) {
         if (remaining.length <= PAGE_SIZE) {
           pages.push(remaining.trim());
           break;
         }
+        // Try to cut at end of sentence
         let cutAt = remaining.lastIndexOf(". ", PAGE_SIZE);
         if (cutAt < PAGE_SIZE / 2) cutAt = PAGE_SIZE;
         pages.push(remaining.slice(0, cutAt + 1).trim());
         remaining = remaining.slice(cutAt + 1).trim();
       }
-    } else {
-      pages.push(...chapterTexts);
     }
 
-    console.log(`[EPUB] Total pages: ${pages.length}`);
+    console.log(`[EPUB] Total pages generated: ${pages.length}`);
     return pages;
   }
 
   // ─── PDF: Extract all text ──────────────────────────────────────────────────
-  async extractTextFromPdfUrl(pdfUrl, bookId, bookData = null) {
+  async extractTextFromPdfUrl(
+    pdfUrl,
+    bookId,
+    bookData = null,
+    maxPages = null,
+  ) {
     try {
       console.log(`Starting text extraction for Book ID: ${bookId}`);
-      const pdfBuffer = await this.getPdfBuffer(pdfUrl, bookData);
+      let pdfBuffer = await this.getPdfBuffer(pdfUrl, bookData);
+
+      if (maxPages) {
+        const srcDoc = await PDFDocument.load(pdfBuffer);
+        const totalPages = srcDoc.getPageCount();
+        const pagesToExtract = Math.min(maxPages, totalPages);
+        for (let i = totalPages - 1; i >= pagesToExtract; i--) {
+          srcDoc.removePage(i);
+        }
+        pdfBuffer = await srcDoc.save({ useObjectStreams: false });
+        console.log(`PDF sliced to first ${pagesToExtract} pages for preview`);
+      }
 
       const parser = new PDFParse(new Uint8Array(pdfBuffer));
       let result = await parser.getText();
@@ -203,13 +216,22 @@ class PdfService {
   }
 
   // ─── EPUB: Extract all text (all chapters combined) ─────────────────────────
-  async extractTextFromEpubUrl(epubUrl, bookId, bookData = null) {
+  async extractTextFromEpubUrl(
+    epubUrl,
+    bookId,
+    bookData = null,
+    maxPages = null,
+  ) {
     try {
       console.log(`[EPUB] Starting text extraction for Book ID: ${bookId}`);
       const chapters = await this.getEpubChapters(epubUrl, bookData);
       if (!chapters.length)
         throw new Error("EPUB se text extract nahi ho paya.");
-      const combinedText = chapters.join("\n\n");
+
+      const filteredChapters = maxPages
+        ? chapters.slice(0, maxPages)
+        : chapters;
+      const combinedText = filteredChapters.join("\n\n");
       console.log(`[EPUB] Total text: ${combinedText.length} characters`);
       return combinedText;
     } catch (error) {
@@ -248,9 +270,6 @@ class PdfService {
       }
 
       extractedText = extractedText?.replace(/\s+/g, " ").trim() || "";
-      console.log(
-        `[PDF] Page ${pageNumber} extracted. Length: ${extractedText.length}`,
-      );
 
       return { text_content: extractedText, total_pages: totalPages };
     } catch (error) {
@@ -280,16 +299,12 @@ class PdfService {
       }
 
       const text = chapters[chapterNumber - 1];
-      console.log(
-        `[EPUB] Chapter ${chapterNumber} extracted. Length: ${text.length}`,
-      );
 
       return {
         text_content: text,
         total_pages: totalChapters, // chapters as "pages"
       };
     } catch (error) {
-      console.error("[EPUB] Chapter Extraction Error:", error.message);
       throw error;
     }
   }

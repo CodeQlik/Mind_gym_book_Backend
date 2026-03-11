@@ -1,5 +1,6 @@
 import { Router } from "express";
 import analyticsController from "../controllers/analytics.controller.js";
+import { getErrorLogs, clearLogs } from "../controllers/admin.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
 
@@ -12,5 +13,8 @@ router.get(
   isAdmin,
   analyticsController.getDashboardStats,
 );
+
+router.get("/logs", verifyJWT, isAdmin, getErrorLogs);
+router.delete("/logs/clear", verifyJWT, isAdmin, clearLogs);
 
 export default router;

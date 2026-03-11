@@ -127,7 +127,13 @@ class PaymentService {
 
     // 3. Prevent double processing
     if (payment.status === "captured") {
-      return { payment, message: "Already processed" };
+      const existingSub = await Subscription.findOne({
+        where: { payment_id: razorpay_payment_id },
+      });
+
+      if (existingSub) {
+        return { payment, message: "Already processed" };
+      }
     }
 
     // 4. Update payment record — save payment_method from Razorpay response
@@ -174,6 +180,8 @@ class PaymentService {
         plan_type: payment.plan_name,
         amount: payment.amount,
         payment_id: razorpay_payment_id,
+        payment_record_id: payment.id,
+        razorpay_order_id: razorpay_order_id,
         start_date: startDate,
         end_date: endDate,
         status: "active",
@@ -187,6 +195,24 @@ class PaymentService {
         },
         { where: { id: payment.user_id } },
       );
+
+      // Notify user about subscription activation
+      try {
+        const notificationService = (await import("./notification.service.js"))
+          .default;
+        await notificationService.sendToUser(
+          payment.user_id,
+          "SUBSCRIPTION_ACTIVATED",
+          "🎊 Subscription Activated!",
+          `Congratulations! Your ${payment.plan_name.toUpperCase()} subscription is now active until ${endDate.toLocaleDateString()}. Enjoy unlimited reading!`,
+          {
+            plan: payment.plan_name,
+            expiry_date: endDate.toISOString(),
+          },
+        );
+      } catch (notifErr) {
+        console.error("Failed to send subscription notification:", notifErr);
+      }
 
       return { payment, message: "Subscription activated" };
     } else if (payment.payment_type === "book_purchase") {

@@ -25,9 +25,22 @@ const Order = sequelize.define(
       allowNull: true,
       references: { model: "addresses", key: "id" },
     },
+    subtotal_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      allowNull: false,
+    },
+    discount_amount: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0,
+    },
     total_amount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
+    },
+    coupon_id: {
+      type: DataTypes.INTEGER,
+      allowNull: true,
+      references: { model: "coupons", key: "id" },
     },
     order_type: {
       type: DataTypes.ENUM("physical_book", "marketplace_book"),
@@ -67,6 +80,10 @@ const Order = sequelize.define(
     },
     dispatch_note: {
       type: DataTypes.TEXT,
+      allowNull: true,
+    },
+    delivered_at: {
+      type: DataTypes.DATE,
       allowNull: true,
     },
     refund_requested: {

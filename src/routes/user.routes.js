@@ -9,11 +9,9 @@ import {
   forgotPassword,
   verifyForgotPasswordOTP,
   resetPassword,
-  deleteAccount,
   getAllUsers,
   updateUser,
   getUserById,
-  deleteUser,
   searchUsers,
   refreshAccessToken,
   sendRegistrationOTP,
@@ -21,6 +19,11 @@ import {
   googleLogin,
   updateTTSPreferences,
   toggleUserStatus,
+  getUserSessions,
+  terminateSession,
+  terminateAllOtherSessions,
+  adminGetUserSessions,
+  adminTerminateSession,
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -30,10 +33,10 @@ import {
   changePasswordValidation,
   forgotPasswordValidation,
   resetPasswordValidation,
-  deleteAccountValidation,
   verifyEmailValidation,
   sendOTPValidation,
   adminUpdateUserValidation,
+  googleLoginValidation,
 } from "../validations/user.validation.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
@@ -52,7 +55,7 @@ router.post(
 );
 
 router.post("/login", validate(loginValidation), login);
-router.post("/google-login", googleLogin);
+router.post("/google-login", validate(googleLoginValidation), googleLogin);
 router.post("/refresh-token", refreshAccessToken);
 router.post(
   "/forgot-password",
@@ -97,13 +100,10 @@ router.post(
   validate(changePasswordValidation),
   changePassword,
 );
-router.delete(
-  "/delete-account",
-  verifyJWT,
-  validate(deleteAccountValidation),
-  deleteAccount,
-);
 router.patch("/update-tts-preferences", verifyJWT, updateTTSPreferences);
+router.get("/sessions", verifyJWT, getUserSessions);
+router.delete("/sessions/other", verifyJWT, terminateAllOtherSessions);
+router.delete("/sessions/:sessionId", verifyJWT, terminateSession);
 
 // Admin Only Routes (Admin Panel)
 router.get("/all-users", verifyJWT, isAdmin, getAllUsers);
@@ -117,7 +117,13 @@ router.put(
   validate(adminUpdateUserValidation),
   updateUser,
 );
-router.delete("/delete/:id", verifyJWT, isAdmin, deleteUser);
 router.patch("/toggle-status/:id", verifyJWT, isAdmin, toggleUserStatus);
+router.get("/admin/sessions/:id", verifyJWT, isAdmin, adminGetUserSessions);
+router.delete(
+  "/admin/terminate-session/:id/:sessionId",
+  verifyJWT,
+  isAdmin,
+  adminTerminateSession,
+);
 
 export default router;

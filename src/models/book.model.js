@@ -38,7 +38,20 @@ const Book = sequelize.define(
     },
     stock: {
       type: DataTypes.INTEGER,
-      defaultValue: 1,
+      defaultValue: 0,
+    },
+    reserved: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+    },
+    // Available stock calculated as (Total Stock - Reserved)
+    available: {
+      type: DataTypes.VIRTUAL,
+      get() {
+        const stock = this.getDataValue("stock") || 0;
+        const reserved = this.getDataValue("reserved") || 0;
+        return Math.max(0, stock - reserved);
+      },
     },
 
     is_bestselling: {
@@ -137,10 +150,6 @@ const Book = sequelize.define(
       type: DataTypes.INTEGER,
       defaultValue: 5, // Default 5 pages free preview
     },
-    otherdescription: {
-      type: DataTypes.TEXT,
-      allowNull: true,
-    },
     dimensions: {
       type: DataTypes.STRING, // e.g. "8 x 5 x 1 inches"
       allowNull: true,
@@ -154,6 +163,8 @@ const Book = sequelize.define(
     timestamps: true,
     underscored: true,
     tableName: "books",
+    toJSON: { virtuals: true },
+    toObject: { virtuals: true },
   },
 );
 

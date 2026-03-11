@@ -82,6 +82,11 @@ const User = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    platform: {
+      type: DataTypes.STRING(20),
+      allowNull: true,
+      defaultValue: "android",
+    },
     tts_preferences: {
       type: DataTypes.JSON,
       defaultValue: {
