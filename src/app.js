@@ -25,14 +25,18 @@ import testimonialRoutes from "./routes/testimonial.routes.js";
 
 import requestLogger from "./middlewares/requestLogger.middleware.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
+import logger from "./utils/logger.js";
 
 const app = express();
 
 const allowedOrigins = [
   process.env.CLIENT_URL,
   "http://localhost:5173",
+  "http://localhost:3000",
   "https://mindgymbook.ductfabrication.in",
-].filter(Boolean);
+]
+  .filter(Boolean)
+  .map((url) => url.replace(/\/$/, ""));
 
 app.use(
   cors({
@@ -40,7 +44,10 @@ app.use(
       if (!origin || allowedOrigins.includes(origin)) {
         callback(null, true);
       } else {
-        console.log("Origin blocked by CORS:", origin);
+        logger.warn(`CORS Reject: Origin [${origin}] is not in allowed list`, {
+          origin,
+          allowedOrigins,
+        });
         callback(new Error("Not allowed by CORS"));
       }
     },
