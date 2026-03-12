@@ -141,6 +141,12 @@ class BookService {
       );
     }
 
+    const validConditions = ["new", "fair", "good", "acceptable"];
+    const inputCondition = (condition || "good").toLowerCase().trim();
+    const sanitizedCondition = validConditions.includes(inputCondition)
+      ? inputCondition
+      : "good";
+
     const book = await Book.create({
       title,
       slug,
@@ -148,7 +154,7 @@ class BookService {
       description,
       price: parseFloat(price) || 0,
       original_price: original_price ? parseFloat(original_price) : null,
-      condition: condition || "good",
+      condition: sanitizedCondition,
       stock: parseInt(stock) || 1,
       thumbnail: thumbnailData || { url: "", public_id: "" },
       cover_image: coverImageData || { url: "", public_id: "" },
@@ -447,7 +453,19 @@ class BookService {
       "weight",
     ];
     scalarFields.forEach((field) => {
-      if (data[field] !== undefined) book[field] = data[field];
+      if (data[field] !== undefined) {
+        if (field === "condition") {
+          const validConditions = ["new", "fair", "good", "acceptable"];
+          const inputCondition = String(data[field])
+            .toLowerCase()
+            .trim();
+          book.condition = validConditions.includes(inputCondition)
+            ? inputCondition
+            : book.condition || "good";
+        } else {
+          book[field] = data[field];
+        }
+      }
     });
 
     // Boolean fields

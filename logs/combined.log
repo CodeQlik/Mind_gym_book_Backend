@@ -5721,3 +5721,44 @@
 [2026-03-12T06:22:02.204Z] [INFO] Redis Client Connected 
 [2026-03-12T06:23:46.695Z] [INFO] Redis Client Connected 
 [2026-03-12T06:24:12.906Z] [INFO] Redis Client Connected 
+[2026-03-12T06:34:22.082Z] [INFO] Redis Client Connected 
+[2026-03-12T06:34:32.378Z] [INFO] Redis Client Connected 
+[2026-03-12T06:34:39.662Z] [INFO] Redis Client Connected 
+[2026-03-12T06:37:12.308Z] [ERROR] Redis Client Error {"errno":-4077,"code":"ECONNRESET","syscall":"read"}
+[2026-03-12T06:37:12.899Z] [ERROR] Redis Client Error {"errno":-4079,"code":"ECONNABORTED","syscall":"connect","address":"98.87.9.168","port":15209}
+[2026-03-12T06:37:13.239Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-12T06:37:13.499Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-12T06:37:13.869Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-12T06:37:14.341Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-12T06:37:15.323Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-12T06:37:17.104Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-12T06:37:19.319Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-12T06:37:21.483Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-12T06:37:23.884Z] [INFO] Redis Client Connected 
+[2026-03-12T06:40:24.146Z] [WARN] GET /api/v1/support/admin/stats 401 (80ms) {"method":"GET","url":"/api/v1/support/admin/stats","status":401,"duration":"80ms","ip":"::1","user":"Guest"}
+[2026-03-12T06:40:24.178Z] [WARN] GET /api/v1/support/admin/tickets?page=1&limit=10 401 (69ms) {"method":"GET","url":"/api/v1/support/admin/tickets?page=1&limit=10","status":401,"duration":"69ms","ip":"::1","user":"Guest"}
+[2026-03-12T06:40:24.221Z] [WARN] GET /api/v1/notifications/admin/stats 401 (79ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"79ms","ip":"::1","user":"Guest"}
+[2026-03-12T06:40:24.305Z] [WARN] GET /api/v1/notifications 401 (140ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"140ms","ip":"::1","user":"Guest"}
+[2026-03-12T06:40:24.359Z] [WARN] GET /api/v1/users/profile 401 (215ms) {"method":"GET","url":"/api/v1/users/profile","status":401,"duration":"215ms","ip":"::1","user":"Guest"}
+[2026-03-12T06:40:35.742Z] [INFO] POST /api/v1/users/login 200 (301ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"301ms","ip":"::1","user":"Guest"}
+[2026-03-12T06:40:35.828Z] [INFO] GET /api/v1/users/profile 200 (43ms) {"method":"GET","url":"/api/v1/users/profile","status":200,"duration":"43ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.051Z] [INFO] GET /api/v1/notifications 200 (161ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"161ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.060Z] [INFO] GET /api/v1/users/profile 304 (157ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"157ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.127Z] [INFO] GET /api/v1/notifications 304 (59ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"59ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.169Z] [INFO] GET /api/v1/notifications/admin/stats 200 (277ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"277ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.181Z] [INFO] GET /api/v1/notifications 304 (47ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"47ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.242Z] [INFO] GET /api/v1/notifications 304 (41ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"41ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.251Z] [INFO] GET /api/v1/analytics/dashboard 200 (354ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":200,"duration":"354ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.286Z] [INFO] GET /api/v1/notifications/admin/stats 304 (98ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"98ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.325Z] [INFO] GET /api/v1/analytics/dashboard 304 (63ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"63ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.336Z] [INFO] GET /api/v1/notifications/admin/stats 304 (41ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"41ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.394Z] [INFO] GET /api/v1/analytics/dashboard 304 (62ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"62ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.402Z] [INFO] GET /api/v1/notifications/admin/stats 304 (51ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"51ms","ip":"::1","user":26}
+[2026-03-12T06:40:36.469Z] [INFO] GET /api/v1/analytics/dashboard 304 (62ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"62ms","ip":"::1","user":26}
+[2026-03-12T06:40:38.430Z] [INFO] GET /api/v1/support/admin/stats 200 (24ms) {"method":"GET","url":"/api/v1/support/admin/stats","status":200,"duration":"24ms","ip":"::1","user":26}
+[2026-03-12T06:40:38.453Z] [INFO] GET /api/v1/support/admin/tickets?page=1&limit=10 200 (32ms) {"method":"GET","url":"/api/v1/support/admin/tickets?page=1&limit=10","status":200,"duration":"32ms","ip":"::1","user":26}
+[2026-03-12T06:40:38.502Z] [INFO] GET /api/v1/support/admin/stats 304 (37ms) {"method":"GET","url":"/api/v1/support/admin/stats","status":304,"duration":"37ms","ip":"::1","user":26}
+[2026-03-12T06:40:38.517Z] [INFO] GET /api/v1/support/admin/tickets?page=1&limit=10 304 (39ms) {"method":"GET","url":"/api/v1/support/admin/tickets?page=1&limit=10","status":304,"duration":"39ms","ip":"::1","user":26}
+[2026-03-12T06:40:38.968Z] [INFO] GET /api/v1/support/admin/tickets?page=1&limit=10 304 (34ms) {"method":"GET","url":"/api/v1/support/admin/tickets?page=1&limit=10","status":304,"duration":"34ms","ip":"::1","user":26}
+[2026-03-12T06:42:17.131Z] [ERROR] Redis Client Error {"errno":-4077,"code":"ECONNRESET","syscall":"read"}
+[2026-03-12T06:42:19.073Z] [INFO] Redis Client Connected 
