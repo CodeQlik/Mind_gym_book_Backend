@@ -23,6 +23,7 @@ import cmsRoutes from "./routes/cms.routes.js";
 import blogRoutes from "./routes/blog.routes.js";
 import testimonialRoutes from "./routes/testimonial.routes.js";
 
+
 import requestLogger from "./middlewares/requestLogger.middleware.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 
@@ -88,6 +89,7 @@ app.use("/api/v1/support", supportRoutes);
 app.use("/api/v1/cms", cmsRoutes);
 app.use("/api/v1/blogs", blogRoutes);
 app.use("/api/v1/testimonials", testimonialRoutes);
+
 
 app.get("/", (req, res) => {
   res.send("Welcome to Mind Gym Book API (Restructured Edition)");

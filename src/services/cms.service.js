@@ -72,11 +72,6 @@ class CMSService {
         content:
           "<h1>Refund Policy</h1><p>Customers are eligible to request a refund within 7 days from the date of delivery. After 7 days, refund requests will not be accepted.</p>",
       },
-      {
-        slug: "faq",
-        title: "FAQ",
-        content: "<h1>Frequently Asked Questions</h1><p>Coming Soon...</p>",
-      },
     ];
 
     for (const p of defaultPages) {
