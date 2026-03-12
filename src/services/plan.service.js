@@ -10,22 +10,33 @@ class PlanService {
       duration_months,
       features,
       device_limit,
+      book_read_limit,
     } = data;
 
     let duration = duration_months;
     if (!duration) {
       if (plan_type === "one_month") duration = 1;
       else if (plan_type === "three_month") duration = 3;
-      else if (plan_type === "one_year") duration = 12;
-      else if (plan_type === "free") duration = 0;
+      else if (plan_type === "premium")
+        duration = 12; // Default for premium
+      else if (plan_type === "free") duration = 1; // Match UI: "Free access... for 1 month"
     }
 
     let dLimit = device_limit;
     if (!dLimit) {
       if (plan_type === "one_month") dLimit = 2;
       else if (plan_type === "three_month") dLimit = 3;
-      else if (plan_type === "one_year") dLimit = 4;
-      else dLimit = 1;
+      else if (plan_type === "premium") dLimit = 5;
+      else dLimit = 1; // Free
+    }
+
+    let bLimit = book_read_limit;
+    if (bLimit === undefined) {
+      if (plan_type === "one_month") bLimit = 50;
+      else if (plan_type === "three_month") bLimit = 150;
+      else if (plan_type === "premium")
+        bLimit = -1; // Unlimited
+      else bLimit = 5; // Free
     }
 
     const newPlan = await Plan.create({
@@ -36,6 +47,7 @@ class PlanService {
       duration_months: duration,
       features,
       device_limit: dLimit,
+      book_read_limit: bLimit,
       is_ad_free: plan_type !== "free",
     });
 

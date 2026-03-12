@@ -15,59 +15,129 @@ const __dirname = path.dirname(__filename);
 
 class PdfService {
   // ─── Helper: Get signed Cloudinary URL ─────────────────────────────────────
-  getSignedCloudinaryUrl(publicId) {
-    return cloudinary.url(publicId, {
-      resource_type: "raw",
+  getSignedCloudinaryUrl(publicId, version = null, type = "upload", resourceType = "raw") {
+    const options = {
+      resource_type: resourceType,
+      type: type,
       sign_url: true,
       secure: true,
-    });
+    };
+    if (version) options.version = version;
+    return cloudinary.url(publicId, options);
   }
 
   // ─── Helper: Download file buffer from URL ──────────────────────────────────
   async downloadBuffer(url) {
-    const response = await axios.get(url, {
-      responseType: "arraybuffer",
-      headers: {
-        "User-Agent":
-          "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
-      },
-      timeout: 30000,
-    });
-    return Buffer.from(response.data);
+    try {
+      const response = await axios.get(url, {
+        byteLength: 30000000, // 30MB max
+        responseType: "arraybuffer",
+        headers: {
+          "User-Agent":
+            "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36",
+        },
+        timeout: 45000,
+      });
+      return Buffer.from(response.data);
+    } catch (error) {
+      if (error.response) {
+        const errorMsg = `Cloudinary Fetch Failed (${error.response.status}): ${error.response.headers['x-cld-error'] || 'ACL/Deny Failure'}`;
+        const err = new Error(errorMsg);
+        err.statusCode = error.response.status;
+        err.cldError = error.response.headers['x-cld-error'];
+        throw err;
+      }
+      throw error;
+    }
   }
 
   // ─── PDF: Get buffer (local first, then Cloudinary signed URL) ──────────────
   async getPdfBuffer(pdfUrl, bookData = null) {
     try {
-      let pdfBuffer;
-
+      console.log(`[PdfService] Fetching PDF: ${pdfUrl}`);
+      
+      // 1. Local Cache Check
       const localPath = bookData?.file_data?.local_path;
       if (localPath) {
         const fullPath = path.resolve(localPath);
         if (fs.existsSync(fullPath)) {
-          pdfBuffer = fs.readFileSync(fullPath);
-          console.log("PDF loaded from local storage");
-          return pdfBuffer;
+          console.log("[PdfService] Found in local storage: " + fullPath);
+          return fs.readFileSync(fullPath);
         }
       }
 
-      let finalUrl = pdfUrl;
       const publicId = bookData?.file_data?.public_id;
-      if (pdfUrl.includes("cloudinary.com") && publicId) {
-        try {
-          finalUrl = this.getSignedCloudinaryUrl(publicId);
-          console.log("Generated signed URL for Cloudinary PDF");
-        } catch (e) {
-          console.warn("Could not sign URL, using original:", e.message);
-        }
+      const storedAssetType = bookData?.file_data?.asset_type || "upload";
+      const versionMatch = pdfUrl.match(/\/v(\d+)\//);
+      const version = versionMatch ? versionMatch[1] : null;
+
+      // Strategy 1: Original URL from DB
+      try {
+        console.log(`[PdfService] Strategy 1: Original URL`);
+        return await this.downloadBuffer(pdfUrl);
+      } catch (err) {
+        console.warn(`[PdfService] Strategy 1 failed: ${err.message}`);
       }
 
-      console.log(`Downloading PDF from: ${finalUrl}`);
-      pdfBuffer = await this.downloadBuffer(finalUrl);
-      console.log("PDF downloaded successfully");
-      return pdfBuffer;
+      if (publicId) {
+        // Strategy 2: Cloudinary API Private Download (Most reliable for Auth/Restricted)
+        if (storedAssetType === "authenticated") {
+          try {
+            console.log(`[PdfService] Strategy 2: API Private Download URL`);
+            const adminUrl = cloudinary.utils.private_download_url(publicId, "pdf", {
+              resource_type: "raw",
+              type: "authenticated",
+              expires_at: Math.floor(Date.now() / 1000) + 3600
+            });
+            return await this.downloadBuffer(adminUrl);
+          } catch(err) {
+            console.warn(`[PdfService] Strategy 2 failed: ${err.message}`);
+          }
+        }
+
+        // Strategy 3: Permutations of resource_type and asset_type
+        const resourceTypes = ["raw", "image"];
+        const assetTypes = ["authenticated", "upload"];
+        
+        for (const rType of resourceTypes) {
+          // Rule: Image type URLs usually DON'T want the extension in the publicId
+          const cleanId = (rType === "image") ? publicId.replace(/\.[^/.]+$/, "") : publicId;
+          
+          for (const aType of assetTypes) {
+            try {
+              const signedUrl = this.getSignedCloudinaryUrl(cleanId, version, aType, rType);
+              console.log(`[PdfService] Trying Strategy: ${rType}/${aType} with ID: ${cleanId}`);
+              return await this.downloadBuffer(signedUrl);
+            } catch (err) {
+              if (err.statusCode !== 404 && err.statusCode !== 401) {
+                console.warn(`[PdfService] ${rType}/${aType} error: ${err.message}`);
+              }
+            }
+          }
+        }
+
+        // Strategy 3: Long Signature RAW
+        try {
+          const longUrl = cloudinary.url(publicId, {
+             resource_type: "raw", type: "upload", sign_url: true, secure: true, long_url_signature: true
+          });
+          console.log("[PdfService] Trying Strategy 3: Long Signature Raw (Upload)");
+          return await this.downloadBuffer(longUrl);
+        } catch (e) {}
+
+        // Strategy 4: Long Signature AUTH
+        try {
+           const longUrlAuth = cloudinary.url(publicId, {
+              resource_type: "raw", type: "authenticated", sign_url: true, secure: true, long_url_signature: true
+           });
+           console.log("[PdfService] Trying Strategy 4: Long Signature Raw (Auth)");
+           return await this.downloadBuffer(longUrlAuth);
+         } catch (e) {}
+      }
+
+      throw new Error("Could not fetch PDF after all attempts. Cloudinary might be blocking the request.");
     } catch (error) {
-      console.error("PDF Download Buffer Error:", error.message);
+      console.error("[PdfService] Critical failure:", error.message);
       throw error;
     }
   }

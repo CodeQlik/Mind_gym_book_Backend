@@ -158,6 +158,19 @@ const Book = sequelize.define(
       type: DataTypes.FLOAT, // numeric value
       allowNull: true,
     },
+    audio_file: {
+      type: DataTypes.JSON,
+      allowNull: true,
+      defaultValue: null,
+      get() {
+        const value = this.getDataValue("audio_file");
+        try {
+          return typeof value === "string" ? JSON.parse(value) : value;
+        } catch (e) {
+          return value || null;
+        }
+      },
+    },
   },
   {
     timestamps: true,

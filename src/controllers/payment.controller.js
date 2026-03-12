@@ -12,6 +12,17 @@ export const createSubscriptionOrder = async (req, res, next) => {
       req.user.id,
       plan_type,
     );
+
+    if (result.isFree) {
+      return sendResponse(
+        res,
+        200,
+        true,
+        result.message || "Free subscription activated",
+        result.subscription,
+      );
+    }
+
     return sendResponse(res, 201, true, "Subscription order created", result);
   } catch (error) {
     next(error);
@@ -61,13 +72,13 @@ export const confirmCodPayment = async (req, res, next) => {
 //  SHARED: Verify Payment
 export const verifyPayment = async (req, res, next) => {
   try {
-    const result = await paymentService.verifyPayment(req.body);
+    const { message, ...data } = await paymentService.verifyPayment(req.body);
     return sendResponse(
       res,
       200,
       true,
-      result.message || "Payment verified",
-      result,
+      message || "Payment verified",
+      data,
     );
   } catch (error) {
     next(error);

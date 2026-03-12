@@ -471,3 +471,13 @@ export const adminTerminateSession = async (req, res, next) => {
     next(error);
   }
 };
+
+export const deleteUser = async (req, res, next) => {
+  try {
+    const { id } = req.params;
+    await userService.deleteUser(id);
+    return sendResponse(res, 200, true, "User and all associated records deleted successfully");
+  } catch (error) {
+    next(error);
+  }
+};

@@ -3,7 +3,7 @@ import pdfService from "../services/pdf.service.js";
 import sendResponse from "../utils/responseHandler.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
 
-import { Bookmark, Book } from "../models/index.js";
+import { Bookmark, Book, UserBook, User } from "../models/index.js";
 import { Op } from "sequelize";
 import rateLimit from "express-rate-limit";
 import { PDFDocument } from "pdf-lib";
@@ -16,6 +16,43 @@ const getCleanBaseUrl = () => {
   return (process.env.BASE_URL || "http://localhost:5000")
     .replace(/\/+$/, "")
     .replace(/\/api\/v1$/, "");
+};
+
+// Helper to get audio preview URL (30 seconds)
+const getAudioPreviewUrl = (url) => {
+  if (!url || !url.includes("cloudinary.com")) return url;
+  if (url.includes("du_30")) return url;
+  return url.replace("/upload/", "/upload/du_30/");
+};
+
+// Helper to remove internal fields like 'local_path' and apply preview logic before sending response
+const cleanBookData = (book, hasAccess = false) => {
+  const data = typeof book.toJSON === "function" ? book.toJSON() : { ...book };
+  
+  if (data.cover_image && data.cover_image.local_path) delete data.cover_image.local_path;
+  if (data.thumbnail && data.thumbnail.local_path) delete data.thumbnail.local_path;
+  if (data.file_data && data.file_data.local_path) delete data.file_data.local_path;
+  
+  if (data.audio_file) {
+    if (data.audio_file.local_path) delete data.audio_file.local_path;
+    if (!hasAccess && data.audio_file.url) {
+      data.audio_file.url = getAudioPreviewUrl(data.audio_file.url);
+      data.audio_file.is_preview = true;
+    } else {
+      data.audio_file.is_preview = false;
+    }
+  }
+
+  if (Array.isArray(data.images)) {
+    data.images = data.images.map(img => {
+      if (img && img.local_path) {
+        const { local_path, ...cleanImg } = img;
+        return cleanImg;
+      }
+      return img;
+    });
+  }
+  return data;
 };
 
 // ULTRA PREMIUM: Rate limit for PDF streaming (10 requests per minute)
@@ -34,13 +71,13 @@ export const createBook = asyncHandler(async (req, res) => {
   const book = await bookService.createBook(req.body, req.files);
 
   return sendResponse(res, 201, true, "Book added successfully", {
-    ...book.toJSON(),
+    ...cleanBookData(book, true), // Admin has always access
   });
 });
 
 export const getAllBooks = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit) || 50;
   const status = req.query.status;
 
   const isAdminRequest = req.user && req.user.user_type === "admin";
@@ -53,9 +90,21 @@ export const getAllBooks = asyncHandler(async (req, res) => {
 
   const result = await bookService.getBooks(filters, page, limit);
 
+  // Fetch user access info once to avoid N+1 queries
+  const user = req.user;
+  const isAdmin = user && user.user_type === "admin";
+  const isSubscribed = user && user.subscription_status === "active" && new Date(user.subscription_end_date) >= new Date();
+  
+  let purchasedBookIds = new Set();
+  if (user && !isSubscribed && !isAdmin) {
+    const purchases = await UserBook.findAll({ where: { user_id: user.id }, attributes: ["book_id"] });
+    purchasedBookIds = new Set(purchases.map(p => p.book_id));
+  }
+
   const baseUrl = getCleanBaseUrl();
   const booksWithReadUrl = result.books.map((book) => {
-    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    const hasAccess = isAdmin || isSubscribed || purchasedBookIds.has(book.id);
+    const bookData = cleanBookData(book, hasAccess);
     return {
       ...bookData,
       read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
@@ -71,13 +120,13 @@ export const getAllBooks = asyncHandler(async (req, res) => {
 // Admin: All books including inactive
 export const getAdminBooks = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
-  const limit = parseInt(req.query.limit) || 10;
+  const limit = parseInt(req.query.limit) || 50;
 
   const result = await bookService.getBooks({}, page, limit);
 
   const baseUrl = getCleanBaseUrl();
   const booksWithReadUrl = result.books.map((book) => {
-    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    const bookData = cleanBookData(book, true); // Admin has always access
     return {
       ...bookData,
       read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
@@ -105,7 +154,9 @@ export const getBookById = asyncHandler(async (req, res) => {
   const baseUrl = getCleanBaseUrl();
   const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
 
-  const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+  const fullAccess = await bookService.hasFullAccess(req.user, book);
+  const bookData = cleanBookData(book, fullAccess);
+  
   return sendResponse(res, 200, true, "Book fetched successfully", {
     ...bookData,
     isBookmarked,
@@ -131,7 +182,8 @@ export const getBookBySlug = asyncHandler(async (req, res) => {
   const baseUrl = getCleanBaseUrl();
   const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
 
-  const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+  const fullAccess = await bookService.hasFullAccess(req.user, book);
+  const bookData = cleanBookData(book, fullAccess);
   return sendResponse(res, 200, true, "Book fetched successfully", {
     ...bookData,
     isBookmarked,
@@ -151,9 +203,21 @@ export const getBooksByCategory = asyncHandler(async (req, res) => {
     limit,
   );
 
+  // Fetch user access info once to avoid N+1 queries
+  const user = req.user;
+  const isAdmin = user && user.user_type === "admin";
+  const isSubscribed = user && user.subscription_status === "active" && new Date(user.subscription_end_date) >= new Date();
+  
+  let purchasedBookIds = new Set();
+  if (user && !isSubscribed && !isAdmin) {
+    const purchases = await UserBook.findAll({ where: { user_id: user.id }, attributes: ["book_id"] });
+    purchasedBookIds = new Set(purchases.map(p => p.book_id));
+  }
+
   const baseUrl = getCleanBaseUrl();
   const booksWithReadUrl = result.books.map((book) => {
-    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    const hasAccess = isAdmin || isSubscribed || purchasedBookIds.has(book.id);
+    const bookData = cleanBookData(book, hasAccess);
     return {
       ...bookData,
       read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
@@ -169,7 +233,7 @@ export const getBooksByCategory = asyncHandler(async (req, res) => {
 export const updateBook = asyncHandler(async (req, res) => {
   const book = await bookService.updateBook(req.params.id, req.body, req.files);
 
-  const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+  const bookData = cleanBookData(book, true); // Admin has access
   return sendResponse(res, 200, true, "Book updated successfully", {
     ...bookData,
   });
@@ -187,7 +251,7 @@ export const toggleBookStatus = asyncHandler(async (req, res) => {
     200,
     true,
     `Book ${book.is_active ? "activated" : "deactivated"} successfully`,
-    book,
+    cleanBookData(book, true), // Admin has access
   );
 });
 
@@ -205,9 +269,21 @@ export const searchBooks = asyncHandler(async (req, res) => {
     status,
   );
 
+  // Fetch user access info once to avoid N+1 queries
+  const user = req.user;
+  const isAdmin = user && user.user_type === "admin";
+  const isSubscribed = user && user.subscription_status === "active" && new Date(user.subscription_end_date) >= new Date();
+  
+  let purchasedBookIds = new Set();
+  if (user && !isSubscribed && !isAdmin) {
+    const purchases = await UserBook.findAll({ where: { user_id: user.id }, attributes: ["book_id"] });
+    purchasedBookIds = new Set(purchases.map(p => p.book_id));
+  }
+
   const baseUrl = getCleanBaseUrl();
   const booksWithReadUrl = result.books.map((book) => {
-    const bookData = typeof book.toJSON === "function" ? book.toJSON() : book;
+    const hasAccess = isAdmin || isSubscribed || purchasedBookIds.has(book.id);
+    const bookData = cleanBookData(book, hasAccess);
     return {
       ...bookData,
       read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
@@ -235,6 +311,12 @@ export const readBookPdf = asyncHandler(async (req, res) => {
   }
 
   const fullAccess = await bookService.hasFullAccess(user, book);
+  
+  // If user has full access and is logged in, increment the read count if it's a new book
+  if (fullAccess && user) {
+    await bookService.incrementBookReadCount(user.id, book.id);
+  }
+
   const fileType = fileInfo.type || "pdf"; // default pdf for older records
 
   // ─── EPUB Handling
@@ -265,7 +347,11 @@ export const readBookPdf = asyncHandler(async (req, res) => {
     let finalUrl = fileInfo.url;
     if (fileInfo.url.includes("cloudinary.com") && fileInfo.public_id) {
       try {
-        finalUrl = pdfService.getSignedCloudinaryUrl(fileInfo.public_id);
+        finalUrl = pdfService.getSignedCloudinaryUrl(
+          fileInfo.public_id,
+          null,
+          fileInfo.asset_type || "upload",
+        );
       } catch (e) {
         console.warn("EPUB URL sign nahi ho payi:", e.message);
       }
@@ -347,6 +433,12 @@ export const extractBookText = asyncHandler(async (req, res) => {
 
   const user = req.user;
   const fullAccess = await bookService.hasFullAccess(user, book);
+
+  // If user has full access and is logged in, increment the read count if it's a new book
+  if (fullAccess && user) {
+    await bookService.incrementBookReadCount(user.id, book.id);
+  }
+
   const isPreview = !fullAccess;
   const maxPages = isPreview ? book.previewPages || 5 : null;
 
@@ -408,6 +500,12 @@ export const extractBookPageText = asyncHandler(async (req, res) => {
   const user = req.user;
   // ── Access Control: Use unified service logic ───
   const fullAccess = await bookService.hasFullAccess(user, book);
+  
+  // If user has full access and is logged in, increment the read count if it's a new book
+  if (fullAccess && user) {
+    await bookService.incrementBookReadCount(user.id, book.id);
+  }
+
   const FREE_LIMIT = book.previewPages || 5;
 
   if (!fullAccess && pageNum > FREE_LIMIT) {

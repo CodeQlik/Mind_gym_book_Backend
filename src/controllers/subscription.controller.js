@@ -25,14 +25,40 @@ export const getSubscriptionStatus = async (req, res, next) => {
       req.user.id,
     );
     if (!subscription) {
-      return sendResponse(res, 200, true, "No active subscription found", null);
+      return sendResponse(res, 200, true, "No active subscription found", {
+        has_active_subscription: false,
+        plan: {
+          name: "Free Plan",
+          book_read_limit: 5,
+        },
+      });
     }
+
+    const plan = subscription.plan;
+    const summary = {
+      has_active_subscription: true,
+      subscription_id: subscription.id,
+      plan_name: plan?.name || subscription.plan_type,
+      plan_type: subscription.plan_type,
+      status: subscription.status,
+      start_date: subscription.start_date,
+      end_date: subscription.end_date,
+      days_remaining: Math.max(0, Math.ceil((new Date(subscription.end_date) - new Date()) / (1000 * 60 * 60 * 24))),
+      usage: {
+        books_read: subscription.books_read_count,
+        limit: plan?.book_read_limit || 5,
+        is_unlimited: plan?.book_read_limit === -1,
+        remaining: plan?.book_read_limit === -1 ? "Unlimited" : Math.max(0, (plan?.book_read_limit || 5) - subscription.books_read_count),
+      },
+      device_limit: plan?.device_limit || 1
+    };
+
     return sendResponse(
       res,
       200,
       true,
       "Subscription details fetched",
-      subscription,
+      summary,
     );
   } catch (error) {
     next(error);

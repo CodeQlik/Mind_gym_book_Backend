@@ -10,7 +10,13 @@ const errorMiddleware = (err, req, res, next) => {
     user: req.user ? req.user.id : "Guest",
   });
 
-  const statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+  let statusCode = err.statusCode || err.status || 500;
+  
+  // If generic Error with "not found" message, default to 404
+  if (err.message && err.message.toLowerCase().includes("not found")) {
+    statusCode = 404;
+  }
+
   res.status(statusCode).json({
     success: false,
     message: err.message,

@@ -24,6 +24,7 @@ import {
   terminateAllOtherSessions,
   adminGetUserSessions,
   adminTerminateSession,
+  deleteUser,
 } from "../controllers/user.controller.js";
 import upload from "../middlewares/multer.js";
 import {
@@ -123,5 +124,6 @@ router.delete(
   isAdmin,
   adminTerminateSession,
 );
+router.delete("/delete/:id", verifyJWT, isAdmin, deleteUser);
 
 export default router;

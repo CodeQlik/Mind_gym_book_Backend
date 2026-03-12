@@ -18,7 +18,7 @@ const Plan = sequelize.define(
       allowNull: false,
     },
     plan_type: {
-      type: DataTypes.ENUM("one_month", "three_month", "one_year", "free"),
+      type: DataTypes.ENUM("one_month", "three_month", "premium", "free"),
       allowNull: false,
     },
     duration_months: {
@@ -36,6 +36,11 @@ const Plan = sequelize.define(
     device_limit: {
       type: DataTypes.INTEGER,
       defaultValue: 1,
+      allowNull: false,
+    },
+    book_read_limit: {
+      type: DataTypes.INTEGER,
+      defaultValue: 5, // Default for free plan
       allowNull: false,
     },
     status: {

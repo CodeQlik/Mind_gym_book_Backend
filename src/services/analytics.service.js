@@ -86,10 +86,30 @@ class AnalyticsService {
     const totalUsers = await User.count({ where: { user_type: "user" } });
     const totalBooks = await Book.count({ where: { is_active: true } });
 
+    // Subscription Distribution
+    const subscriptionStats = await User.findAll({
+      attributes: [
+        ['subscription_plan', 'plan'],
+        [sequelize.fn('COUNT', sequelize.col('id')), 'count']
+      ],
+      where: { 
+        subscription_status: 'active',
+        user_type: 'user'
+      },
+      group: ['subscription_plan'],
+      raw: true
+    });
+
+    const activeSubscribers = await User.count({
+      where: { subscription_status: 'active', user_type: 'user' }
+    });
+
     return {
       activeUsers,
       totalUsers,
       totalBooks,
+      activeSubscribers,
+      subscriptionDistribution: subscriptionStats,
       popularBooks,
       topAudiobooks,
     };

@@ -1,6 +1,6 @@
 import { Op } from "sequelize";
 import path from "path";
-import { Book, Category, User, UserBook } from "../models/index.js";
+import { Book, Category, User, UserBook, Subscription, Plan, ReadingProgress } from "../models/index.js";
 import {
   deleteFromCloudinary,
   uploadOnCloudinary,
@@ -74,18 +74,9 @@ class BookService {
         : null;
     };
 
-    const thumbnailData = await uploadFiles(
-      files?.thumbnail,
-      "mindgymbook/books/thumbnails",
-    );
-    const coverImageData = await uploadFiles(
-      files?.cover_image,
-      "mindgymbook/books/covers",
-    );
-    // Detect file type and upload single book file
-    let bookFileData = null;
-    const bookFileInput = files?.pdf_file?.[0] || files?.epub_file?.[0];
-    if (bookFileInput) {
+    const uploadBookFile = async () => {
+      const bookFileInput = files?.pdf_file?.[0] || files?.epub_file?.[0];
+      if (!bookFileInput) return null;
       const ext = path
         .extname(bookFileInput.originalname)
         .toLowerCase()
@@ -94,30 +85,60 @@ class BookService {
         ext === "pdf" ? "mindgymbook/books/pdf" : "mindgymbook/books/epub";
       const res = await uploadOnCloudinary(bookFileInput.path, folder);
       if (res) {
-        bookFileData = {
+        return {
           url: res.secure_url,
           public_id: res.public_id,
-          type: ext, // "pdf" or "epub"
+          type: ext,
+          asset_type: res.type || "upload",
           local_path: bookFileInput.path,
         };
       }
-    }
+      return null;
+    };
 
-    // ✅ Validation: Book file (PDF or EPUB) is required
-    if (!bookFileData) {
-      throw new Error("Please upload a book file (PDF or EPUB)");
-    }
-
-    let extraImages = [];
-    if (files?.images?.length > 0) {
-      for (const file of files.images) {
-        const res = await uploadOnCloudinary(
-          file.path,
-          "mindgymbook/books/gallery",
-        );
-        if (res)
-          extraImages.push({ url: res.secure_url, public_id: res.public_id });
+    const uploadAudioFile = async () => {
+      if (!files?.audio_file?.[0]) return null;
+      const audioFile = files.audio_file[0];
+      const res = await uploadOnCloudinary(audioFile.path, "mindgymbook/books/audio");
+      if (res) {
+        return {
+          url: res.secure_url,
+          public_id: res.public_id,
+          asset_type: res.type || "upload",
+          local_path: audioFile.path,
+        };
       }
+      return null;
+    };
+
+    const uploadExtraImages = async () => {
+      let images = [];
+      if (files?.images?.length > 0) {
+        const promises = files.images.map(async (file) => {
+          const res = await uploadOnCloudinary(file.path, "mindgymbook/books/gallery");
+          if (res) return { url: res.secure_url, public_id: res.public_id };
+          return null;
+        });
+        const results = await Promise.all(promises);
+        images = results.filter(Boolean);
+      }
+      return images;
+    };
+
+    // Parallelize all uploads to significantly reduce response time
+    const [thumbnailData, coverImageData, bookFileData, audioFileData, extraImages] = await Promise.all([
+      uploadFiles(files?.thumbnail, "mindgymbook/books/thumbnails"),
+      uploadFiles(files?.cover_image, "mindgymbook/books/covers"),
+      uploadBookFile(),
+      uploadAudioFile(),
+      uploadExtraImages(),
+    ]);
+
+    // ✅ Validation: At least one format (Digital or Audio) should be available
+    if (!bookFileData && !audioFileData) {
+      throw new Error(
+        "Please upload at least a book file (PDF/EPUB) or an audio file.",
+      );
     }
 
     const book = await Book.create({
@@ -132,20 +153,24 @@ class BookService {
       thumbnail: thumbnailData || { url: "", public_id: "" },
       cover_image: coverImageData || { url: "", public_id: "" },
       file_data: bookFileData,
+      audio_file: audioFileData,
       images: extraImages,
       category_id,
-      is_active: is_active !== undefined ? String(is_active) !== "false" : true,
+      is_active:
+        is_active === undefined
+          ? true
+          : is_active === "true" || is_active === true,
       published_date: published_date || null,
-      is_premium: String(is_premium) === "true",
-      is_bestselling: String(is_bestselling) === "true",
-      is_trending: String(is_trending) === "true",
+      is_premium: is_premium === "true" || is_premium === true,
+      is_bestselling: is_bestselling === "true" || is_bestselling === true,
+      is_trending: is_trending === "true" || is_trending === true,
       highlights: highlights || null,
       isbn: isbn || null,
       language: language || null,
       page_count: 0,
       previewPages: parseInt(previewPages) || 5,
       dimensions: dimensions || null,
-      weight: weight ? parseFloat(weight) : null,
+      weight: parseFloat(weight) || null,
     });
 
     // Reload with category association
@@ -170,7 +195,7 @@ class BookService {
     return createdBook;
   }
 
-  async getBooks(filters = {}, page = 1, limit = 10) {
+  async getBooks(filters = {}, page = 1, limit = 50) {
     const cacheKey = `books:list:${JSON.stringify(filters)}:${page}:${limit}`;
     const cachedData = await getCache(cacheKey);
     if (cachedData) return cachedData;
@@ -307,104 +332,103 @@ class BookService {
       book.category_id = data.category_id;
     }
 
-    // Handle Cloudinary updates (Manual upload to keep local copies)
-    if (files?.thumbnail?.[0]) {
-      if (book.thumbnail?.public_id)
-        await deleteFromCloudinary(book.thumbnail.public_id);
-      const res = await uploadOnCloudinary(
-        files.thumbnail[0].path,
-        "mindgymbook/books/thumbnails",
-      );
-      if (res)
-        book.thumbnail = {
-          url: res.secure_url,
-          public_id: res.public_id,
-          local_path: files.thumbnail[0].path,
-        };
-    }
-
-    if (files?.cover_image?.[0]) {
-      if (book.cover_image?.public_id)
-        await deleteFromCloudinary(book.cover_image.public_id);
-      const res = await uploadOnCloudinary(
-        files.cover_image[0].path,
-        "mindgymbook/books/covers",
-      );
-      if (res)
-        book.cover_image = {
-          url: res.secure_url,
-          public_id: res.public_id,
-          local_path: files.cover_image[0].path,
-        };
-    }
-
-    // Handle book file update (PDF or EPUB — only one at a time)
-    const newBookFile = files?.pdf_file?.[0] || files?.epub_file?.[0];
-    if (newBookFile) {
-      // Delete old file from Cloudinary
-      const rawFileData = book.getDataValue("file_data");
-      const existingFile =
-        typeof rawFileData === "string" ? JSON.parse(rawFileData) : rawFileData;
-      if (existingFile?.public_id)
-        await deleteFromCloudinary(existingFile.public_id);
-
-      const ext = path
-        .extname(newBookFile.originalname)
-        .toLowerCase()
-        .replace(".", "");
-      const folder =
-        ext === "pdf" ? "mindgymbook/books/pdf" : "mindgymbook/books/epub";
-      const res = await uploadOnCloudinary(newBookFile.path, folder);
-      if (res) {
-        book.setDataValue("file_data", {
-          url: res.secure_url,
-          public_id: res.public_id,
-          type: ext,
-          local_path: newBookFile.path,
-        });
-      }
-    }
-
-    // Handle Gallery Images (Multiple)
-    let gallery = [];
-
-    // 1. If existing images are passed as JSON string or array in req.body.images, keep them
-    if (data.images) {
-      try {
-        gallery =
-          typeof data.images === "string"
-            ? JSON.parse(data.images)
-            : data.images;
-      } catch (e) {
-        gallery = book.images || [];
-      }
-    } else {
-      gallery = book.images || [];
-    }
-
-    // 2. If new images are uploaded, add them to the gallery
-    if (files?.images?.length > 0) {
-      for (const file of files.images) {
-        const res = await uploadOnCloudinary(
-          file.path,
-          "mindgymbook/books/gallery",
-        );
-        if (res)
-          gallery.push({ url: res.secure_url, public_id: res.public_id });
-      }
-    }
-
-    // 3. If there were images removed (not present in the new set), delete them from Cloudinary
-    if (Array.isArray(book.images)) {
-      const currentPublicIds = gallery.map((img) => img.public_id);
-      for (const oldImg of book.images) {
-        if (oldImg.public_id && !currentPublicIds.includes(oldImg.public_id)) {
-          await deleteFromCloudinary(oldImg.public_id);
+    // Concurrent File Upload Tasks
+    const updateThumbnail = async () => {
+      if (files?.thumbnail?.[0]) {
+        if (book.thumbnail?.public_id) {
+          deleteFromCloudinary(book.thumbnail.public_id).catch(()=>console.warn("Could not delete old thumbnail"));
+        }
+        const res = await uploadOnCloudinary(files.thumbnail[0].path, "mindgymbook/books/thumbnails");
+        if (res) {
+          book.thumbnail = { url: res.secure_url, public_id: res.public_id, local_path: files.thumbnail[0].path };
         }
       }
-    }
+    };
 
-    book.images = gallery;
+    const updateCoverImage = async () => {
+      if (files?.cover_image?.[0]) {
+        if (book.cover_image?.public_id) {
+          deleteFromCloudinary(book.cover_image.public_id).catch(()=>console.warn("Could not delete old cover"));
+        }
+        const res = await uploadOnCloudinary(files.cover_image[0].path, "mindgymbook/books/covers");
+        if (res) {
+          book.cover_image = { url: res.secure_url, public_id: res.public_id, local_path: files.cover_image[0].path };
+        }
+      }
+    };
+
+    const updateBookFile = async () => {
+      const newBookFile = files?.pdf_file?.[0] || files?.epub_file?.[0];
+      if (newBookFile) {
+        const rawFileData = book.getDataValue("file_data");
+        const existingFile = typeof rawFileData === "string" ? JSON.parse(rawFileData) : rawFileData;
+        if (existingFile?.public_id) {
+          deleteFromCloudinary(existingFile.public_id).catch(()=>console.warn("Could not delete old book file"));
+        }
+
+        const ext = path.extname(newBookFile.originalname).toLowerCase().replace(".", "");
+        const folder = ext === "pdf" ? "mindgymbook/books/pdf" : "mindgymbook/books/epub";
+        const res = await uploadOnCloudinary(newBookFile.path, folder);
+        if (res) {
+          book.setDataValue("file_data", { url: res.secure_url, public_id: res.public_id, type: ext, asset_type: res.type || "upload", local_path: newBookFile.path });
+        }
+      }
+    };
+
+    const updateAudioFile = async () => {
+      if (files?.audio_file?.[0]) {
+        const rawAudioData = book.getDataValue("audio_file");
+        const existingAudio = typeof rawAudioData === "string" ? JSON.parse(rawAudioData) : rawAudioData;
+        if (existingAudio?.public_id) {
+          deleteFromCloudinary(existingAudio.public_id).catch(()=>console.warn("Could not delete old audio file"));
+        }
+        const res = await uploadOnCloudinary(files.audio_file[0].path, "mindgymbook/books/audio");
+        if (res) {
+          book.setDataValue("audio_file", { url: res.secure_url, public_id: res.public_id, asset_type: res.type || "upload", local_path: files.audio_file[0].path });
+        }
+      }
+    };
+
+    const updateGalleryImages = async () => {
+      let gallery = [];
+      if (data.images) {
+        try { gallery = typeof data.images === "string" ? JSON.parse(data.images) : data.images; } 
+        catch (e) { gallery = book.images || []; }
+      } else {
+        gallery = book.images || [];
+      }
+
+      // 3. Deletion of removed images
+      if (Array.isArray(book.images)) {
+        const currentPublicIds = gallery.map((img) => img.public_id);
+        const deletionPromises = book.images.map(async (oldImg) => {
+          if (oldImg.public_id && !currentPublicIds.includes(oldImg.public_id)) {
+            await deleteFromCloudinary(oldImg.public_id).catch(()=>console.warn("Failed deleting gallery image"));
+          }
+        });
+        await Promise.all(deletionPromises);
+      }
+
+      // 2. Uploading new images
+      if (files?.images?.length > 0) {
+        const uploadPromises = files.images.map(async (file) => {
+          const res = await uploadOnCloudinary(file.path, "mindgymbook/books/gallery");
+          if (res) gallery.push({ url: res.secure_url, public_id: res.public_id });
+        });
+        await Promise.all(uploadPromises);
+      }
+      
+      book.images = gallery;
+    };
+
+    // Execute all updates simultaneously
+    await Promise.all([
+      updateThumbnail(),
+      updateCoverImage(),
+      updateBookFile(),
+      updateAudioFile(),
+      updateGalleryImages()
+    ]);
 
     // Scalar fields
     const scalarFields = [
@@ -454,8 +478,19 @@ class BookService {
 
     if (book.thumbnail?.public_id)
       await deleteFromCloudinary(book.thumbnail.public_id);
+    if (book.cover_image?.public_id)
+      await deleteFromCloudinary(book.cover_image.public_id);
     if (book.file_data?.public_id)
       await deleteFromCloudinary(book.file_data.public_id);
+    if (book.audio_file?.public_id)
+      await deleteFromCloudinary(book.audio_file.public_id);
+
+    // Cleanup gallery images
+    if (Array.isArray(book.images)) {
+      for (const img of book.images) {
+        if (img.public_id) await deleteFromCloudinary(img.public_id);
+      }
+    }
 
     await book.destroy();
 
@@ -514,21 +549,78 @@ class BookService {
     if (!book.is_premium) return true;
 
     if (userId) {
+      // 1. Check if book is purchased directly
       const purchase = await UserBook.findOne({
         where: { user_id: userId, book_id: book.id },
       });
       if (purchase) return true;
 
-      const dbUser = await User.findByPk(userId);
-      const now = new Date();
-      if (
-        dbUser?.subscription_status === "active" &&
-        new Date(dbUser.subscription_end_date) >= now
-      ) {
+      // 2. Check for an ACTIVE subscription
+      const activeSub = await Subscription.findOne({
+        where: {
+          user_id: userId,
+          status: "active",
+          end_date: { [Op.gt]: new Date() },
+        },
+        include: [{ model: Plan, as: "plan" }],
+      });
+
+      if (!activeSub) return false;
+
+      // 3. User has active sub. Is this book already in their "Reading History"?
+      // If they've already started the book, they should always have access during the sub period.
+      const progress = await ReadingProgress.findOne({
+        where: { user_id: userId, book_id: book.id },
+      });
+      if (progress) return true;
+
+      // 4. New book - check the plan's read limit
+      const plan = activeSub.plan;
+      const limit = plan ? plan.book_read_limit : 5; // fallback to 5
+
+      if (limit === -1) return true; // Unlimited access
+      if (activeSub.books_read_count < limit) {
         return true;
       }
     }
     return false;
+  }
+
+  // Method to increment count when user actually opens a new book
+  async incrementBookReadCount(userId, bookId) {
+    // 1. Check if already reading this book
+    const progress = await ReadingProgress.findOne({
+      where: { user_id: userId, book_id: bookId },
+    });
+    if (progress) return; // Keep same count
+
+    // 2. Check for active sub
+    const activeSub = await Subscription.findOne({
+      where: {
+        user_id: userId,
+        status: "active",
+        end_date: { [Op.gt]: new Date() },
+      },
+      include: [{ model: Plan, as: "plan" }],
+    });
+
+    if (activeSub) {
+      const plan = activeSub.plan;
+      const limit = plan ? plan.book_read_limit : 5;
+
+      // Only increment if not unlimited and within limit (or just started)
+      if (limit === -1 || activeSub.books_read_count < limit) {
+        // Create initial progress to mark as "reading"
+        await ReadingProgress.create({
+          user_id: userId,
+          book_id: bookId,
+          last_page: 1,
+        });
+
+        // Increment count
+        await activeSub.increment("books_read_count", { by: 1 });
+      }
+    }
   }
 
   async getReadPdfUrl(bookId, user) {
