@@ -160,8 +160,9 @@ class PdfService {
       const publicId = bookData?.file_data?.public_id;
       if (epubUrl.includes("cloudinary.com") && publicId) {
         try {
-          finalUrl = this.getSignedCloudinaryUrl(publicId);
-          console.log("Generated signed URL for Cloudinary EPUB");
+          const aType = bookData?.file_data?.asset_type || "upload";
+          finalUrl = this.getSignedCloudinaryUrl(publicId, null, aType);
+          console.log(`Generated signed URL for Cloudinary EPUB (Asset Type: ${aType})`);
         } catch (e) {
           console.warn("Could not sign EPUB URL:", e.message);
         }

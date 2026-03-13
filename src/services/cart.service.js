@@ -10,11 +10,13 @@ class CartService {
 
     // Check if book exists and is active
     const [book] = await sequelize.query(
-      "SELECT id, is_active FROM books WHERE id = :book_id LIMIT 1",
+      "SELECT id, title, is_active, stock, reserved FROM books WHERE id = :book_id LIMIT 1",
       { replacements: { book_id }, type: QueryTypes.SELECT },
     );
     if (!book) throw new Error("Book not found");
     if (!book.is_active) throw new Error("Book is not available for purchase");
+
+    const availableStock = (book.stock || 0) - (book.reserved || 0);
 
     // Check if item already exists in cart
     const [existingItem] = await sequelize.query(
@@ -24,6 +26,13 @@ class CartService {
 
     if (existingItem) {
       const newQuantity = existingItem.quantity + parseInt(quantity);
+
+      if (newQuantity > availableStock) {
+        throw new Error(
+          `Only ${availableStock} units of "${book.title}" are available in stock.`,
+        );
+      }
+
       await sequelize.query(
         "UPDATE carts SET quantity = :quantity, updated_at = NOW() WHERE id = :id",
         {
@@ -37,6 +46,12 @@ class CartService {
         { replacements: { id: existingItem.id }, type: QueryTypes.SELECT },
       );
       return updated;
+    }
+
+    if (parseInt(quantity) > availableStock) {
+      throw new Error(
+        `Only ${availableStock} units of "${book.title}" are available in stock.`,
+      );
     }
 
     const [, meta] = await sequelize.query(
@@ -67,7 +82,10 @@ class CartService {
 
   async updateQuantity(userId, cartId, quantity) {
     const [cartItem] = await sequelize.query(
-      "SELECT id FROM carts WHERE id = :cartId AND user_id = :userId LIMIT 1",
+      `SELECT c.id, c.quantity, b.title, b.stock, b.reserved 
+       FROM carts c 
+       JOIN books b ON c.book_id = b.id 
+       WHERE c.id = :cartId AND c.user_id = :userId LIMIT 1`,
       { replacements: { cartId, userId }, type: QueryTypes.SELECT },
     );
     if (!cartItem) throw new Error("Cart item not found");
@@ -78,6 +96,13 @@ class CartService {
         type: QueryTypes.DELETE,
       });
       return { message: "Item removed from cart" };
+    }
+
+    const availableStock = (cartItem.stock || 0) - (cartItem.reserved || 0);
+    if (quantity > availableStock) {
+      throw new Error(
+        `Only ${availableStock} units of "${cartItem.title}" are available in stock.`,
+      );
     }
 
     await sequelize.query(

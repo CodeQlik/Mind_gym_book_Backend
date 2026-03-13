@@ -96,20 +96,6 @@ class BookService {
       return null;
     };
 
-    const uploadAudioFile = async () => {
-      if (!files?.audio_file?.[0]) return null;
-      const audioFile = files.audio_file[0];
-      const res = await uploadOnCloudinary(audioFile.path, "mindgymbook/books/audio");
-      if (res) {
-        return {
-          url: res.secure_url,
-          public_id: res.public_id,
-          asset_type: res.type || "upload",
-          local_path: audioFile.path,
-        };
-      }
-      return null;
-    };
 
     const uploadExtraImages = async () => {
       let images = [];
@@ -126,19 +112,16 @@ class BookService {
     };
 
     // Parallelize all uploads to significantly reduce response time
-    const [thumbnailData, coverImageData, bookFileData, audioFileData, extraImages] = await Promise.all([
+    const [thumbnailData, coverImageData, bookFileData, extraImages] = await Promise.all([
       uploadFiles(files?.thumbnail, "mindgymbook/books/thumbnails"),
       uploadFiles(files?.cover_image, "mindgymbook/books/covers"),
       uploadBookFile(),
-      uploadAudioFile(),
       uploadExtraImages(),
     ]);
 
-    // ✅ Validation: At least one format (Digital or Audio) should be available
-    if (!bookFileData && !audioFileData) {
-      throw new Error(
-        "Please upload at least a book file (PDF/EPUB) or an audio file.",
-      );
+    // ✅ Validation: Book file (PDF/EPUB) should be available
+    if (!bookFileData) {
+      throw new Error("Please upload a book file (PDF/EPUB).");
     }
 
     const validConditions = ["new", "fair", "good", "acceptable"];
@@ -155,17 +138,16 @@ class BookService {
       price: parseFloat(price) || 0,
       original_price: original_price ? parseFloat(original_price) : null,
       condition: sanitizedCondition,
-      stock: parseInt(stock) || 1,
+      stock: parseInt(stock) || 0,
       thumbnail: thumbnailData || { url: "", public_id: "" },
       cover_image: coverImageData || { url: "", public_id: "" },
       file_data: bookFileData,
-      audio_file: audioFileData,
       images: extraImages,
       category_id,
       is_active:
-        is_active === undefined
-          ? true
-          : is_active === "true" || is_active === true,
+        (parseInt(stock) || 0) <= 0 
+          ? false 
+          : (is_active === undefined ? true : is_active === "true" || is_active === true),
       published_date: published_date || null,
       is_premium: is_premium === "true" || is_premium === true,
       is_bestselling: is_bestselling === "true" || is_bestselling === true,
@@ -298,8 +280,14 @@ class BookService {
     const book = await Book.findByPk(id);
     if (!book) throw new Error("Book not found");
 
+    if (book.stock <= 0 && !book.is_active) {
+      throw new Error("Cannot publish a book with 0 stock. Please update the stock first.");
+    }
+
     book.is_active = !book.is_active;
     await book.save();
+
+    await clearCachePattern("books:*");
     return book;
   }
 
@@ -381,19 +369,6 @@ class BookService {
       }
     };
 
-    const updateAudioFile = async () => {
-      if (files?.audio_file?.[0]) {
-        const rawAudioData = book.getDataValue("audio_file");
-        const existingAudio = typeof rawAudioData === "string" ? JSON.parse(rawAudioData) : rawAudioData;
-        if (existingAudio?.public_id) {
-          deleteFromCloudinary(existingAudio.public_id).catch(()=>console.warn("Could not delete old audio file"));
-        }
-        const res = await uploadOnCloudinary(files.audio_file[0].path, "mindgymbook/books/audio");
-        if (res) {
-          book.setDataValue("audio_file", { url: res.secure_url, public_id: res.public_id, asset_type: res.type || "upload", local_path: files.audio_file[0].path });
-        }
-      }
-    };
 
     const updateGalleryImages = async () => {
       let gallery = [];
@@ -432,7 +407,6 @@ class BookService {
       updateThumbnail(),
       updateCoverImage(),
       updateBookFile(),
-      updateAudioFile(),
       updateGalleryImages()
     ]);
 
@@ -469,8 +443,14 @@ class BookService {
     });
 
     // Boolean fields
-    if (data.is_active !== undefined)
-      book.is_active = data.is_active !== "false";
+    if (data.is_active !== undefined) {
+      book.is_active = data.is_active === "true" || data.is_active === true;
+    }
+
+    // Auto deactivate if stock reaches 0
+    if (book.stock <= 0) {
+      book.is_active = false;
+    }
     if (data.is_premium !== undefined)
       book.is_premium = String(data.is_premium) === "true";
     if (data.is_bestselling !== undefined)
@@ -500,8 +480,6 @@ class BookService {
       await deleteFromCloudinary(book.cover_image.public_id);
     if (book.file_data?.public_id)
       await deleteFromCloudinary(book.file_data.public_id);
-    if (book.audio_file?.public_id)
-      await deleteFromCloudinary(book.audio_file.public_id);
 
     // Cleanup gallery images
     if (Array.isArray(book.images)) {

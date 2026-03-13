@@ -11,6 +11,28 @@ import fs from "fs";
 import path from "path";
 import axios from "axios";
 import { cloudinary } from "../config/cloudinary.js";
+import crypto from "crypto";
+
+const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
+const IV_LENGTH = 16;
+
+function encryptUrl(text) {
+  if (!text) return text;
+  try {
+    const iv = crypto.randomBytes(IV_LENGTH);
+    const cipher = crypto.createCipheriv(
+      "aes-256-cbc",
+      Buffer.from(ENCRYPTION_KEY),
+      iv,
+    );
+    let encrypted = cipher.update(text);
+    encrypted = Buffer.concat([encrypted, cipher.final()]);
+    return iv.toString("hex") + ":" + encrypted.toString("hex");
+  } catch (error) {
+    console.error("Encryption failed:", error);
+    return null;
+  }
+}
 
 const getCleanBaseUrl = () => {
   return (process.env.BASE_URL || "http://localhost:5000")
@@ -18,33 +40,70 @@ const getCleanBaseUrl = () => {
     .replace(/\/api\/v1$/, "");
 };
 
-// Helper to get audio preview URL (30 seconds)
-const getAudioPreviewUrl = (url) => {
-  if (!url || !url.includes("cloudinary.com")) return url;
-  if (url.includes("du_30")) return url;
-  return url.replace("/upload/", "/upload/du_30/");
-};
-
 // Helper to remove internal fields like 'local_path' and apply preview logic before sending response
-const cleanBookData = (book, hasAccess = false) => {
+const cleanBookData = (book, isAdminRequest = false) => {
   const data = typeof book.toJSON === "function" ? book.toJSON() : { ...book };
-  
-  if (data.cover_image && data.cover_image.local_path) delete data.cover_image.local_path;
-  if (data.thumbnail && data.thumbnail.local_path) delete data.thumbnail.local_path;
-  if (data.file_data && data.file_data.local_path) delete data.file_data.local_path;
-  
-  if (data.audio_file) {
-    if (data.audio_file.local_path) delete data.audio_file.local_path;
-    if (!hasAccess && data.audio_file.url) {
-      data.audio_file.url = getAudioPreviewUrl(data.audio_file.url);
-      data.audio_file.is_preview = true;
-    } else {
-      data.audio_file.is_preview = false;
+
+  if (data.cover_image && data.cover_image.local_path)
+    delete data.cover_image.local_path;
+  if (data.thumbnail && data.thumbnail.local_path)
+    delete data.thumbnail.local_path;
+  if (data.file_data && data.file_data.local_path)
+    delete data.file_data.local_path;
+
+  // Encrypt actual Cloudinary URLs for paid files from non-admin users to prevent direct downloads
+  if (!isAdminRequest && data.file_data) {
+    if (data.file_data.url) {
+      data.file_data.url = encryptUrl(data.file_data.url);
+      data.file_data.is_encrypted = true;
     }
+    if (data.file_data.public_id) delete data.file_data.public_id;
+
+    // Handle older formats where file_data has 'pdf' or 'epub' keys that might be stringified JSON
+    ["pdf", "epub"].forEach((type) => {
+      if (data.file_data[type]) {
+        try {
+          let parsed =
+            typeof data.file_data[type] === "string"
+              ? JSON.parse(data.file_data[type])
+              : data.file_data[type];
+          if (parsed && parsed.url) {
+            parsed.url = encryptUrl(parsed.url);
+            parsed.is_encrypted = true;
+            if (parsed.public_id) delete parsed.public_id;
+            data.file_data[type] =
+              typeof data.file_data[type] === "string"
+                ? JSON.stringify(parsed)
+                : parsed;
+          }
+        } catch (e) {}
+      }
+    });
+  }
+
+  // Backwards compatibility for older schema fields if they exist outside file_data
+  if (!isAdminRequest) {
+    ["pdf_file", "epub_file"].forEach((field) => {
+      if (data[field]) {
+        try {
+          let parsed =
+            typeof data[field] === "string"
+              ? JSON.parse(data[field])
+              : data[field];
+          if (parsed && parsed.url) {
+            parsed.url = encryptUrl(parsed.url);
+            parsed.is_encrypted = true;
+            if (parsed.public_id) delete parsed.public_id;
+            data[field] =
+              typeof data[field] === "string" ? JSON.stringify(parsed) : parsed;
+          }
+        } catch (e) {}
+      }
+    });
   }
 
   if (Array.isArray(data.images)) {
-    data.images = data.images.map(img => {
+    data.images = data.images.map((img) => {
       if (img && img.local_path) {
         const { local_path, ...cleanImg } = img;
         return cleanImg;
@@ -93,27 +152,25 @@ export const getAllBooks = asyncHandler(async (req, res) => {
   // Fetch user access info once to avoid N+1 queries
   const user = req.user;
   const isAdmin = user && user.user_type === "admin";
-  const isSubscribed = user && user.subscription_status === "active" && new Date(user.subscription_end_date) >= new Date();
-  
+  const isSubscribed =
+    user &&
+    user.subscription_status === "active" &&
+    new Date(user.subscription_end_date) >= new Date();
+
   let purchasedBookIds = new Set();
   if (user && !isSubscribed && !isAdmin) {
-    const purchases = await UserBook.findAll({ where: { user_id: user.id }, attributes: ["book_id"] });
-    purchasedBookIds = new Set(purchases.map(p => p.book_id));
+    const purchases = await UserBook.findAll({
+      where: { user_id: user.id },
+      attributes: ["book_id"],
+    });
+    purchasedBookIds = new Set(purchases.map((p) => p.book_id));
   }
 
-  const baseUrl = getCleanBaseUrl();
-  const booksWithReadUrl = result.books.map((book) => {
-    const hasAccess = isAdmin || isSubscribed || purchasedBookIds.has(book.id);
-    const bookData = cleanBookData(book, hasAccess);
-    return {
-      ...bookData,
-      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
-    };
-  });
+  const cleanBooks = result.books.map((book) => cleanBookData(book, isAdmin));
 
   return sendResponse(res, 200, true, "Books fetched successfully", {
     ...result,
-    books: booksWithReadUrl,
+    books: cleanBooks,
   });
 });
 
@@ -124,18 +181,11 @@ export const getAdminBooks = asyncHandler(async (req, res) => {
 
   const result = await bookService.getBooks({}, page, limit);
 
-  const baseUrl = getCleanBaseUrl();
-  const booksWithReadUrl = result.books.map((book) => {
-    const bookData = cleanBookData(book, true); // Admin has always access
-    return {
-      ...bookData,
-      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
-    };
-  });
+  const cleanBooks = result.books.map((book) => cleanBookData(book, true));
 
   return sendResponse(res, 200, true, "Admin books fetched successfully", {
     ...result,
-    books: booksWithReadUrl,
+    books: cleanBooks,
   });
 });
 
@@ -151,16 +201,11 @@ export const getBookById = asyncHandler(async (req, res) => {
     isBookmarked = !!bookmark;
   }
 
-  const baseUrl = getCleanBaseUrl();
-  const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
+  const bookData = cleanBookData(book, isAdminRequest);
 
-  const fullAccess = await bookService.hasFullAccess(req.user, book);
-  const bookData = cleanBookData(book, fullAccess);
-  
   return sendResponse(res, 200, true, "Book fetched successfully", {
     ...bookData,
     isBookmarked,
-    read_url,
   });
 });
 
@@ -179,15 +224,10 @@ export const getBookBySlug = asyncHandler(async (req, res) => {
     isBookmarked = !!bookmark;
   }
 
-  const baseUrl = getCleanBaseUrl();
-  const read_url = `${baseUrl}/api/v1/book/readBook/${book.id}`;
-
-  const fullAccess = await bookService.hasFullAccess(req.user, book);
-  const bookData = cleanBookData(book, fullAccess);
+  const bookData = cleanBookData(book, isAdminRequest);
   return sendResponse(res, 200, true, "Book fetched successfully", {
     ...bookData,
     isBookmarked,
-    read_url,
   });
 });
 
@@ -206,27 +246,25 @@ export const getBooksByCategory = asyncHandler(async (req, res) => {
   // Fetch user access info once to avoid N+1 queries
   const user = req.user;
   const isAdmin = user && user.user_type === "admin";
-  const isSubscribed = user && user.subscription_status === "active" && new Date(user.subscription_end_date) >= new Date();
-  
+  const isSubscribed =
+    user &&
+    user.subscription_status === "active" &&
+    new Date(user.subscription_end_date) >= new Date();
+
   let purchasedBookIds = new Set();
   if (user && !isSubscribed && !isAdmin) {
-    const purchases = await UserBook.findAll({ where: { user_id: user.id }, attributes: ["book_id"] });
-    purchasedBookIds = new Set(purchases.map(p => p.book_id));
+    const purchases = await UserBook.findAll({
+      where: { user_id: user.id },
+      attributes: ["book_id"],
+    });
+    purchasedBookIds = new Set(purchases.map((p) => p.book_id));
   }
 
-  const baseUrl = getCleanBaseUrl();
-  const booksWithReadUrl = result.books.map((book) => {
-    const hasAccess = isAdmin || isSubscribed || purchasedBookIds.has(book.id);
-    const bookData = cleanBookData(book, hasAccess);
-    return {
-      ...bookData,
-      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
-    };
-  });
+  const cleanBooks = result.books.map((book) => cleanBookData(book, isAdmin));
 
   return sendResponse(res, 200, true, "Category books fetched successfully", {
     ...result,
-    books: booksWithReadUrl,
+    books: cleanBooks,
   });
 });
 
@@ -272,27 +310,25 @@ export const searchBooks = asyncHandler(async (req, res) => {
   // Fetch user access info once to avoid N+1 queries
   const user = req.user;
   const isAdmin = user && user.user_type === "admin";
-  const isSubscribed = user && user.subscription_status === "active" && new Date(user.subscription_end_date) >= new Date();
-  
+  const isSubscribed =
+    user &&
+    user.subscription_status === "active" &&
+    new Date(user.subscription_end_date) >= new Date();
+
   let purchasedBookIds = new Set();
   if (user && !isSubscribed && !isAdmin) {
-    const purchases = await UserBook.findAll({ where: { user_id: user.id }, attributes: ["book_id"] });
-    purchasedBookIds = new Set(purchases.map(p => p.book_id));
+    const purchases = await UserBook.findAll({
+      where: { user_id: user.id },
+      attributes: ["book_id"],
+    });
+    purchasedBookIds = new Set(purchases.map((p) => p.book_id));
   }
 
-  const baseUrl = getCleanBaseUrl();
-  const booksWithReadUrl = result.books.map((book) => {
-    const hasAccess = isAdmin || isSubscribed || purchasedBookIds.has(book.id);
-    const bookData = cleanBookData(book, hasAccess);
-    return {
-      ...bookData,
-      read_url: `${baseUrl}/api/v1/book/readBook/${bookData.id}`,
-    };
-  });
+  const cleanBooks = result.books.map((book) => cleanBookData(book, isAdmin));
 
   return sendResponse(res, 200, true, "Search results fetched", {
     ...result,
-    books: booksWithReadUrl,
+    books: cleanBooks,
   });
 });
 
@@ -311,7 +347,7 @@ export const readBookPdf = asyncHandler(async (req, res) => {
   }
 
   const fullAccess = await bookService.hasFullAccess(user, book);
-  
+
   // If user has full access and is logged in, increment the read count if it's a new book
   if (fullAccess && user) {
     await bookService.incrementBookReadCount(user.id, book.id);
@@ -500,7 +536,7 @@ export const extractBookPageText = asyncHandler(async (req, res) => {
   const user = req.user;
   // ── Access Control: Use unified service logic ───
   const fullAccess = await bookService.hasFullAccess(user, book);
-  
+
   // If user has full access and is logged in, increment the read count if it's a new book
   if (fullAccess && user) {
     await bookService.incrementBookReadCount(user.id, book.id);

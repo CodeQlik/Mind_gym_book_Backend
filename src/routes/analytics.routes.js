@@ -1,7 +1,7 @@
 import { Router } from "express";
 import analyticsController from "../controllers/analytics.controller.js";
 import { getErrorLogs, clearLogs } from "../controllers/admin.controller.js";
-import { verifyJWT } from "../middlewares/auth.middleware.js";
+import { verifyJWT, optionalVerifyJWT } from "../middlewares/auth.middleware.js";
 import { isAdmin } from "../middlewares/admin.middleware.js";
 
 const router = Router();
@@ -12,6 +12,12 @@ router.get(
   verifyJWT,
   isAdmin,
   analyticsController.getDashboardStats,
+);
+
+router.get(
+  "/top-selling-books-week",
+  optionalVerifyJWT,
+  analyticsController.getTopSellingBooksThisWeek,
 );
 
 router.get("/logs", verifyJWT, isAdmin, getErrorLogs);
