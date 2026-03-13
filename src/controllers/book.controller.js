@@ -13,16 +13,16 @@ import path from "path";
 import axios from "axios";
 import { cloudinary } from "../config/cloudinary.js";
 
-
-
-
 const getCleanBaseUrl = () => {
-  return (process.env.BASE_URL || "http://localhost:5000")
-    .replace(/\/+$/, "")
-    .replace(/\/api\/v1$/, "");
+  return process.env.BASE_URL.replace(/\/+$/, "").replace(/\/api\/v1$/, "");
 };
 
-const cleanBookData = (book, isAdminRequest = false, includeAudio = true, includeFiles = true) => {
+const cleanBookData = (
+  book,
+  isAdminRequest = false,
+  includeAudio = true,
+  includeFiles = true,
+) => {
   const data = typeof book.toJSON === "function" ? book.toJSON() : { ...book };
 
   // Transform to the requested Premium Format with SPECIFIC ORDER
@@ -35,26 +35,39 @@ const cleanBookData = (book, isAdminRequest = false, includeAudio = true, includ
     description: data.description || "",
     highlights: data.highlights || "",
     language: data.language || "Hindi",
-    category: data.category ? { id: data.category.id, name: data.category.name } : null,
-    images: data.images || []
+    category: data.category
+      ? { id: data.category.id, name: data.category.name }
+      : null,
+    images: data.images || [],
   };
 
   // 1. Handle Audio Book structure (Middle)
-  if (includeAudio && Array.isArray(data.audiobooks) && data.audiobooks.length > 0) {
+  if (
+    includeAudio &&
+    Array.isArray(data.audiobooks) &&
+    data.audiobooks.length > 0
+  ) {
     const baseUrl = getCleanBaseUrl();
     cleaned.audio_book = {
       available: true,
-      chapters: data.audiobooks.map(chapter => ({
+      chapters: data.audiobooks.map((chapter) => ({
         title: chapter.chapter_title || `Chapter ${chapter.chapter_number}`,
-        audio_url: (chapter.audio_file && chapter.audio_file.url) ? chapter.audio_file.url : "",
-        is_encrypted: false
-      }))
+        audio_url:
+          chapter.audio_file && chapter.audio_file.url
+            ? chapter.audio_file.url
+            : "",
+        is_encrypted: false,
+      })),
     };
   }
 
   // 2. Heavy fields at the BOTTOM
-  cleaned.cover_image = (data.cover_image === 0 || data.cover_image === "0") ? null : data.cover_image;
-  cleaned.thumbnail = (data.thumbnail === 0 || data.thumbnail === "0") ? null : data.thumbnail;
+  cleaned.cover_image =
+    data.cover_image === 0 || data.cover_image === "0"
+      ? null
+      : data.cover_image;
+  cleaned.thumbnail =
+    data.thumbnail === 0 || data.thumbnail === "0" ? null : data.thumbnail;
 
   // Handle File Data (PDF/EPUB) last
   if (includeFiles) {
@@ -62,21 +75,26 @@ const cleanBookData = (book, isAdminRequest = false, includeAudio = true, includ
     if (data.file_data) {
       const original = data.file_data;
       if (original.url) {
-        const type = original.type || (original.url.toLowerCase().includes(".epub") ? "epub" : "pdf");
+        const type =
+          original.type ||
+          (original.url.toLowerCase().includes(".epub") ? "epub" : "pdf");
         const fileObj = {
           url: original.url,
-          type: type
+          type: type,
         };
         if (type === "pdf") cleaned.file_data.pdf = fileObj;
         else cleaned.file_data.epub = fileObj;
       } else {
-        ["pdf", "epub"].forEach(type => {
+        ["pdf", "epub"].forEach((type) => {
           if (original[type]) {
-            const inner = typeof original[type] === "string" ? JSON.parse(original[type]) : original[type];
+            const inner =
+              typeof original[type] === "string"
+                ? JSON.parse(original[type])
+                : original[type];
             if (inner && inner.url) {
               cleaned.file_data[type] = {
                 url: inner.url,
-                type: type
+                type: type,
               };
             }
           }
@@ -93,7 +111,7 @@ const cleanBookData = (book, isAdminRequest = false, includeAudio = true, includ
       is_active: data.is_active,
       stock: data.stock,
       reserved: data.reserved,
-      available: data.available // Maintain virtuals if any
+      available: data.available, // Maintain virtuals if any
     };
   }
 
@@ -158,14 +176,14 @@ export const getAllBooks = asyncHandler(async (req, res) => {
   categories.forEach((cat) => {
     const categoryData = cat.toJSON ? cat.toJSON() : cat;
     const catName = categoryData.name || "Unknown";
-    
+
     const cleanedBooks = (categoryData.books || []).map((book) => {
       // Inject category data so cleanBookData can find it
       const bookData = book.toJSON ? book.toJSON() : { ...book };
       bookData.category = { id: categoryData.id, name: categoryData.name };
       return cleanBookData(bookData, isAdmin, false, false);
     });
-    
+
     books[catName] = cleanedBooks;
   });
 
@@ -176,7 +194,7 @@ export const getAllBooks = asyncHandler(async (req, res) => {
     totalItems: result.totalItems,
     totalPages: result.totalPages,
     currentPage: result.currentPage,
-    books
+    books,
   });
 });
 
@@ -187,7 +205,9 @@ export const getAdminBooks = asyncHandler(async (req, res) => {
 
   const result = await bookService.getBooks({}, page, limit, false);
 
-  const cleanBooks = (result.books || []).map((book) => cleanBookData(book, true, true, true));
+  const cleanBooks = (result.books || []).map((book) =>
+    cleanBookData(book, true, true, true),
+  );
 
   return sendResponse(res, 200, true, "Admin books fetched successfully", {
     totalItems: result.totalItems,
@@ -232,7 +252,12 @@ export const getBookBySlug = asyncHandler(async (req, res) => {
     isBookmarked = !!bookmark;
   }
 
-  const bookData = cleanBookData(book, isAdminRequest, isAdminRequest, isAdminRequest);
+  const bookData = cleanBookData(
+    book,
+    isAdminRequest,
+    isAdminRequest,
+    isAdminRequest,
+  );
   return sendResponse(res, 200, true, "Book fetched successfully", {
     ...bookData,
     isBookmarked,
@@ -615,7 +640,7 @@ export const extractBookPageText = asyncHandler(async (req, res) => {
 export const getBookContent = asyncHandler(async (req, res) => {
   const { id } = req.params;
   const user = req.user;
-  
+
   const book = await bookService.getBookById(id, true);
   if (!book) {
     return sendResponse(res, 404, false, "Book not found");
@@ -626,7 +651,7 @@ export const getBookContent = asyncHandler(async (req, res) => {
   const baseUrl = getCleanBaseUrl();
 
   // Map audio chapters
-  const audioChapters = (book.audiobooks || []).map(ch => {
+  const audioChapters = (book.audiobooks || []).map((ch) => {
     let audioUrl = "";
     if (ch.audio_file && ch.audio_file.url) {
       if (fullAccess) {
@@ -637,12 +662,12 @@ export const getBookContent = asyncHandler(async (req, res) => {
         audioUrl = `${baseUrl}/api/v1/audiobook/stream/${ch.id}`;
       }
     }
-    
+
     return {
       chapter_number: ch.chapter_number,
       chapter_title: ch.chapter_title || `Chapter ${ch.chapter_number}`,
       audio_url: audioUrl,
-      is_preview: !fullAccess
+      is_preview: !fullAccess,
     };
   });
 
@@ -651,8 +676,11 @@ export const getBookContent = asyncHandler(async (req, res) => {
   let fileType = null;
 
   if (book.file_data) {
-    const fd = typeof book.file_data === "string" ? JSON.parse(book.file_data) : book.file_data;
-    
+    const fd =
+      typeof book.file_data === "string"
+        ? JSON.parse(book.file_data)
+        : book.file_data;
+
     // Determine the raw source URL
     let sourceUrl = "";
     if (fd.epub && fd.epub.url) {
@@ -663,7 +691,8 @@ export const getBookContent = asyncHandler(async (req, res) => {
       fileType = "pdf";
     } else if (fd.url) {
       sourceUrl = fd.url;
-      fileType = fd.type || (fd.url.toLowerCase().includes(".epub") ? "epub" : "pdf");
+      fileType =
+        fd.type || (fd.url.toLowerCase().includes(".epub") ? "epub" : "pdf");
     }
 
     if (sourceUrl) {
@@ -685,6 +714,6 @@ export const getBookContent = asyncHandler(async (req, res) => {
     file_url: fileUrl,
     file_type: fileType,
     is_preview: !fullAccess,
-    audio_chapters: audioChapters
+    audio_chapters: audioChapters,
   });
 });

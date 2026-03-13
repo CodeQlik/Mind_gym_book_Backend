@@ -13,7 +13,7 @@ const createAudiobook = asyncHandler(async (req, res) => {
 });
 
 const getCleanBaseUrl = () => {
-  return (process.env.BASE_URL || "http://localhost:5000")
+  return (process.env.BASE_URL)
     .replace(/\/+$/, "")
     .replace(/\/api\/v1$/, "");
 };

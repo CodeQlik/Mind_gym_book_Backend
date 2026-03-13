@@ -8257,3 +8257,69 @@
 [2026-03-13T12:56:51.327Z] [INFO] Redis Client Connected 
 [2026-03-13T12:57:08.484Z] [INFO] Redis Client Connected 
 [2026-03-13T13:02:05.765Z] [INFO] Redis Client Connected 
+[2026-03-13T13:04:56.370Z] [WARN] GET /api/v1/notifications 401 (96ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"96ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.374Z] [WARN] GET /api/v1/users/profile 401 (35ms) {"method":"GET","url":"/api/v1/users/profile","status":401,"duration":"35ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.382Z] [WARN] GET /api/v1/notifications/admin/stats 401 (58ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"58ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.387Z] [WARN] GET /api/v1/book/admin/all?page=1&limit=10 401 (54ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":401,"duration":"54ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.417Z] [WARN] GET /api/v1/notifications 401 (28ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"28ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.420Z] [WARN] GET /api/v1/users/profile 401 (23ms) {"method":"GET","url":"/api/v1/users/profile","status":401,"duration":"23ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.425Z] [WARN] GET /api/v1/notifications/admin/stats 401 (21ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"21ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.431Z] [WARN] GET /api/v1/book/admin/all?page=1&limit=10 401 (23ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":401,"duration":"23ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.738Z] [WARN] GET /api/v1/notifications 401 (2ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"2ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.800Z] [WARN] GET /api/v1/notifications 401 (1ms) {"method":"GET","url":"/api/v1/notifications","status":401,"duration":"1ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.862Z] [WARN] GET /api/v1/notifications/admin/stats 401 (0ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"0ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.939Z] [WARN] GET /api/v1/book/admin/all?page=1&limit=10 401 (3ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":401,"duration":"3ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:56.975Z] [WARN] GET /api/v1/notifications/admin/stats 401 (1ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":401,"duration":"1ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:04:57.007Z] [WARN] GET /api/v1/book/admin/all?page=1&limit=10 401 (1ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":401,"duration":"1ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:05:31.117Z] [INFO] POST /api/v1/users/login 200 (161ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"161ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:05:31.198Z] [INFO] GET /api/v1/users/profile 304 (41ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"41ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.395Z] [INFO] GET /api/v1/notifications 304 (111ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"111ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.421Z] [INFO] GET /api/v1/users/profile 304 (135ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"135ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.469Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (123ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"123ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.512Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (11ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"11ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.544Z] [INFO] GET /api/v1/notifications 304 (66ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"66ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.562Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (22ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"22ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.613Z] [INFO] GET /api/v1/notifications/admin/stats 200 (301ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"301ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.669Z] [INFO] GET /api/v1/notifications 304 (91ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"91ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.688Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (65ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"65ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.713Z] [INFO] GET /api/v1/analytics/dashboard 304 (391ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"391ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.720Z] [INFO] GET /api/v1/notifications 304 (36ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"36ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.782Z] [INFO] GET /api/v1/notifications/admin/stats 304 (125ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"125ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.831Z] [INFO] GET /api/v1/notifications/admin/stats 304 (43ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"43ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.839Z] [INFO] GET /api/v1/analytics/dashboard 304 (114ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"114ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.901Z] [INFO] GET /api/v1/analytics/dashboard 304 (53ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"53ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.931Z] [INFO] GET /api/v1/notifications/admin/stats 304 (78ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"78ms","ip":"::1","user":26}
+[2026-03-13T13:05:31.966Z] [INFO] GET /api/v1/analytics/dashboard 304 (60ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"60ms","ip":"::1","user":26}
+[2026-03-13T13:05:35.309Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (517ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"517ms","ip":"::1","user":26}
+[2026-03-13T13:05:35.594Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (273ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"273ms","ip":"::1","user":26}
+[2026-03-13T13:05:45.641Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 200 (24ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":200,"duration":"24ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:05:45.662Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 304 (14ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":304,"duration":"14ms","ip":"::1","user":"Guest"}
+[2026-03-13T13:06:14.481Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (512ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"512ms","ip":"::1","user":26}
+[2026-03-13T13:06:14.757Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (263ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"263ms","ip":"::1","user":26}
+[2026-03-13T13:06:32.297Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (794ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"794ms","ip":"::1","user":26}
+[2026-03-13T13:06:32.813Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (510ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"510ms","ip":"::1","user":26}
+[2026-03-13T13:06:41.975Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (512ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"512ms","ip":"::1","user":26}
+[2026-03-13T13:06:42.259Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (278ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"278ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.051Z] [INFO] GET /api/v1/notifications 304 (49ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"49ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.062Z] [INFO] GET /api/v1/users/profile 304 (36ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"36ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.091Z] [INFO] GET /api/v1/notifications 304 (26ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"26ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.104Z] [INFO] GET /api/v1/users/profile 304 (25ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"25ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.124Z] [INFO] GET /api/v1/notifications/admin/stats 304 (102ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"102ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.156Z] [INFO] GET /api/v1/notifications/admin/stats 304 (14ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"14ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.238Z] [INFO] GET /api/v1/notifications 304 (17ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"17ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.252Z] [INFO] GET /api/v1/notifications 304 (10ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"10ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.265Z] [INFO] GET /api/v1/notifications/admin/stats 304 (38ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"38ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.282Z] [INFO] GET /api/v1/notifications/admin/stats 304 (15ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"15ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.560Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (544ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"544ms","ip":"::1","user":26}
+[2026-03-13T13:07:22.861Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (281ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"281ms","ip":"::1","user":26}
+[2026-03-13T13:07:23.156Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (269ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"269ms","ip":"::1","user":26}
+[2026-03-13T13:07:23.426Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (267ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"267ms","ip":"::1","user":26}
+[2026-03-13T13:07:55.352Z] [INFO] GET /api/v1/category/all 304 (20ms) {"method":"GET","url":"/api/v1/category/all","status":304,"duration":"20ms","ip":"::1","user":26}
+[2026-03-13T13:07:55.370Z] [INFO] GET /api/v1/category/all 304 (14ms) {"method":"GET","url":"/api/v1/category/all","status":304,"duration":"14ms","ip":"::1","user":26}
+[2026-03-13T13:08:38.567Z] [INFO] POST /api/v1/book/add 201 (4219ms) {"method":"POST","url":"/api/v1/book/add","status":201,"duration":"4219ms","ip":"::1","user":26}
+[2026-03-13T13:08:39.363Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (571ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"571ms","ip":"::1","user":26}
+[2026-03-13T13:08:39.886Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (517ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"517ms","ip":"::1","user":26}
+[2026-03-13T13:10:33.923Z] [INFO] Redis Client Connected 
+[2026-03-13T13:10:42.064Z] [INFO] Redis Client Connected 
+[2026-03-13T13:10:50.480Z] [INFO] Redis Client Connected 
+[2026-03-13T13:11:16.202Z] [INFO] Redis Client Connected 
