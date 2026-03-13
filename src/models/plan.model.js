@@ -61,10 +61,6 @@ const Plan = sequelize.define(
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
-    is_premium: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
   },
   {
     timestamps: true,

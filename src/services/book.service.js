@@ -8,6 +8,8 @@ import {
 import notificationService from "./notification.service.js";
 import sequelize from "../config/db.js";
 import { getCache, setCache, clearCachePattern } from "../utils/redisCache.js";
+import { encryptId } from "../utils/cryptoUtils.js";
+
 
 class BookService {
   generateSlug(title) {
@@ -346,11 +348,8 @@ class BookService {
   }
 
   async getBookBySlug(slug, activeOnly = true) {
-    const where = { slug };
-    if (activeOnly) where.is_active = true;
-
     const book = await Book.findOne({
-      where,
+      where: { slug },
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
         { 
@@ -361,16 +360,21 @@ class BookService {
         }
       ],
     });
-    if (!book) throw new Error("Book not found");
+
+    if (!book) {
+      throw new Error(`Book not found with slug: ${slug}`);
+    }
+
+    if (activeOnly && !book.is_active) {
+      throw new Error("This book is currently marked as draft and is not publicly available.");
+    }
+
     return book;
   }
 
   async getBookById(id, activeOnly = true) {
-    const where = { id };
-    if (activeOnly) where.is_active = true;
-
     const book = await Book.findOne({
-      where,
+      where: { id },
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
         { 
@@ -381,7 +385,15 @@ class BookService {
         }
       ],
     });
-    if (!book) throw new Error("Book not found");
+
+    if (!book) {
+      throw new Error(`Book not found with ID: ${id}`);
+    }
+
+    if (activeOnly && !book.is_active) {
+      throw new Error("This book is currently marked as draft and is not publicly available.");
+    }
+
     return book;
   }
 
@@ -829,7 +841,8 @@ class BookService {
     const baseUrl = (process.env.BASE_URL)
       .replace(/\/+$/, "")
       .replace(/\/api\/v1$/, "");
-    const finalUrl = `${baseUrl}/api/v1/book/readBook/${bookId}`;
+    const finalUrl = `${baseUrl}/api/v1/book/readBook/${encryptId(bookId)}`;
+
 
     return {
       pdf_url: finalUrl,
