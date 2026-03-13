@@ -1,4 +1,4 @@
-import { Audiobook, Book } from "../models/index.js";
+import { Audiobook, Book, Category } from "../models/index.js";
 import { uploadOnCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
 
 class AudiobookService {
@@ -90,7 +90,14 @@ class AudiobookService {
   async getAllAudiobooks(page = 1, limit = 10) {
     const offset = (page - 1) * limit;
     const { count, rows } = await Audiobook.findAndCountAll({
-      include: [{ model: Book, as: "book", attributes: ["id", "title", "author", "cover_image", "thumbnail"] }],
+      include: [
+        { 
+          model: Book, 
+          as: "book", 
+          attributes: ["id", "title", "author", "cover_image", "thumbnail"],
+          include: [{ model: Category, as: "category", attributes: ["id", "name"] }]
+        }
+      ],
       limit,
       offset,
       order: [
@@ -168,6 +175,20 @@ class AudiobookService {
     audiobook.status = !audiobook.status;
     await audiobook.save();
     return audiobook;
+  }
+
+  async toggleBookAudiobooksStatus(bookId) {
+    const chapters = await Audiobook.findAll({ where: { book_id: bookId } });
+    if (chapters.length === 0) throw new Error("No chapters found for this book");
+
+    // Check if any chapter is currently active
+    const anyActive = chapters.some(c => c.status);
+    const newStatus = !anyActive;
+
+    // Update all chapters to the new status
+    await Audiobook.update({ status: newStatus }, { where: { book_id: bookId } });
+    
+    return { book_id: bookId, status: newStatus };
   }
 }
 

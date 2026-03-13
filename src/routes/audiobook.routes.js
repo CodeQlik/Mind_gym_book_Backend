@@ -8,6 +8,13 @@ const router = Router();
 
 // Public routes (if any)
 router.get("/all", audiobookController.getAllAudiobooks);
+router.get("/stream/:id", (req, res, next) => {
+  // Optional JWT verification to check subscription
+  if (req.cookies.accessToken || req.headers.authorization) {
+    return verifyJWT(req, res, next);
+  }
+  next();
+}, audiobookController.streamAudiobook);
 router.get("/:id", audiobookController.getAudiobookById);
 
 // Admin only routes
@@ -28,6 +35,7 @@ router.put(
   audiobookController.updateAudiobook
 );
 router.put("/toggle-status/:id", audiobookController.toggleAudiobookStatus);
+router.put("/toggle-book-status/:bookId", audiobookController.toggleBookAudiobooksStatus);
 router.delete("/delete/:id", audiobookController.deleteAudiobook);
 
 export default router;

@@ -14,6 +14,7 @@ import {
   pdfLimiter,
   extractBookText,
   extractBookPageText,
+  getBookContent,
 } from "../controllers/book.controller.js";
 
 import {
@@ -43,6 +44,7 @@ router.get("/category/:categoryId", optionalVerifyJWT, getBooksByCategory);
 router.get("/:id(\\d+)", optionalVerifyJWT, getBookById);
 router.get("/:slug", optionalVerifyJWT, getBookBySlug);
 router.get("/readBook/:id", optionalVerifyJWT, readBookPdf);
+router.get("/content/:id", optionalVerifyJWT, getBookContent);
 router.get("/readText/:id", optionalVerifyJWT, extractBookText);
 router.get(
   "/readText/:id/page/:page_number",
@@ -65,6 +67,7 @@ router.post(
     { name: "pdf_file", maxCount: 1 },
     { name: "epub_file", maxCount: 1 },
     { name: "images", maxCount: 20 },
+    { name: "audio_files", maxCount: 20 },
   ]),
   validate(bookValidation),
   createBook,
@@ -80,6 +83,7 @@ router.put(
     { name: "pdf_file", maxCount: 1 },
     { name: "epub_file", maxCount: 1 },
     { name: "images", maxCount: 20 },
+    { name: "audio_files", maxCount: 20 },
   ]),
   validate(updateBookValidation),
   updateBook,
