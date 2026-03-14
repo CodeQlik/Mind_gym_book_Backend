@@ -26,6 +26,8 @@ import CMSPage from "./cmsPage.model.js";
 import Blog from "./blog.model.js";
 import Testimonial from "./testimonial.model.js";
 import Audiobook from "./audiobook.model.js";
+import Faq from "./faq.model.js";
+import Setting from "./setting.model.js";
 
 // Associations
 
@@ -203,4 +205,6 @@ export {
   Blog,
   Testimonial,
   Audiobook,
+  Faq,
+  Setting,
 };

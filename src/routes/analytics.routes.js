@@ -20,6 +20,12 @@ router.get(
   analyticsController.getTopSellingBooksThisWeek,
 );
 
+router.get(
+  "/top-book-week",
+  optionalVerifyJWT,
+  analyticsController.getTopBookThisWeek,
+);
+
 router.get("/logs", verifyJWT, isAdmin, getErrorLogs);
 router.delete("/logs/clear", verifyJWT, isAdmin, clearLogs);
 

@@ -35,6 +35,16 @@ const Audiobook = sequelize.define(
       type: DataTypes.JSON,
       allowNull: false,
       defaultValue: { url: "", public_id: "" },
+      get() {
+        const rawValue = this.getDataValue("audio_file");
+        if (!rawValue) return { url: "", public_id: "" };
+        
+        let data = typeof rawValue === "string" ? JSON.parse(rawValue) : rawValue;
+        if (data && data.url && data.url.endsWith("/")) {
+          data.url = data.url.slice(0, -1);
+        }
+        return data;
+      },
     },
 
     language: {

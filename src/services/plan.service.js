@@ -12,7 +12,7 @@ class PlanService {
       device_limit,
       book_read_limit,
       is_ad_free,
-      is_popular,
+      is_premium,
     } = data;
 
     const newPlan = await Plan.create({
@@ -26,7 +26,7 @@ class PlanService {
       book_read_limit:
         book_read_limit !== undefined ? parseInt(book_read_limit) : 5,
       is_ad_free: is_ad_free === "true" || is_ad_free === true,
-      is_popular: is_popular === "true" || is_popular === true,
+      is_premium: is_premium === "true" || is_premium === true,
     });
 
     return newPlan;

@@ -4,7 +4,7 @@ import logger from "./logger.js";
 const DEFAULT_TTL = process.env.REDIS_TTL || 3600;
 
 const getPrefix = () => {
-  const baseUrl = process.env.BASE_URL || "http://localhost:5000";
+  const baseUrl = process.env.BASE_URL;
   return baseUrl.includes("localhost") ? "local:" : "live:";
 };
 

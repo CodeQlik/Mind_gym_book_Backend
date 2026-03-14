@@ -2,8 +2,9 @@ import bookService from "../services/book.service.js";
 import pdfService from "../services/pdf.service.js";
 import sendResponse from "../utils/responseHandler.js";
 import { asyncHandler } from "../utils/asyncHandler.js";
+import { clearCachePattern } from "../utils/redisCache.js";
 
-import { Bookmark, Book, UserBook, User } from "../models/index.js";
+import { Bookmark, Book, UserBook, User, Audiobook } from "../models/index.js";
 import { Op } from "sequelize";
 import rateLimit from "express-rate-limit";
 import { PDFDocument } from "pdf-lib";
@@ -11,107 +12,113 @@ import fs from "fs";
 import path from "path";
 import axios from "axios";
 import { cloudinary } from "../config/cloudinary.js";
-import crypto from "crypto";
+import { encryptId, decryptId } from "../utils/cryptoUtils.js";
 
-const ENCRYPTION_KEY = process.env.ENCRYPTION_KEY;
-const IV_LENGTH = 16;
-
-function encryptUrl(text) {
-  if (!text) return text;
-  try {
-    const iv = crypto.randomBytes(IV_LENGTH);
-    const cipher = crypto.createCipheriv(
-      "aes-256-cbc",
-      Buffer.from(ENCRYPTION_KEY),
-      iv,
-    );
-    let encrypted = cipher.update(text);
-    encrypted = Buffer.concat([encrypted, cipher.final()]);
-    return iv.toString("hex") + ":" + encrypted.toString("hex");
-  } catch (error) {
-    console.error("Encryption failed:", error);
-    return null;
-  }
-}
 
 const getCleanBaseUrl = () => {
-  return (process.env.BASE_URL || "http://localhost:5000")
-    .replace(/\/+$/, "")
-    .replace(/\/api\/v1$/, "");
+  return process.env.BASE_URL.replace(/\/+$/, "").replace(/\/api\/v1$/, "");
 };
 
-// Helper to remove internal fields like 'local_path' and apply preview logic before sending response
-const cleanBookData = (book, isAdminRequest = false) => {
+const cleanBookData = (
+  book,
+  isAdminRequest = false,
+  includeAudio = true,
+  includeFiles = true,
+) => {
   const data = typeof book.toJSON === "function" ? book.toJSON() : { ...book };
 
-  if (data.cover_image && data.cover_image.local_path)
-    delete data.cover_image.local_path;
-  if (data.thumbnail && data.thumbnail.local_path)
-    delete data.thumbnail.local_path;
-  if (data.file_data && data.file_data.local_path)
-    delete data.file_data.local_path;
+  // Transform to the requested Premium Format with SPECIFIC ORDER
+  const cleaned = {
+    id: data.id,
+    title: data.title,
+    slug: data.slug,
+    author: data.author,
+    price: data.price ? parseFloat(data.price).toFixed(2) : "0.00",
+    description: data.description || "",
+    highlights: data.highlights || "",
+    language: data.language || "Hindi",
+    category: data.category
+      ? { id: data.category.id, name: data.category.name }
+      : null,
+    images: data.images || [],
+  };
 
-  // Encrypt actual Cloudinary URLs for paid files from non-admin users to prevent direct downloads
-  if (!isAdminRequest && data.file_data) {
-    if (data.file_data.url) {
-      data.file_data.url = encryptUrl(data.file_data.url);
-      data.file_data.is_encrypted = true;
+  // 1. Handle Audio Book structure (Middle)
+  if (
+    includeAudio &&
+    Array.isArray(data.audiobooks) &&
+    data.audiobooks.length > 0
+  ) {
+    const baseUrl = getCleanBaseUrl();
+    cleaned.audio_book = {
+      available: true,
+      chapters: data.audiobooks.map((chapter) => ({
+        title: chapter.chapter_title || `Chapter ${chapter.chapter_number}`,
+        audio_url:
+          chapter.audio_file && chapter.audio_file.url
+            ? `${baseUrl}/api/v1/audiobook/stream/${encryptId(chapter.id)}`
+            : "",
+        is_encrypted: true,
+      })),
+    };
+
+  }
+
+  // 2. Heavy fields at the BOTTOM
+  cleaned.cover_image =
+    data.cover_image === 0 || data.cover_image === "0"
+      ? null
+      : data.cover_image;
+  cleaned.thumbnail =
+    data.thumbnail === 0 || data.thumbnail === "0" ? null : data.thumbnail;
+
+  // Handle File Data (PDF/EPUB) last
+  if (includeFiles) {
+    cleaned.file_data = { pdf: null, epub: null };
+    if (data.file_data) {
+      const original = data.file_data;
+      if (original.url) {
+        const type =
+          original.type ||
+          (original.url.toLowerCase().includes(".epub") ? "epub" : "pdf");
+        const fileObj = {
+          url: original.url,
+          type: type,
+        };
+        if (type === "pdf") cleaned.file_data.pdf = fileObj;
+        else cleaned.file_data.epub = fileObj;
+      } else {
+        ["pdf", "epub"].forEach((type) => {
+          if (original[type]) {
+            const inner =
+              typeof original[type] === "string"
+                ? JSON.parse(original[type])
+                : original[type];
+            if (inner && inner.url) {
+              cleaned.file_data[type] = {
+                url: inner.url,
+                type: type,
+              };
+            }
+          }
+        });
+      }
     }
-    if (data.file_data.public_id) delete data.file_data.public_id;
-
-    // Handle older formats where file_data has 'pdf' or 'epub' keys that might be stringified JSON
-    ["pdf", "epub"].forEach((type) => {
-      if (data.file_data[type]) {
-        try {
-          let parsed =
-            typeof data.file_data[type] === "string"
-              ? JSON.parse(data.file_data[type])
-              : data.file_data[type];
-          if (parsed && parsed.url) {
-            parsed.url = encryptUrl(parsed.url);
-            parsed.is_encrypted = true;
-            if (parsed.public_id) delete parsed.public_id;
-            data.file_data[type] =
-              typeof data.file_data[type] === "string"
-                ? JSON.stringify(parsed)
-                : parsed;
-          }
-        } catch (e) {}
-      }
-    });
   }
 
-  // Backwards compatibility for older schema fields if they exist outside file_data
-  if (!isAdminRequest) {
-    ["pdf_file", "epub_file"].forEach((field) => {
-      if (data[field]) {
-        try {
-          let parsed =
-            typeof data[field] === "string"
-              ? JSON.parse(data[field])
-              : data[field];
-          if (parsed && parsed.url) {
-            parsed.url = encryptUrl(parsed.url);
-            parsed.is_encrypted = true;
-            if (parsed.public_id) delete parsed.public_id;
-            data[field] =
-              typeof data[field] === "string" ? JSON.stringify(parsed) : parsed;
-          }
-        } catch (e) {}
-      }
-    });
+  // Preserve all fields and admin-only fields if necessary
+  if (isAdminRequest) {
+    return {
+      ...data,
+      ...cleaned,
+      is_active: data.is_active,
+      stock: data.stock,
+      reserved: data.reserved,
+      available: data.available, // Maintain virtuals if any
+    };
   }
 
-  if (Array.isArray(data.images)) {
-    data.images = data.images.map((img) => {
-      if (img && img.local_path) {
-        const { local_path, ...cleanImg } = img;
-        return cleanImg;
-      }
-      return img;
-    });
-  }
-  return data;
+  return cleaned;
 };
 
 // ULTRA PREMIUM: Rate limit for PDF streaming (10 requests per minute)
@@ -166,11 +173,31 @@ export const getAllBooks = asyncHandler(async (req, res) => {
     purchasedBookIds = new Set(purchases.map((p) => p.book_id));
   }
 
-  const cleanBooks = result.books.map((book) => cleanBookData(book, isAdmin));
+  const categories = result.categories || [];
+  const books = {};
+
+  categories.forEach((cat) => {
+    const categoryData = cat.toJSON ? cat.toJSON() : cat;
+    const catName = categoryData.name || "Unknown";
+
+    const cleanedBooks = (categoryData.books || []).map((book) => {
+      // Inject category data so cleanBookData can find it
+      const bookData = book.toJSON ? book.toJSON() : { ...book };
+      bookData.category = { id: categoryData.id, name: categoryData.name };
+      return cleanBookData(bookData, isAdmin, false, false);
+    });
+
+    books[catName] = cleanedBooks;
+  });
+
+  // Clear cache for books to reflect changes immediately
+  await clearCachePattern("books:*");
 
   return sendResponse(res, 200, true, "Books fetched successfully", {
-    ...result,
-    books: cleanBooks,
+    totalItems: result.totalItems,
+    totalPages: result.totalPages,
+    currentPage: result.currentPage,
+    books,
   });
 });
 
@@ -179,18 +206,23 @@ export const getAdminBooks = asyncHandler(async (req, res) => {
   const page = parseInt(req.query.page) || 1;
   const limit = parseInt(req.query.limit) || 50;
 
-  const result = await bookService.getBooks({}, page, limit);
+  const result = await bookService.getBooks({}, page, limit, false);
 
-  const cleanBooks = result.books.map((book) => cleanBookData(book, true));
+  const cleanBooks = (result.books || []).map((book) =>
+    cleanBookData(book, true, true, true),
+  );
 
   return sendResponse(res, 200, true, "Admin books fetched successfully", {
-    ...result,
+    totalItems: result.totalItems,
+    totalPages: result.totalPages,
+    currentPage: result.currentPage,
     books: cleanBooks,
   });
 });
 
 export const getBookById = asyncHandler(async (req, res) => {
-  const isAdminRequest = req.user && req.user.user_type === "admin";
+  const userRole = (req.user?.user_type || "").toLowerCase();
+  const isAdminRequest = ["admin", "system admin", "master admin"].includes(userRole);
   const book = await bookService.getBookById(req.params.id, !isAdminRequest);
 
   let isBookmarked = false;
@@ -201,7 +233,7 @@ export const getBookById = asyncHandler(async (req, res) => {
     isBookmarked = !!bookmark;
   }
 
-  const bookData = cleanBookData(book, isAdminRequest);
+  const bookData = cleanBookData(book, isAdminRequest, false, false);
 
   return sendResponse(res, 200, true, "Book fetched successfully", {
     ...bookData,
@@ -210,7 +242,8 @@ export const getBookById = asyncHandler(async (req, res) => {
 });
 
 export const getBookBySlug = asyncHandler(async (req, res) => {
-  const isAdminRequest = req.user && req.user.user_type === "admin";
+  const userRole = (req.user?.user_type || "").toLowerCase();
+  const isAdminRequest = ["admin", "system admin", "master admin"].includes(userRole);
   const book = await bookService.getBookBySlug(
     req.params.slug,
     !isAdminRequest,
@@ -224,7 +257,12 @@ export const getBookBySlug = asyncHandler(async (req, res) => {
     isBookmarked = !!bookmark;
   }
 
-  const bookData = cleanBookData(book, isAdminRequest);
+  const bookData = cleanBookData(
+    book,
+    isAdminRequest,
+    isAdminRequest,
+    isAdminRequest,
+  );
   return sendResponse(res, 200, true, "Book fetched successfully", {
     ...bookData,
     isBookmarked,
@@ -335,10 +373,12 @@ export const searchBooks = asyncHandler(async (req, res) => {
 });
 
 export const readBookPdf = asyncHandler(async (req, res) => {
-  const { id: bookId } = req.params;
+  const { id: encryptedId } = req.params;
+  const bookId = decryptId(encryptedId);
   const user = req.user;
 
   const book = await Book.findByPk(bookId);
+
   if (!book) return res.status(404).json({ message: "Book nahi mili" });
 
   const fileInfo = book.file_data;
@@ -605,4 +645,86 @@ export const extractBookPageText = asyncHandler(async (req, res) => {
       },
     );
   }
+});
+export const getBookContent = asyncHandler(async (req, res) => {
+  const { id } = req.params;
+  const user = req.user;
+
+  const book = await bookService.getBookById(id, true);
+  if (!book) {
+    return sendResponse(res, 404, false, "Book not found");
+  }
+
+  // Check if user has full access (Subscription or Purchase)
+  const fullAccess = await bookService.hasFullAccess(user, book);
+  const baseUrl = getCleanBaseUrl();
+
+  // Map audio chapters
+  const audioChapters = (book.audiobooks || []).map((ch) => {
+    let audioUrl = "";
+    if (ch.audio_file && ch.audio_file.url) {
+      if (fullAccess) {
+        // Enforce full direct link for subscribed/purchased users
+        audioUrl = ch.audio_file.url;
+      } else {
+        // Enforce 30-second preview via internal stream endpoint
+        audioUrl = `${baseUrl}/api/v1/audiobook/stream/${encryptId(ch.id)}`;
+      }
+
+    }
+
+    return {
+      chapter_number: ch.chapter_number,
+      chapter_title: ch.chapter_title || `Chapter ${ch.chapter_number}`,
+      audio_url: audioUrl,
+      is_preview: !fullAccess,
+    };
+  });
+
+  // Get file data
+  let fileUrl = null;
+  let fileType = null;
+
+  if (book.file_data) {
+    const fd =
+      typeof book.file_data === "string"
+        ? JSON.parse(book.file_data)
+        : book.file_data;
+
+    // Determine the raw source URL
+    let sourceUrl = "";
+    if (fd.epub && fd.epub.url) {
+      sourceUrl = fd.epub.url;
+      fileType = "epub";
+    } else if (fd.pdf && fd.pdf.url) {
+      sourceUrl = fd.pdf.url;
+      fileType = "pdf";
+    } else if (fd.url) {
+      sourceUrl = fd.url;
+      fileType =
+        fd.type || (fd.url.toLowerCase().includes(".epub") ? "epub" : "pdf");
+    }
+
+    if (sourceUrl) {
+      if (fullAccess) {
+        fileUrl = sourceUrl;
+      } else {
+        // Enforce 5-page preview via internal read endpoint
+        fileUrl = `${baseUrl}/api/v1/book/readBook/${encryptId(id)}`;
+      }
+
+    }
+  }
+
+  if (!fileUrl) {
+    return sendResponse(res, 404, false, "Book file content not found");
+  }
+
+  return sendResponse(res, 200, true, "Book content fetched successfully", {
+    book_id: parseInt(id),
+    file_url: fileUrl,
+    file_type: fileType,
+    is_preview: !fullAccess,
+    audio_chapters: audioChapters,
+  });
 });

@@ -42,6 +42,25 @@ class AnalyticsController {
       });
     }
   }
+
+  async getTopBookThisWeek(req, res) {
+    try {
+      const books = await analyticsService.getTopSellingBooksThisWeek(1);
+      const topBook = books.length > 0 ? books[0] : null;
+
+      return res.status(200).json({
+        success: true,
+        data: topBook,
+      });
+    } catch (error) {
+      console.error("Top Book This Week API Error:", error);
+      return res.status(500).json({
+        success: false,
+        message: "Failed to fetch top book of the week",
+        error: error.message,
+      });
+    }
+  }
 }
 
 export default new AnalyticsController();

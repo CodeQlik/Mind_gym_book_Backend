@@ -18,7 +18,16 @@ const Plan = sequelize.define(
       allowNull: false,
     },
     plan_type: {
-      type: DataTypes.ENUM("monthly", "annual", "free"),
+      type: DataTypes.ENUM(
+        "monthly",
+        "annual",
+        "one_month",
+        "three_month",
+        "one_year",
+        "free",
+        "premium",
+        "",
+      ),
       allowNull: false,
     },
     duration_months: {
@@ -31,7 +40,7 @@ const Plan = sequelize.define(
       allowNull: true,
     },
     features: {
-      type: DataTypes.JSON,
+      type: DataTypes.STRING(255),
       allowNull: true,
     },
     device_limit: {
@@ -49,10 +58,6 @@ const Plan = sequelize.define(
       defaultValue: "active",
     },
     is_ad_free: {
-      type: DataTypes.BOOLEAN,
-      defaultValue: false,
-    },
-    is_popular: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },
