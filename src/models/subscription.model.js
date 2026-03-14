@@ -28,7 +28,7 @@ const Subscription = sequelize.define(
       onDelete: "SET NULL",
     },
     plan_type: {
-      type: DataTypes.ENUM("one_month", "three_month", "one_year", "free"),
+      type: DataTypes.ENUM("monthly", "annual", "free"),
       allowNull: false,
       defaultValue: "free",
     },
@@ -65,6 +65,11 @@ const Subscription = sequelize.define(
     razorpay_order_id: {
       type: DataTypes.STRING,
       allowNull: true,
+    },
+    books_read_count: {
+      type: DataTypes.INTEGER,
+      defaultValue: 0,
+      allowNull: false,
     },
   },
   {

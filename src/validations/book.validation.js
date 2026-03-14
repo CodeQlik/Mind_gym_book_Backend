@@ -41,7 +41,14 @@ export const bookValidation = Joi.object({
   is_premium: Joi.alternatives()
     .try(Joi.boolean(), Joi.string().valid("true", "false"))
     .optional(),
-  isbn: Joi.string().optional().trim().allow(null, ""),
+  isbn: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .optional()
+    .trim()
+    .allow(null, "")
+    .messages({
+      "string.pattern.base": "ISBN must contain only numbers",
+    }),
   language: Joi.string().optional().trim().allow(null, ""),
   is_bestselling: Joi.alternatives()
     .try(Joi.boolean(), Joi.string().valid("true", "false"))
@@ -88,7 +95,14 @@ export const updateBookValidation = Joi.object({
   is_premium: Joi.alternatives()
     .try(Joi.boolean(), Joi.string().valid("true", "false"))
     .optional(),
-  isbn: Joi.string().optional().trim().allow(null, ""),
+  isbn: Joi.string()
+    .pattern(/^[0-9]+$/)
+    .optional()
+    .trim()
+    .allow(null, "")
+    .messages({
+      "string.pattern.base": "ISBN must contain only numbers",
+    }),
   language: Joi.string().optional().trim().allow(null, ""),
   is_bestselling: Joi.alternatives()
     .try(Joi.boolean(), Joi.string().valid("true", "false"))

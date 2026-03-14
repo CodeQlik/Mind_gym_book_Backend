@@ -9,6 +9,28 @@ class OrderService {
     userId,
     { address_id, payment_method = "prepaid", coupon_code },
   ) {
+    // This is now primarily for COD orders or as a wrapper
+    const orderData = await this.prepareOrderData(userId, {
+      address_id,
+      payment_method,
+      coupon_code,
+    });
+
+    if (payment_method === "cod") {
+      return await this.finalizeOrder(orderData);
+    }
+
+    // For Prepaid, we just return the data to be used by PaymentService
+    return orderData;
+  }
+
+  /**
+   * 1. Validate and Prepare Order Data (Doesn't save to DB)
+   */
+  async prepareOrderData(
+    userId,
+    { address_id, payment_method = "prepaid", coupon_code },
+  ) {
     if (!address_id) throw new Error("address_id is required");
 
     const VALID_PAYMENT_METHODS = ["upi", "card", "prepaid", "cod"];
@@ -18,14 +40,14 @@ class OrderService {
       );
     }
 
-    // 1. Get user's cart with book details
+    // 1. Get user's cart
     const cartItems = await Cart.findAll({
       where: { user_id: userId },
       include: [
         {
           model: Book,
           as: "book",
-          attributes: ["id", "title", "price", "stock", "is_active"],
+          attributes: ["id", "title", "price", "stock", "reserved", "is_active"],
         },
       ],
     });
@@ -34,7 +56,7 @@ class OrderService {
       throw new Error("Cart is empty. Add books before placing an order.");
     }
 
-    // 2. Validate stock (available quantity) and activity for all items
+    // 2. Validate stock and activity
     for (const item of cartItems) {
       if (!item.book)
         throw new Error(`Book not found for cart item ${item.id}`);
@@ -44,13 +66,12 @@ class OrderService {
       const available = (item.book.stock || 0) - (item.book.reserved || 0);
       if (available < item.quantity) {
         throw new Error(
-          `Insufficient available stock for "${item.book.title}". Total: ${item.book.stock}, Reserved: ${item.book.reserved}, Available: ${available}, Requested: ${item.quantity}`,
+          `Insufficient available stock for "${item.book.title}". Available: ${available}, Requested: ${item.quantity}`,
         );
       }
     }
 
-    // 3. Fetch and snapshot the shipping address using raw SQL
-    // (addresses are linked to users via JSON address_ids column, not a direct FK)
+    // 3. Address snapshot
     const [address] = await sequelize.query(
       "SELECT * FROM addresses WHERE id = :address_id LIMIT 1",
       { replacements: { address_id }, type: QueryTypes.SELECT },
@@ -76,7 +97,6 @@ class OrderService {
     let discountAmount = 0;
     let couponId = null;
 
-    // Validate coupon if provided
     if (coupon_code) {
       const validation = await couponService.validateCoupon(
         coupon_code,
@@ -87,48 +107,82 @@ class OrderService {
       totalAmount = validation.total_amount;
     }
 
-    // 5. Create Order + OrderItems in a transaction
-    const order = await sequelize.transaction(async (t) => {
-      const newOrder = await Order.create(
-        {
-          user_id: userId,
-          address_id,
-          shipping_address: addressSnapshot,
-          subtotal_amount: subtotal.toFixed(2),
-          discount_amount: discountAmount.toFixed(2),
-          total_amount: totalAmount.toFixed(2),
-          coupon_id: couponId,
-          order_type: "physical_book",
-          payment_method,
-          payment_status: "pending",
-          delivery_status: "processing",
-        },
-        { transaction: t },
-      );
-
-      // If coupon used, increment usage count
-      if (couponId) {
-        await Coupon.update(
-          { used_count: sequelize.literal("used_count + 1") },
-          { where: { id: couponId }, transaction: t },
-        );
-      }
-
-      // Create order items
-      const itemsPayload = cartItems.map((item) => ({
-        order_id: newOrder.id,
+    return {
+      userId,
+      address_id,
+      shipping_address: addressSnapshot,
+      subtotal_amount: subtotal.toFixed(2),
+      discount_amount: discountAmount.toFixed(2),
+      total_amount: totalAmount.toFixed(2),
+      coupon_id: couponId,
+      order_type: "physical_book",
+      payment_method,
+      items: cartItems.map((item) => ({
         book_id: item.book_id,
         quantity: item.quantity,
         unit_price: parseFloat(item.book.price),
         subtotal: parseFloat(
           (parseFloat(item.book.price) * item.quantity).toFixed(2),
         ),
-      }));
+      })),
+    };
+  }
 
+  /**
+   * 2. Finalize and Save Order to DB (Called after payment or for COD)
+   */
+  async finalizeOrder(orderData, razorpayOrderId = null) {
+    const {
+      userId,
+      address_id,
+      shipping_address,
+      subtotal_amount,
+      discount_amount,
+      total_amount,
+      coupon_id,
+      order_type,
+      payment_method,
+      items,
+    } = orderData;
+
+    const order = await sequelize.transaction(async (t) => {
+      // Create Order
+      const newOrder = await Order.create(
+        {
+          user_id: userId,
+          address_id,
+          shipping_address,
+          subtotal_amount,
+          discount_amount,
+          total_amount,
+          coupon_id,
+          order_type,
+          payment_method,
+          payment_status: payment_method === "cod" ? "pending" : "paid",
+          delivery_status: "processing",
+          razorpay_order_id: razorpayOrderId,
+        },
+        { transaction: t },
+      );
+
+      // Coupon Usage
+      if (coupon_id) {
+        await Coupon.update(
+          { used_count: sequelize.literal("used_count + 1") },
+          { where: { id: coupon_id }, transaction: t },
+        );
+      }
+
+      // Order Items
+      const itemsPayload = items.map((item) => ({
+        order_id: newOrder.id,
+        ...item,
+      }));
       await OrderItem.bulkCreate(itemsPayload, { transaction: t });
 
-      // Mark items as Reserved (do not deduct total stock yet)
-      for (const item of cartItems) {
+      // Inventory adjustment (Reserve for COD, DEDUCT later during dispatch)
+      // Actually, standard flow: if PAID, we don't 'reserve', we just track.
+      for (const item of items) {
         await Book.update(
           { reserved: sequelize.literal(`reserved + ${item.quantity}`) },
           { where: { id: item.book_id }, transaction: t },
@@ -141,21 +195,20 @@ class OrderService {
       return newOrder;
     });
 
-    // 6. Notify user about new order
+    // Notify user
     const orderWithDetails = await this._getOrderWithDetails(order.id);
     try {
       await notificationService.sendToUser(
         userId,
         "ORDER_CREATED",
-        "📦 Order Placed Successfully!",
-        `Your order ${orderWithDetails.order_no} for ${orderWithDetails.items.length} item(s) has been placed. Payment Method: ${payment_method.toUpperCase()}.`,
+        payment_method === "cod"
+          ? "📦 Order Placed (COD)!"
+          : "📦 Order Confirmed!",
+        `Your order ${orderWithDetails.order_no} has been ${payment_method === "cod" ? "placed" : "successfully paid and recorded"}.`,
         { order_id: String(order.id), order_no: orderWithDetails.order_no },
       );
-    } catch (notifError) {
-      console.error("Notification failed:", notifError.message);
-    }
+    } catch (err) {}
 
-    // Return order with items
     return orderWithDetails;
   }
 

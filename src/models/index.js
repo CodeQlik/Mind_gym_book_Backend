@@ -25,6 +25,7 @@ import UserSession from "./userSession.model.js";
 import CMSPage from "./cmsPage.model.js";
 import Blog from "./blog.model.js";
 import Testimonial from "./testimonial.model.js";
+import Audiobook from "./audiobook.model.js";
 
 // Associations
 
@@ -169,6 +170,10 @@ SupportMessage.belongsTo(User, { foreignKey: "sender_id", as: "sender" });
 Category.hasMany(Blog, { foreignKey: "category_id", as: "blogs" });
 Blog.belongsTo(Category, { foreignKey: "category_id", as: "category" });
 
+// Audiobook Associations
+Book.hasMany(Audiobook, { foreignKey: "book_id", as: "audiobooks" });
+Audiobook.belongsTo(Book, { foreignKey: "book_id", as: "book" });
+
 export {
   User,
   Address,
@@ -197,4 +202,5 @@ export {
   CMSPage,
   Blog,
   Testimonial,
+  Audiobook,
 };

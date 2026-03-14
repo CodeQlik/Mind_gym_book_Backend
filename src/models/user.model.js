@@ -67,7 +67,7 @@ const User = sequelize.define(
       defaultValue: "inactive",
     },
     subscription_plan: {
-      type: DataTypes.ENUM("one_month", "three_month", "one_year", "free"),
+      type: DataTypes.ENUM("monthly", "annual", "free"),
       defaultValue: "free",
     },
     subscription_end_date: {

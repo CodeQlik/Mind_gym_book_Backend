@@ -42,8 +42,25 @@ const storage = new CloudinaryStorage({
 export const deleteFromCloudinary = async (public_id) => {
   try {
     if (!public_id) return false;
-    await cloudinary.uploader.destroy(public_id);
-    return true;
+
+    // First try as image (default)
+    let res = await cloudinary.uploader.destroy(public_id);
+
+    // If not found or not deleted, try as raw (PDFs/EPUBs)
+    if (res.result !== "ok") {
+      res = await cloudinary.uploader.destroy(public_id, {
+        resource_type: "raw",
+      });
+    }
+
+    // If still not deleted, try as video (Audio/Video frequently use this)
+    if (res.result !== "ok") {
+      res = await cloudinary.uploader.destroy(public_id, {
+        resource_type: "video",
+      });
+    }
+
+    return res.result === "ok";
   } catch (error) {
     console.error("Cloudinary Delete Error:", error.message);
     return false;
@@ -56,14 +73,30 @@ export const uploadOnCloudinary = async (localFilePath, folderName = "") => {
 
     const extension = localFilePath.toLowerCase().split(".").pop();
     const isRaw = ["pdf", "epub"].includes(extension);
+    const isAudio = ["mp3", "wav", "m4a", "ogg", "aac"].includes(extension);
+
     const response = await cloudinary.uploader.upload(localFilePath, {
-      resource_type: isRaw ? "raw" : "auto",
+      resource_type: isRaw ? "raw" : isAudio ? "video" : "auto",
+      type: isRaw ? "authenticated" : "upload", // Secure raw files
       folder: folderName || "mindgymbook",
     });
+
+    // Cleanup: Remove local file after upload success
+    try {
+      fs.unlinkSync(localFilePath);
+    } catch (e) {
+      console.warn("Failed to delete temp file:", localFilePath);
+    }
 
     return response;
   } catch (error) {
     console.error("Cloudinary Upload Error:", error.message);
+    // Cleanup: Remove local file on failure too
+    try {
+      if (localFilePath && fs.existsSync(localFilePath)) {
+        fs.unlinkSync(localFilePath);
+      }
+    } catch (e) {}
     return null;
   }
 };

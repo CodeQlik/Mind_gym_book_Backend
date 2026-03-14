@@ -285,13 +285,7 @@ class UserService {
   async enforceSessionLimit(userId, deviceId) {
     // 1. Get user's device limit from current active plan
     const [planData] = await sequelize.query(
-      `SELECT 
-        CASE 
-          WHEN p.plan_type = 'one_month' THEN 2
-          WHEN p.plan_type = 'three_month' THEN 3
-          WHEN p.plan_type = 'one_year' THEN 4
-          ELSE p.device_limit
-        END as device_limit 
+      `SELECT p.device_limit 
        FROM plans p
        JOIN subscriptions s ON s.plan_id = p.id
        WHERE s.user_id = :userId AND s.status = 'active' AND s.end_date >= NOW()
@@ -1019,6 +1013,139 @@ class UserService {
     );
 
     return updatedUser;
+  }
+
+  // ─── Delete User (Admin)
+  async deleteUser(userId) {
+    const [user] = await sequelize.query(
+      "SELECT id, email, profile, address_ids FROM users WHERE id = :id LIMIT 1",
+      { replacements: { id: userId }, type: QueryTypes.SELECT },
+    );
+
+    if (!user) throw new Error("User not found");
+
+    // 1. Delete profile image from Cloudinary
+    let profile = user.profile;
+    if (typeof profile === "string") {
+      try {
+        profile = JSON.parse(profile);
+      } catch (e) {
+        profile = {};
+      }
+    }
+    if (profile?.public_id) {
+      try {
+        await deleteFromCloudinary(profile.public_id);
+      } catch (err) {
+        console.error("[CLOUDINARY DELETE ERROR]:", err.message);
+      }
+    }
+
+    // 2. Delete related records (Manual Cascade)
+    // Temporarily disable FK checks to avoid dependency issues (e.g. Subscriptions referencing Payments)
+    await sequelize.query("SET FOREIGN_KEY_CHECKS = 0;");
+    try {
+      const tables = [
+        "user_sessions",
+        "carts",
+        "wishlists",
+        "subscriptions",
+        "payments",
+        "user_notes",
+        "user_books",
+        "bookmarks",
+        "reviews",
+        "notifications",
+        "user_favorite_categories",
+        "reading_progress",
+        "highlights",
+      ];
+
+      for (const table of tables) {
+        await sequelize.query(`DELETE FROM ${table} WHERE user_id = :userId`, {
+          replacements: { userId },
+          type: QueryTypes.DELETE,
+        });
+      }
+
+      // Special cases:
+      // Support Messages (linked via sender_id)
+      await sequelize.query(
+        "DELETE FROM support_messages WHERE sender_id = :userId",
+        { replacements: { userId }, type: QueryTypes.DELETE },
+      );
+
+      // Support Tickets & their messages
+      const tickets = await sequelize.query(
+        "SELECT id FROM support_tickets WHERE user_id = :userId",
+        { replacements: { userId }, type: QueryTypes.SELECT },
+      );
+      for (const ticket of tickets) {
+        await sequelize.query(
+          "DELETE FROM support_messages WHERE ticket_id = :ticketId",
+          { replacements: { ticketId: ticket.id }, type: QueryTypes.DELETE },
+        );
+      }
+      await sequelize.query(
+        "DELETE FROM support_tickets WHERE user_id = :userId",
+        { replacements: { userId }, type: QueryTypes.DELETE },
+      );
+
+      // Orders & their items
+      const orders = await sequelize.query(
+        "SELECT id FROM orders WHERE user_id = :userId",
+        { replacements: { userId }, type: QueryTypes.SELECT },
+      );
+      for (const order of orders) {
+        await sequelize.query(
+          "DELETE FROM order_items WHERE order_id = :orderId",
+          { replacements: { orderId: order.id }, type: QueryTypes.DELETE },
+        );
+      }
+      await sequelize.query("DELETE FROM orders WHERE user_id = :userId", {
+        replacements: { userId },
+        type: QueryTypes.DELETE,
+      });
+
+      // Addresses
+      let addressIds = user.address_ids;
+      if (typeof addressIds === "string") {
+        try {
+          addressIds = JSON.parse(addressIds);
+        } catch (e) {
+          addressIds = [];
+        }
+      }
+
+      if (Array.isArray(addressIds) && addressIds.length > 0) {
+        const placeholders = addressIds.map((_, i) => `:id${i}`).join(", ");
+        const replacements = {};
+        addressIds.forEach((id, i) => {
+          replacements[`id${i}`] = id;
+        });
+        await sequelize.query(
+          `DELETE FROM addresses WHERE id IN (${placeholders})`,
+          { replacements, type: QueryTypes.DELETE },
+        );
+      }
+
+      // Email Verifications (linked via email)
+      await sequelize.query(
+        "DELETE FROM email_verifications WHERE email = :email",
+        { replacements: { email: user.email }, type: QueryTypes.DELETE },
+      );
+
+      // 3. Finally delete the user
+      await sequelize.query("DELETE FROM users WHERE id = :id", {
+        replacements: { id: userId },
+        type: QueryTypes.DELETE,
+      });
+    } finally {
+      // Re-enable FK checks
+      await sequelize.query("SET FOREIGN_KEY_CHECKS = 1;");
+    }
+
+    return true;
   }
 }
 

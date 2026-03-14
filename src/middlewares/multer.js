@@ -28,9 +28,9 @@ const upload = multer({
   },
   fileFilter: function (req, file, cb) {
     const allowedExtensions =
-      /\.(jpg|jpeg|png|gif|svg|webp|avif|heic|jfif|pdf|epub)$/i;
+      /\.(jpg|jpeg|png|gif|svg|webp|avif|heic|jfif|pdf|epub|mp3|wav|m4a|ogg|aac)$/i;
     const allowedMimeTypes =
-      /^(image\/(jpeg|png|gif|svg\+xml|webp|avif|heic)|application\/pdf|application\/epub\+zip|application\/x-epub\+zip)$/;
+      /^(image\/(jpeg|png|gif|svg\+xml|webp|avif|heic)|application\/pdf|application\/epub\+zip|application\/x-epub\+zip|audio\/(mpeg|wav|mp4|ogg|aac|x-m4a))$/;
 
     const isExtensionValid = allowedExtensions.test(
       path.extname(file.originalname),
@@ -46,9 +46,9 @@ const upload = multer({
         mimetype: file.mimetype,
         extension: path.extname(file.originalname),
       });
-      req.fileValidationError = "Only images, PDF, or EPUB files are allowed!";
+      req.fileValidationError = "Only images, PDF, EPUB, or Audio files are allowed!";
       return cb(
-        new Error("Only images, PDF, or EPUB files are allowed!"),
+        new Error("Only images, PDF, EPUB, or Audio files are allowed!"),
         false,
       );
     }

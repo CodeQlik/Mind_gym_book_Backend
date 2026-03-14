@@ -2,16 +2,40 @@ import orderService from "../services/order.service.js";
 import invoiceService from "../services/invoice.service.js";
 import sendResponse from "../utils/responseHandler.js";
 
+import paymentService from "../services/payment.service.js";
+
 // ─── USER: Place order from cart ───────────────────────────────────────────────
 export const checkoutFromCart = async (req, res, next) => {
   try {
-    const order = await orderService.createOrderFromCart(req.user.id, req.body);
+    const result = await orderService.createOrderFromCart(req.user.id, req.body);
+
+    // If it's a prepaid order, the service returned orderData (not a DB model)
+    // We now automatically create the Razorpay order to return it to the frontend
+    if (req.body.payment_method !== "cod") {
+      const razorpayData = await paymentService.createPhysicalBookPaymentOrder(
+        req.user.id,
+        result,
+      );
+      return sendResponse(
+        res,
+        200,
+        true,
+        "Prepaid order initialized. Proceed to Razorpay checkout.",
+        {
+          payment_type: "prepaid",
+          ...razorpayData,
+          order_data: result, // Full order details for frontend verification
+        },
+      );
+    }
+
+    // For COD, it returns the final DB order
     return sendResponse(
       res,
       201,
       true,
-      "Order created. Proceed to payment.",
-      order,
+      "COD Order placed successfully.",
+      result,
     );
   } catch (error) {
     next(error);

@@ -18,12 +18,13 @@ const Plan = sequelize.define(
       allowNull: false,
     },
     plan_type: {
-      type: DataTypes.ENUM("one_month", "three_month", "one_year", "free"),
+      type: DataTypes.ENUM("monthly", "annual", "free"),
       allowNull: false,
     },
     duration_months: {
       type: DataTypes.INTEGER,
       allowNull: false,
+      defaultValue: 1,
     },
     description: {
       type: DataTypes.TEXT,
@@ -38,11 +39,20 @@ const Plan = sequelize.define(
       defaultValue: 1,
       allowNull: false,
     },
+    book_read_limit: {
+      type: DataTypes.INTEGER,
+      defaultValue: 5, // Default for free plan
+      allowNull: false,
+    },
     status: {
       type: DataTypes.ENUM("active", "inactive"),
       defaultValue: "active",
     },
     is_ad_free: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    is_popular: {
       type: DataTypes.BOOLEAN,
       defaultValue: false,
     },

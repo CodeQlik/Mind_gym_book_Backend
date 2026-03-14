@@ -86,13 +86,89 @@ class AnalyticsService {
     const totalUsers = await User.count({ where: { user_type: "user" } });
     const totalBooks = await Book.count({ where: { is_active: true } });
 
+    // Subscription Distribution
+    const subscriptionStats = await User.findAll({
+      attributes: [
+        ["subscription_plan", "plan"],
+        [sequelize.fn("COUNT", sequelize.col("id")), "count"],
+      ],
+      where: {
+        subscription_status: "active",
+        user_type: "user",
+      },
+      group: ["subscription_plan"],
+      raw: true,
+    });
+
+    const activeSubscribers = await User.count({
+      where: { subscription_status: "active", user_type: "user" },
+    });
+
     return {
       activeUsers,
       totalUsers,
       totalBooks,
+      activeSubscribers,
+      subscriptionDistribution: subscriptionStats,
       popularBooks,
       topAudiobooks,
     };
+  }
+
+  async getTopSellingBooksThisWeek(limit = 10) {
+    const today = new Date();
+    const day = today.getDay(); // 0 is Sunday, 1 is Monday...
+
+    // Calculate start of current week (Monday 00:00:00)
+    const startOfWeek = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      today.getDate() - (day === 0 ? 6 : day - 1),
+    );
+    startOfWeek.setHours(0, 0, 0, 0);
+
+    const stats = await OrderItem.findAll({
+      attributes: [
+        "book_id",
+        [sequelize.fn("SUM", sequelize.col("quantity")), "sales_count"],
+      ],
+      include: [
+        {
+          model: Order,
+          as: "order",
+          where: {
+            payment_status: "paid",
+            created_at: {
+              [Op.gte]: startOfWeek,
+            },
+          },
+          attributes: [],
+        },
+      ],
+      group: ["book_id"],
+      order: [[sequelize.literal("sales_count"), "DESC"]],
+      limit,
+      raw: true,
+    });
+
+    if (!stats || stats.length === 0) return [];
+
+    const bookIds = stats.map((s) => s.book_id);
+    const books = await Book.findAll({
+      where: { id: bookIds },
+      attributes: ["id", "title", "author", "thumbnail", "slug", "price"],
+    });
+
+    return stats
+      .map((stat) => {
+        const bookDetail = books.find((b) => b.id === stat.book_id);
+        return {
+          book_id: stat.book_id,
+          sales_count: parseInt(stat.sales_count) || 0,
+          book: bookDetail || null,
+        };
+      })
+      .filter((item) => item.book !== null);
   }
 }
 

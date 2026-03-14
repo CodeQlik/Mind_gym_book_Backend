@@ -10,6 +10,7 @@ import {
   Order,
 } from "../models/index.js";
 import orderService from "./order.service.js";
+import { redisClient } from "../config/redis.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -25,6 +26,46 @@ class PaymentService {
     });
     if (!plan) {
       throw new Error(`Plan type '${planType}' not found or inactive`);
+    }
+
+    // If it's a FREE plan, skip Razorpay and return success
+    if (plan.plan_type === "free" || plan.price <= 0) {
+      const duration = parseInt(plan.duration_months) || 0;
+      const startDate = new Date();
+      const endDate = new Date();
+      endDate.setMonth(startDate.getMonth() + duration);
+
+      // Expire previous active subscriptions
+      await Subscription.update(
+        { status: "expired" },
+        { where: { user_id: userId, status: "active" } }
+      );
+
+      const subscription = await Subscription.create({
+        user_id: userId,
+        plan_id: plan.id,
+        plan_type: plan.plan_type,
+        amount: 0,
+        status: "active",
+        start_date: startDate,
+        end_date: endDate,
+        payment_id: "FREE_PLAN",
+      });
+
+      await User.update(
+        {
+          subscription_status: "active",
+          subscription_plan: plan.plan_type,
+          subscription_end_date: endDate,
+        },
+        { where: { id: userId } }
+      );
+
+      return { 
+        message: "Free subscription activated successfully", 
+        subscription, 
+        isFree: true 
+      };
     }
 
     const options = {
@@ -48,46 +89,58 @@ class PaymentService {
   }
 
   //  WEBSITE: Physical Book Payment (Online: UPI / Card / Prepaid)
-  async createPhysicalBookPaymentOrder(userId, dbOrderId) {
-    const dbOrder = await Order.findOne({
-      where: { id: dbOrderId, user_id: userId },
-    });
-    if (!dbOrder) throw new Error("Order not found");
-    if (dbOrder.payment_status === "paid") {
-      throw new Error("This order is already paid");
-    }
-    // COD orders do NOT go through Razorpay
-    if (dbOrder.payment_method === "cod") {
-      throw new Error(
-        "COD orders do not require online payment. Order is already confirmed.",
-      );
+  async createPhysicalBookPaymentOrder(userId, orderData) {
+    // If orderData is just an ID (backward compatibility or retry), we fetch from DB
+    let dbOrder = null;
+    let finalOrderData = orderData;
+
+    if (typeof orderData === "number" || typeof orderData === "string") {
+      dbOrder = await Order.findOne({
+        where: { id: orderData, user_id: userId },
+      });
+      if (!dbOrder) throw new Error("Order not found");
+      if (dbOrder.payment_status === "paid") {
+        throw new Error("This order is already paid");
+      }
+
+      finalOrderData = {
+        userId: dbOrder.user_id,
+        total_amount: dbOrder.total_amount,
+        payment_method: dbOrder.payment_method,
+        db_order_id: dbOrder.id, // Flag to indicate it's already in DB
+      };
     }
 
-    const amount = Math.round(parseFloat(dbOrder.total_amount) * 100); // paise
+    const amount = Math.round(parseFloat(finalOrderData.total_amount) * 100); // paise
+    const receiptId = `rzp_phys_${userId}_${crypto.randomUUID().split("-")[0]}`;
 
     const razorpayOrder = await razorpay.orders.create({
       amount,
       currency: "INR",
-      receipt: `receipt_phys_${userId}_${dbOrderId}_${Date.now()}`,
+      receipt: receiptId,
     });
 
-    // Record payment attempt
+    // Store orderData in Redis for 1 hour
+    // This allows us to create the order record ONLY after verification
+    await redisClient.set(
+      `rzp_order_info:${razorpayOrder.id}`,
+      JSON.stringify(finalOrderData),
+      { EX: 3600 },
+    );
+
+    // Record payment attempt (Payment record is created, but Order table is clean)
     await Payment.create({
       user_id: userId,
       order_id: razorpayOrder.id,
-      amount: dbOrder.total_amount,
+      amount: finalOrderData.total_amount,
       payment_type: "book_purchase",
-      payment_method: dbOrder.payment_method, // upi | card | prepaid
+      payment_method: finalOrderData.payment_method,
       status: "created",
     });
 
-    // Link Razorpay order ID to our DB order
-    await orderService.linkRazorpayOrder(dbOrderId, razorpayOrder.id);
-
     return {
       razorpay_order: razorpayOrder,
-      db_order_id: dbOrderId,
-      payment_method: dbOrder.payment_method,
+      payment_method: finalOrderData.payment_method,
     };
   }
 
@@ -137,8 +190,6 @@ class PaymentService {
     }
 
     // 4. Update payment record — save payment_method from Razorpay response
-    // Razorpay returns method: 'upi' | 'card' | 'netbanking' | 'wallet' etc.
-    // We map it to our ENUM: upi->upi, card->card, netbanking/wallet->prepaid
     let capturedMethod = null;
     try {
       const rzpPayment = await razorpay.payments.fetch(razorpay_payment_id);
@@ -146,9 +197,7 @@ class PaymentService {
       if (rzpMethod === "upi") capturedMethod = "upi";
       else if (rzpMethod === "card") capturedMethod = "card";
       else capturedMethod = "prepaid"; // netbanking, wallet, etc.
-    } catch (_) {
-      // Non-critical: if fetch fails, leave as null
-    }
+    } catch (_) {}
 
     await payment.update({
       payment_id: razorpay_payment_id,
@@ -174,7 +223,7 @@ class PaymentService {
         { where: { user_id: payment.user_id, status: "active" } },
       );
 
-      await Subscription.create({
+      const subscription = await Subscription.create({
         user_id: payment.user_id,
         plan_id: plan ? plan.id : null,
         plan_type: payment.plan_name,
@@ -214,19 +263,47 @@ class PaymentService {
         console.error("Failed to send subscription notification:", notifErr);
       }
 
-      return { payment, message: "Subscription activated" };
+      return { payment, subscription, message: "Subscription activated" };
     } else if (payment.payment_type === "book_purchase") {
-      // ── WEBSITE: Mark physical order as paid ──
-      const markedOrder = await orderService.markOrderPaid(razorpay_order_id);
-      if (markedOrder) {
-        console.log(
-          `[PAYMENT] Physical order #${markedOrder.id} marked as paid`,
-        );
+      // ── WEBSITE: Finalize Physical Order ──
+      // Fetch orderData from Redis
+      const redisData = await redisClient.get(
+        `rzp_order_info:${razorpay_order_id}`,
+      );
+      if (!redisData) {
+        // Fallback: If not in Redis, maybe it was a retry for an existing DB order
+        const markedOrder = await orderService.markOrderPaid(razorpay_order_id);
+        return {
+          payment,
+          order: markedOrder,
+          message: "Order payment confirmed",
+        };
       }
+
+      const orderData = JSON.parse(redisData);
+
+      // If it was already in DB (retry flow)
+      if (orderData.db_order_id) {
+        const markedOrder = await orderService.markOrderPaid(razorpay_order_id);
+        return {
+          payment,
+          order: markedOrder,
+          message: "Order payment confirmed",
+        };
+      }
+
+      // If NEW order (common flow): Finally save to DB
+      const finalOrder = await orderService.finalizeOrder(
+        orderData,
+        razorpay_order_id,
+      );
+      // Clean up Redis
+      await redisClient.del(`rzp_order_info:${razorpay_order_id}`);
+
       return {
         payment,
-        order: markedOrder,
-        message: "Order payment confirmed",
+        order: finalOrder,
+        message: "Order placed successfully",
       };
     }
 
