@@ -599,21 +599,25 @@ class OrderService {
       throw new Error("Refund already requested for this order");
     }
 
-    if (!order.delivered_at) {
+    const isPrepaidCancelled = order.delivery_status === "cancelled" && order.payment_method !== "cod";
+    
+    if (!order.delivered_at && !isPrepaidCancelled) {
       throw new Error(
-        "Refund can only be requested after the order is delivered. Please use 'Cancel Order' if it is still processing.",
+        "Refund can only be requested after delivery or if a prepaid order is cancelled.",
       );
     }
 
-    const deliveryDate = new Date(order.delivered_at);
-    const now = new Date();
-    const diffTime = Math.abs(now - deliveryDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    if (order.delivered_at) {
+      const deliveryDate = new Date(order.delivered_at);
+      const now = new Date();
+      const diffTime = Math.abs(now - deliveryDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays > 7) {
-      throw new Error(
-        "Refund request window (7 days from delivery) has expired",
-      );
+      if (diffDays > 7) {
+        throw new Error(
+          "Refund request window (7 days from delivery) has expired",
+        );
+      }
     }
 
     await order.update({ refund_requested: true, refund_reason: reason });

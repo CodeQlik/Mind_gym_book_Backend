@@ -156,7 +156,7 @@ class AnalyticsService {
     const bookIds = stats.map((s) => s.book_id);
     const books = await Book.findAll({
       where: { id: bookIds },
-      attributes: ["id", "title", "author", "thumbnail", "slug", "price"],
+      attributes: ["id", "title", "author", "thumbnail", "slug", "price", "description"],
     });
 
     return stats
