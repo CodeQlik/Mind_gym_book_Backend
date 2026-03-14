@@ -144,11 +144,15 @@ class BookService {
       ? inputCondition
       : "good";
 
+    // Strip HTML tags for database cleanliness
+    const cleanDescription = (description || "").replace(/<[^>]*>?/gm, "");
+    const cleanHighlights = (highlights || "").replace(/<[^>]*>?/gm, "");
+
     const bookDataForCreation = {
       title,
       slug,
       author,
-      description,
+      description: cleanDescription,
       price: parseFloat(price) || 0,
       original_price: original_price ? parseFloat(original_price) : null,
       condition: sanitizedCondition,
@@ -166,7 +170,7 @@ class BookService {
       is_premium: is_premium === "true" || is_premium === true,
       is_bestselling: is_bestselling === "true" || is_bestselling === true,
       is_trending: is_trending === "true" || is_trending === true,
-      highlights,
+      highlights: cleanHighlights,
       isbn,
       language,
       page_count: 0,
@@ -557,6 +561,9 @@ class BookService {
           book.condition = validConditions.includes(inputCondition)
             ? inputCondition
             : book.condition || "good";
+        } else if (field === "description" || field === "highlights") {
+          // Strip HTML tags
+          book[field] = String(data[field]).replace(/<[^>]*>?/gm, "");
         } else {
           book[field] = data[field];
         }

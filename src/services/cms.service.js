@@ -21,11 +21,13 @@ class CMSService {
       throw new Error("Slug, Title and Content are required");
     }
 
+    const cleanContent = content.replace(/<[^>]*>?/gm, "");
+
     const [page, created] = await CMSPage.findOrCreate({
       where: { slug: slug.toLowerCase() },
       defaults: {
         title,
-        content,
+        content: cleanContent,
         is_active: is_active !== undefined ? is_active : true,
       },
     });
@@ -33,7 +35,7 @@ class CMSService {
     if (!created) {
       await page.update({
         title,
-        content,
+        content: cleanContent,
         is_active: is_active !== undefined ? is_active : page.is_active,
       });
     }
@@ -80,9 +82,10 @@ class CMSService {
     ];
 
     for (const p of defaultPages) {
+      const cleanContent = p.content.replace(/<[^>]*>?/gm, "");
       await CMSPage.findOrCreate({
         where: { slug: p.slug },
-        defaults: p,
+        defaults: { ...p, content: cleanContent },
       });
     }
   }
