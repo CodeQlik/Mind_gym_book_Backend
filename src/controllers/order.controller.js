@@ -85,9 +85,11 @@ export const requestRefund = async (req, res, next) => {
 // ─── USER: Cancel order ────────────────────────────────────────────────────────
 export const cancelOrder = async (req, res, next) => {
   try {
+    const { reason } = req.body;
     const order = await orderService.cancelOrder(
       req.user.id,
       req.params.orderId,
+      reason,
     );
     return sendResponse(res, 200, true, "Order cancelled successfully", order);
   } catch (error) {

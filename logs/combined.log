@@ -9454,3 +9454,36 @@
 [2026-03-14T07:35:06.813Z] [INFO] GET /api/v1/faqs/admin 304 (27ms) {"method":"GET","url":"/api/v1/faqs/admin","status":304,"duration":"27ms","ip":"::1","user":26}
 [2026-03-14T07:35:09.196Z] [INFO] GET /api/v1/faqs/5 200 (3ms) {"method":"GET","url":"/api/v1/faqs/5","status":200,"duration":"3ms","ip":"::1","user":"Guest"}
 [2026-03-14T07:35:09.262Z] [INFO] GET /api/v1/faqs/5 304 (5ms) {"method":"GET","url":"/api/v1/faqs/5","status":304,"duration":"5ms","ip":"::1","user":"Guest"}
+[2026-03-14T08:28:20.751Z] [INFO] POST /api/v1/users/login 200 (182ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"182ms","ip":"::1","user":"Guest"}
+[2026-03-14T08:28:20.860Z] [INFO] GET /api/v1/users/profile 304 (15ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"15ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.071Z] [INFO] GET /api/v1/users/profile 304 (103ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"103ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.097Z] [INFO] GET /api/v1/notifications 304 (121ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"121ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.118Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (118ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"118ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.215Z] [INFO] GET /api/v1/notifications 304 (47ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"47ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.261Z] [INFO] GET /api/v1/notifications/admin/stats 304 (274ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"274ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.353Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (121ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"121ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.411Z] [INFO] GET /api/v1/notifications 304 (48ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"48ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.415Z] [INFO] GET /api/v1/analytics/dashboard 304 (424ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"424ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.450Z] [INFO] GET /api/v1/notifications/admin/stats 304 (73ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"73ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.462Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (82ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"82ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.486Z] [INFO] GET /api/v1/notifications 304 (49ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"49ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.538Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (32ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"32ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.612Z] [INFO] GET /api/v1/notifications/admin/stats 304 (111ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"111ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.669Z] [INFO] GET /api/v1/analytics/dashboard 304 (204ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"204ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.733Z] [INFO] GET /api/v1/notifications/admin/stats 304 (118ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"118ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.759Z] [INFO] GET /api/v1/analytics/dashboard 304 (74ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"74ms","ip":"::1","user":26}
+[2026-03-14T08:28:21.813Z] [INFO] GET /api/v1/analytics/dashboard 304 (51ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"51ms","ip":"::1","user":26}
+[2026-03-14T08:28:25.384Z] [INFO] GET /api/v1/support/admin/stats 304 (16ms) {"method":"GET","url":"/api/v1/support/admin/stats","status":304,"duration":"16ms","ip":"::1","user":26}
+[2026-03-14T08:28:25.417Z] [INFO] GET /api/v1/support/admin/tickets?page=1&limit=10 304 (21ms) {"method":"GET","url":"/api/v1/support/admin/tickets?page=1&limit=10","status":304,"duration":"21ms","ip":"::1","user":26}
+[2026-03-14T08:28:25.500Z] [INFO] GET /api/v1/support/admin/stats 304 (57ms) {"method":"GET","url":"/api/v1/support/admin/stats","status":304,"duration":"57ms","ip":"::1","user":26}
+[2026-03-14T08:28:25.563Z] [INFO] GET /api/v1/support/admin/tickets?page=1&limit=10 304 (73ms) {"method":"GET","url":"/api/v1/support/admin/tickets?page=1&limit=10","status":304,"duration":"73ms","ip":"::1","user":26}
+[2026-03-14T08:28:25.880Z] [INFO] GET /api/v1/support/admin/tickets?page=1&limit=10 304 (11ms) {"method":"GET","url":"/api/v1/support/admin/tickets?page=1&limit=10","status":304,"duration":"11ms","ip":"::1","user":26}
+[2026-03-14T08:31:58.639Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (38ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"38ms","ip":"::1","user":26}
+[2026-03-14T08:31:58.658Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (10ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"10ms","ip":"::1","user":26}
+[2026-03-14T08:31:58.806Z] [INFO] GET /api/v1/analytics/dashboard 304 (206ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"206ms","ip":"::1","user":26}
+[2026-03-14T08:31:58.877Z] [INFO] GET /api/v1/analytics/dashboard 304 (60ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"60ms","ip":"::1","user":26}
+[2026-03-14T08:33:10.203Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 200 (37ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":200,"duration":"37ms","ip":"::1","user":"Guest"}
+[2026-03-14T08:33:10.326Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 200 (12ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":200,"duration":"12ms","ip":"::1","user":"Guest"}
+[2026-03-14T08:44:43.172Z] [INFO] Redis Client Connected 
+[2026-03-14T08:52:41.074Z] [INFO] Redis Client Connected 
+[2026-03-14T08:52:50.519Z] [INFO] Redis Client Connected 
