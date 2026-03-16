@@ -8,7 +8,7 @@ import {
 import notificationService from "./notification.service.js";
 import sequelize from "../config/db.js";
 import { getCache, setCache, clearCachePattern } from "../utils/redisCache.js";
-import { encryptId } from "../utils/cryptoUtils.js";
+
 
 
 class BookService {
@@ -848,7 +848,8 @@ class BookService {
     const baseUrl = (process.env.BASE_URL)
       .replace(/\/+$/, "")
       .replace(/\/api\/v1$/, "");
-    const finalUrl = `${baseUrl}/api/v1/book/readBook/${encryptId(bookId)}`;
+    const finalUrl = `${baseUrl}/api/v1/book/readBook/${bookId}`;
+
 
 
     return {

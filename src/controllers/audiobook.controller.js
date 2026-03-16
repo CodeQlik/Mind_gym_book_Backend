@@ -4,7 +4,7 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import sendResponse from "../utils/responseHandler.js";
 import ffmpeg from "fluent-ffmpeg";
 import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
-import { encryptId, decryptId } from "../utils/cryptoUtils.js";
+
 
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
@@ -53,7 +53,8 @@ const getAllAudiobooks = asyncHandler(async (req, res) => {
         id: audioData.id,
         chapter_number: audioData.chapter_number,
         title: audioData.chapter_title,
-        audio_url: `${baseUrl}/api/v1/audiobook/stream/${encryptId(audioData.id)}`,
+        audio_url: `${baseUrl}/api/v1/audiobook/stream/${audioData.id}`,
+
         status: audioData.status,
 
         narrator: audioData.narrator,
@@ -99,7 +100,8 @@ const getAudiobookById = asyncHandler(async (req, res) => {
 
   const structuredData = {
     book: book,
-    audio_url: `${baseUrl}/api/v1/audiobook/stream/${encryptId(audioData.id)}`,
+    audio_url: `${baseUrl}/api/v1/audiobook/stream/${audioData.id}`,
+
     audio_file: {
 
       ...audio_file,
@@ -113,9 +115,9 @@ const getAudiobookById = asyncHandler(async (req, res) => {
 });
 
 const streamAudiobook = asyncHandler(async (req, res) => {
-  const { id: encryptedId } = req.params;
-  const id = decryptId(encryptedId);
+  const { id } = req.params;
   const audiobook = await audiobookService.getAudiobookById(id);
+
 
   
   if (!audiobook || !audiobook.audio_file?.url) {
