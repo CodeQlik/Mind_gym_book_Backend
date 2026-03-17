@@ -12,6 +12,7 @@ import sequelize from "../config/db.js";
 import { emitNotification } from "../utils/socket.js";
 import sendEmail from "../config/sendEmail.js";
 import invoiceService from "./invoice.service.js";
+import logger from "../utils/logger.js";
 
 class NotificationService {
   // Usage: formatMessage("Hello {user_name}, {book_title} is available!", user, metadata)
@@ -235,7 +236,9 @@ class NotificationService {
     );
     const finalSendEmail = send_email !== null ? send_email : isEmailRequired;
 
+    logger.info(`Checking email condition: status=${status}, finalSendEmail=${finalSendEmail}, userEmail=${user.email}`);
     if (status === "SENT" && finalSendEmail && user.email) {
+      logger.info(`Attempting to send email to ${user.email} for type ${type}`);
       try {
         const emailTemplate = `
           <!DOCTYPE html>
@@ -576,14 +579,34 @@ class NotificationService {
   }
 
   // Get user notifications (paginated)
-  async getUserNotifications(userId, page = 1, limit = 20) {
+  async getUserNotifications(userId, userType, page = 1, limit = 20) {
     const offset = (page - 1) * limit;
 
+    const where = {
+      status: "SENT",
+    };
+
+    if (userType === "admin") {
+      // Admins see their specific ones + System-level ones (where userId is null)
+      where.userId = { [Op.or]: [userId, null] };
+    } else {
+      // Regular users only see their specific ones + Broadcasts meant for ALL
+      where[Op.or] = [
+        { userId: userId },
+        { 
+          [Op.and]: [
+            { userId: null },
+            sequelize.where(
+              sequelize.fn('JSON_EXTRACT', sequelize.col('metadata'), '$.target'),
+              'ALL'
+            )
+          ]
+        }
+      ];
+    }
+
     const { count, rows } = await Notification.findAndCountAll({
-      where: {
-        userId: { [Op.or]: [userId, null] },
-        status: "SENT",
-      },
+      where,
       order: [["createdAt", "DESC"]],
       limit,
       offset,
@@ -598,17 +621,43 @@ class NotificationService {
   }
 
   // Get unread count for a user
-  async getUnreadCount(userId) {
-    return await Notification.count({
-      where: { userId: userId, is_read: false },
-    });
+  async getUnreadCount(userId, userType) {
+    const where = {
+      is_read: false,
+      status: "SENT",
+    };
+
+    if (userType === "admin") {
+      where.userId = { [Op.or]: [userId, null] };
+    } else {
+      where[Op.or] = [
+        { userId: userId },
+        { 
+          [Op.and]: [
+            { userId: null },
+            sequelize.where(
+              sequelize.fn('JSON_EXTRACT', sequelize.col('metadata'), '$.target'),
+              'ALL'
+            )
+          ]
+        }
+      ];
+    }
+
+    return await Notification.count({ where });
   }
 
   // Mark a single notification as read
-  async markAsRead(notificationId, userId) {
-    const notification = await Notification.findOne({
-      where: { id: notificationId, userId: userId },
-    });
+  async markAsRead(notificationId, userId, userType) {
+    const where = { id: notificationId };
+    
+    if (userType === "admin") {
+      where.userId = { [Op.or]: [userId, null] };
+    } else {
+      where.userId = userId;
+    }
+
+    const notification = await Notification.findOne({ where });
     if (!notification) return null;
 
     notification.is_read = true;
@@ -617,11 +666,16 @@ class NotificationService {
   }
 
   // Mark all notifications as read for a user
-  async markAllAsRead(userId) {
-    await Notification.update(
-      { is_read: true },
-      { where: { userId: userId, is_read: false } },
-    );
+  async markAllAsRead(userId, userType) {
+    const where = { is_read: false };
+    
+    if (userType === "admin") {
+      where.userId = { [Op.or]: [userId, null] };
+    } else {
+      where.userId = userId;
+    }
+
+    await Notification.update({ is_read: true }, { where });
     return true;
   }
 
@@ -672,13 +726,13 @@ class NotificationService {
 
   async addFavoriteCategory(userId, categoryId) {
     const category = await Category.findByPk(categoryId);
-    if (!category) throw new Error("Category not found");
+    if (!category) throw new Error("Category not found.");
 
     const [fav, created] = await UserFavoriteCategory.findOrCreate({
       where: { userId: userId, categoryId: categoryId },
     });
 
-    if (!created) throw new Error("Category already in favorites");
+    if (!created) throw new Error("This category is already in your favorites.");
     return fav;
   }
 
@@ -686,7 +740,7 @@ class NotificationService {
     const fav = await UserFavoriteCategory.findOne({
       where: { userId: userId, categoryId: categoryId },
     });
-    if (!fav) throw new Error("Category not in favorites");
+    if (!fav) throw new Error("This category is not in your favorites.");
 
     await fav.destroy();
     return true;

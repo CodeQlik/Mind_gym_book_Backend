@@ -6,15 +6,15 @@ class CartService {
     const book_id = data.book_id || data.bookId;
     const quantity = data.quantity || 1;
 
-    if (!book_id) throw new Error("Book ID is required");
+    if (!book_id) throw new Error("Book ID is required.");
 
     // Check if book exists and is active
     const [book] = await sequelize.query(
       "SELECT id, title, is_active, stock, reserved FROM books WHERE id = :book_id LIMIT 1",
       { replacements: { book_id }, type: QueryTypes.SELECT },
     );
-    if (!book) throw new Error("Book not found");
-    if (!book.is_active) throw new Error("Book is not available for purchase");
+    if (!book) throw new Error("Book not found.");
+    if (!book.is_active) throw new Error("This book is not available for purchase.");
 
     const availableStock = (book.stock || 0) - (book.reserved || 0);
 
@@ -88,7 +88,7 @@ class CartService {
        WHERE c.id = :cartId AND c.user_id = :userId LIMIT 1`,
       { replacements: { cartId, userId }, type: QueryTypes.SELECT },
     );
-    if (!cartItem) throw new Error("Cart item not found");
+    if (!cartItem) throw new Error("The specified cart item was not found.");
 
     if (quantity < 1) {
       await sequelize.query("DELETE FROM carts WHERE id = :cartId", {
@@ -122,7 +122,7 @@ class CartService {
       "SELECT id FROM carts WHERE id = :cartId AND user_id = :userId LIMIT 1",
       { replacements: { cartId, userId }, type: QueryTypes.SELECT },
     );
-    if (!cartItem) throw new Error("Cart item not found");
+    if (!cartItem) throw new Error("The specified cart item was not found.");
 
     await sequelize.query("DELETE FROM carts WHERE id = :cartId", {
       replacements: { cartId },

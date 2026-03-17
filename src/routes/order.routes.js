@@ -12,8 +12,12 @@ import {
   searchOrders,
   dispatchOrder,
   updateOrderStatus,
+  dispatchWithShiprocket,
   cancelOrder,
   deleteOrder,
+  approveRefund,
+  refreshShiprocketStatus,
+  handleShiprocketWebhook,
 } from "../controllers/order.controller.js";
 
 const router = express.Router();
@@ -38,7 +42,13 @@ router.get("/admin/search", verifyJWT, isAdmin, searchOrders);
 router.get("/admin/all", verifyJWT, isAdmin, getAllOrders);
 router.get("/admin/:orderId", verifyJWT, isAdmin, getOrderByIdAdmin);
 router.patch("/admin/dispatch/:orderId", verifyJWT, isAdmin, dispatchOrder);
+router.patch("/admin/dispatch-shiprocket/:orderId", verifyJWT, isAdmin, dispatchWithShiprocket);
 router.patch("/admin/status/:orderId", verifyJWT, isAdmin, updateOrderStatus);
+router.post("/admin/approve-refund/:orderId", verifyJWT, isAdmin, approveRefund);
+router.get("/admin/refresh-shiprocket/:orderId", verifyJWT, isAdmin, refreshShiprocketStatus);
 router.delete("/admin/delete/:orderId", verifyJWT, isAdmin, deleteOrder);
+
+// ─── EXTERNAL Webhooks ───
+router.post("/fulfillment-update", handleShiprocketWebhook);
 
 export default router;

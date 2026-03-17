@@ -18,6 +18,7 @@ export const getUserNotifications = async (req, res, next) => {
 
     const result = await notificationService.getUserNotifications(
       req.user.id,
+      req.user.user_type,
       page,
       limit,
     );
@@ -35,7 +36,10 @@ export const getUserNotifications = async (req, res, next) => {
 
 export const getUnreadCount = async (req, res, next) => {
   try {
-    const count = await notificationService.getUnreadCount(req.user.id);
+    const count = await notificationService.getUnreadCount(
+      req.user.id,
+      req.user.user_type,
+    );
     return sendResponse(res, 200, true, "Unread count fetched", { count });
   } catch (error) {
     next(error);
@@ -47,10 +51,11 @@ export const markAsRead = async (req, res, next) => {
     const notification = await notificationService.markAsRead(
       req.params.id,
       req.user.id,
+      req.user.user_type,
     );
 
     if (!notification) {
-      return sendResponse(res, 404, false, "Notification not found");
+      return sendResponse(res, 404, false, "Notification not found.");
     }
 
     return sendResponse(
@@ -67,7 +72,7 @@ export const markAsRead = async (req, res, next) => {
 
 export const markAllAsRead = async (req, res, next) => {
   try {
-    await notificationService.markAllAsRead(req.user.id);
+    await notificationService.markAllAsRead(req.user.id, req.user.user_type);
     return sendResponse(res, 200, true, "All notifications marked as read");
   } catch (error) {
     next(error);
@@ -82,7 +87,7 @@ export const deleteNotification = async (req, res, next) => {
     );
 
     if (!success) {
-      return sendResponse(res, 404, false, "Notification not found");
+      return sendResponse(res, 404, false, "Notification not found.");
     }
 
     return sendResponse(res, 200, true, "Notification deleted successfully");
@@ -183,7 +188,7 @@ export const sendNotificationToUser = async (req, res, next) => {
       );
     } else if (target === "CATEGORY") {
       if (!category_id)
-        throw new Error("category_id is required for category targeting");
+        throw new Error("A category ID is required for category targeting.");
       result = await notificationService.sendToCategory(
         category_id,
         type,
@@ -235,7 +240,7 @@ export const sendNotificationToUser = async (req, res, next) => {
     } else {
       // Default: Single User targeting (USER)
       if (!user_id && target !== "ALL" && target !== "CATEGORY")
-        throw new Error("user_id or target is required");
+        throw new Error("A user ID or target is required.");
       result = await notificationService.sendToUser(
         user_id,
         type,
@@ -316,7 +321,7 @@ export const deleteNotificationAdmin = async (req, res, next) => {
     const { id } = req.params;
     const success = await notificationService.deleteNotificationAdmin(id);
     if (!success) {
-      return sendResponse(res, 404, false, "Notification not found");
+      return sendResponse(res, 404, false, "Notification not found.");
     }
     return sendResponse(res, 200, true, "Notification deleted by admin");
   } catch (error) {

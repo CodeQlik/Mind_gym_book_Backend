@@ -57,12 +57,12 @@ class BookService {
 
     // Validate category
     const category = await Category.findByPk(category_id);
-    if (!category) throw new Error("Invalid category ID");
+    if (!category) throw new Error("Invalid category ID.");
 
     const slug = this.generateSlug(title);
     const existingBook = await Book.findOne({ where: { slug } });
     if (existingBook)
-      throw new Error("Book title already exists (slug conflict)");
+      throw new Error("A book with this title already exists.");
 
     const uploadFiles = async (fileArray, folder) => {
       if (!fileArray || fileArray.length === 0) return null;
@@ -366,7 +366,7 @@ class BookService {
     });
 
     if (!book) {
-      throw new Error(`Book not found with slug: ${slug}`);
+      throw new Error(`No book was found with the slug: ${slug}.`);
     }
 
     if (activeOnly && !book.is_active) {
@@ -391,7 +391,7 @@ class BookService {
     });
 
     if (!book) {
-      throw new Error(`Book not found with ID: ${id}`);
+      throw new Error(`No book was found with ID: ${id}.`);
     }
 
     if (activeOnly && !book.is_active) {
@@ -403,10 +403,10 @@ class BookService {
 
   async toggleBookStatus(id) {
     const book = await Book.findByPk(id);
-    if (!book) throw new Error("Book not found");
+    if (!book) throw new Error("The specified book was not found.");
 
     if (book.stock <= 0 && !book.is_active) {
-      throw new Error("Cannot publish a book with 0 stock. Please update the stock first.");
+      throw new Error("Cannot publish a book with zero stock. Please update the stock level first.");
     }
 
     book.is_active = !book.is_active;
@@ -418,281 +418,225 @@ class BookService {
 
   async updateBook(id, data, files) {
     const book = await Book.findByPk(id);
+    if (!book) throw new Error("The specified book was not found.");
 
-    if (!book) throw new Error("Book not found");
+    // 1. Concurrent Simple Validations & Preparation
+    const validationTasks = [];
+    if (data.title && data.title !== book.title) {
+      const newSlug = this.generateSlug(data.title);
+      validationTasks.push(
+        Book.findOne({
+          where: { slug: newSlug, id: { [Op.ne]: id } },
+          attributes: ["id"],
+        }).then((existing) => {
+          if (existing) throw new Error("Another book with this title already exists.");
+          book.title = data.title;
+          book.slug = newSlug;
+        })
+      );
+    }
+
+    if (data.category_id) {
+      validationTasks.push(
+        Category.findByPk(data.category_id, { attributes: ["id"] }).then((cat) => {
+          if (!cat) throw new Error("Invalid category ID.");
+          book.category_id = data.category_id;
+        })
+      );
+    }
 
     // Smart routing for 'book_file'
     if (files?.book_file?.[0]) {
       const file = files.book_file[0];
       const ext = path.extname(file.originalname).toLowerCase();
-      if (ext === ".pdf") {
-        if (!files.pdf_file) files.pdf_file = [file];
-      } else if (ext === ".epub") {
-        if (!files.epub_file) files.epub_file = [file];
-      }
+      if (ext === ".pdf" && !files.pdf_file) files.pdf_file = [file];
+      else if (ext === ".epub" && !files.epub_file) files.epub_file = [file];
     }
 
-    // Handle title/slug change
-    if (data.title && data.title !== book.title) {
-      const newSlug = this.generateSlug(data.title);
-      const existingBook = await Book.findOne({
-        where: { slug: newSlug, id: { [Op.ne]: id } },
+    await Promise.all(validationTasks);
+
+    // 2. Prepare Background Deletion Queue
+    const cloudCleanupQueue = [];
+    const addToCleanup = (id) => {
+      if (id) cloudCleanupQueue.push(deleteFromCloudinary(id).catch((e) => console.warn("[Background Cleanup] Failed:", e.message)));
+    };
+
+    // 3. Define Upload Tasks (Parallel)
+    const uploadTasks = [];
+
+    // Thumbnail
+    if (files?.thumbnail?.[0]) {
+      uploadTasks.push(
+        uploadOnCloudinary(files.thumbnail[0].path, "mindgymbook/books/thumbnails").then((res) => {
+          if (res) {
+            addToCleanup(book.thumbnail?.public_id);
+            book.thumbnail = { url: res.secure_url, public_id: res.public_id, local_path: files.thumbnail[0].path };
+          }
+        })
+      );
+    }
+
+    // Cover Image
+    if (files?.cover_image?.[0]) {
+      uploadTasks.push(
+        uploadOnCloudinary(files.cover_image[0].path, "mindgymbook/books/covers").then((res) => {
+          if (res) {
+            addToCleanup(book.cover_image?.public_id);
+            book.cover_image = { url: res.secure_url, public_id: res.public_id, local_path: files.cover_image[0].path };
+          }
+        })
+      );
+    }
+
+    // Book File (PDF/EPUB)
+    const newBookFile = files?.pdf_file?.[0] || files?.epub_file?.[0];
+    if (newBookFile) {
+      uploadTasks.push(
+        uploadOnCloudinary(newBookFile.path, `mindgymbook/books/${path.extname(newBookFile.originalname).slice(1)}`).then((res) => {
+          if (res) {
+            const currentFile = typeof book.file_data === "string" ? JSON.parse(book.file_data) : book.file_data;
+            addToCleanup(currentFile?.public_id);
+            book.setDataValue("file_data", {
+              url: res.secure_url,
+              public_id: res.public_id,
+              type: path.extname(newBookFile.originalname).replace(".", "").toLowerCase(),
+              asset_type: res.type || "upload",
+              local_path: newBookFile.path,
+            });
+          }
+        })
+      );
+    }
+
+    // Gallery Images
+    let gallery = [];
+    if (data.images) {
+      try { gallery = typeof data.images === "string" ? JSON.parse(data.images) : data.images; } catch (e) { gallery = book.images || []; }
+    } else { gallery = book.images || []; }
+
+    if (Array.isArray(book.images)) {
+      const currentPublicIds = gallery.map((img) => img.public_id);
+      book.images.forEach((oldImg) => {
+        if (oldImg.public_id && !currentPublicIds.includes(oldImg.public_id)) addToCleanup(oldImg.public_id);
       });
-      if (existingBook)
-        throw new Error("Another book already exists with this title");
-      book.title = data.title;
-      book.slug = newSlug;
     }
 
-    // Validate category
-    if (data.category_id) {
-      const cat = await Category.findByPk(data.category_id);
-      if (!cat) throw new Error("Invalid category ID");
-      book.category_id = data.category_id;
+    if (files?.images?.length > 0) {
+      files.images.forEach((file) => {
+        uploadTasks.push(
+          uploadOnCloudinary(file.path, "mindgymbook/books/gallery").then((res) => {
+            if (res) gallery.push({ url: res.secure_url, public_id: res.public_id });
+          })
+        );
+      });
     }
 
-    // Concurrent File Upload Tasks
-    const updateThumbnail = async () => {
-      if (files?.thumbnail?.[0]) {
-        if (book.thumbnail?.public_id) {
-          deleteFromCloudinary(book.thumbnail.public_id).catch(()=>console.warn("Could not delete old thumbnail"));
-        }
-        const res = await uploadOnCloudinary(files.thumbnail[0].path, "mindgymbook/books/thumbnails");
-        if (res) {
-          book.thumbnail = { url: res.secure_url, public_id: res.public_id, local_path: files.thumbnail[0].path };
-        }
-      }
-    };
-
-    const updateCoverImage = async () => {
-      if (files?.cover_image?.[0]) {
-        if (book.cover_image?.public_id) {
-          deleteFromCloudinary(book.cover_image.public_id).catch(()=>console.warn("Could not delete old cover"));
-        }
-        const res = await uploadOnCloudinary(files.cover_image[0].path, "mindgymbook/books/covers");
-        if (res) {
-          book.cover_image = { url: res.secure_url, public_id: res.public_id, local_path: files.cover_image[0].path };
-        }
-      }
-    };
-
-    const updateBookFile = async () => {
-      const newBookFile = files?.pdf_file?.[0] || files?.epub_file?.[0];
-      if (newBookFile) {
-        const rawFileData = book.getDataValue("file_data");
-        const existingFile = typeof rawFileData === "string" ? JSON.parse(rawFileData) : rawFileData;
-        if (existingFile?.public_id) {
-          deleteFromCloudinary(existingFile.public_id).catch(()=>console.warn("Could not delete old book file"));
-        }
-
-        const ext = path.extname(newBookFile.originalname).toLowerCase().replace(".", "");
-        const folder = ext === "pdf" ? "mindgymbook/books/pdf" : "mindgymbook/books/epub";
-        const res = await uploadOnCloudinary(newBookFile.path, folder);
-        if (res) {
-          book.setDataValue("file_data", { url: res.secure_url, public_id: res.public_id, type: ext, asset_type: res.type || "upload", local_path: newBookFile.path });
-        }
-      }
-    };
-
-
-    const updateGalleryImages = async () => {
-      let gallery = [];
-      if (data.images) {
-        try { gallery = typeof data.images === "string" ? JSON.parse(data.images) : data.images; } 
-        catch (e) { gallery = book.images || []; }
-      } else {
-        gallery = book.images || [];
-      }
-
-      // 3. Deletion of removed images
-      if (Array.isArray(book.images)) {
-        const currentPublicIds = gallery.map((img) => img.public_id);
-        const deletionPromises = book.images.map(async (oldImg) => {
-          if (oldImg.public_id && !currentPublicIds.includes(oldImg.public_id)) {
-            await deleteFromCloudinary(oldImg.public_id).catch(()=>console.warn("Failed deleting gallery image"));
+    // 4. Handle Audio Chapters (Heavy Parallel)
+    let audioChaptersToSave = [];
+    if (data.audio_chapters) {
+      try {
+        const chapters = typeof data.audio_chapters === "string" ? JSON.parse(data.audio_chapters) : data.audio_chapters;
+        const existingAudiobooks = await Audiobook.findAll({ where: { book_id: id }, attributes: ["id", "audio_file"] });
+        const existingMap = new Map(existingAudiobooks.map((a) => [parseInt(a.id), a]));
+        
+        const updatedIds = chapters.filter((ch) => ch.id).map((ch) => parseInt(ch.id));
+        existingAudiobooks.forEach((ab) => {
+          if (!updatedIds.includes(parseInt(ab.id))) {
+            addToCleanup(ab.audio_file?.public_id);
+            // Non-blocking destroy
+            Audiobook.destroy({ where: { id: ab.id } }).catch(() => {});
           }
         });
-        await Promise.all(deletionPromises);
-      }
 
-      // 2. Uploading new images
-      if (files?.images?.length > 0) {
-        const uploadPromises = files.images.map(async (file) => {
-          const res = await uploadOnCloudinary(file.path, "mindgymbook/books/gallery");
-          if (res) gallery.push({ url: res.secure_url, public_id: res.public_id });
+        let audioFileIndex = 0;
+        chapters.forEach((ch, idx) => {
+          const chapterData = { ...ch, index: idx };
+          const existingAb = ch.id ? existingMap.get(parseInt(ch.id)) : null;
+
+          if (ch.use_file && files?.audio_files?.[audioFileIndex]) {
+            const file = files.audio_files[audioFileIndex];
+            audioFileIndex++;
+            uploadTasks.push(
+              uploadOnCloudinary(file.path, "mindgymbook/audiobooks").then((res) => {
+                if (res) {
+                  if (existingAb) addToCleanup(existingAb.audio_file?.public_id);
+                  chapterData.final_audio_file = { url: res.secure_url, public_id: res.public_id, asset_type: "upload" };
+                }
+                audioChaptersToSave.push(chapterData);
+              })
+            );
+          } else {
+            chapterData.final_audio_file = ch.audio_file || { url: "", public_id: "", asset_type: "external" };
+            audioChaptersToSave.push(chapterData);
+          }
         });
-        await Promise.all(uploadPromises);
-      }
-      
-      book.images = gallery;
-    };
+      } catch (err) { console.error("Error preparing audio chapters:", err.message); }
+    }
 
-    // Execute all updates simultaneously
-    await Promise.all([
-      updateThumbnail(),
-      updateCoverImage(),
-      updateBookFile(),
-      updateGalleryImages()
-    ]);
+    // 5. Execute all uploads in parallel
+    await Promise.all(uploadTasks);
 
-    // Scalar fields
-    const scalarFields = [
-      "description",
-      "author",
-      "price",
-      "original_price",
-      "condition",
-      "stock",
-      "published_date",
-      "isbn",
-      "language",
-      "highlights",
-      "previewPages",
-      "dimensions",
-      "weight",
-    ];
+    // 6. Final Scalar Updates
+    book.images = gallery;
+    const scalarFields = ["description", "author", "price", "original_price", "condition", "stock", "published_date", "isbn", "language", "highlights", "previewPages", "dimensions", "weight"];
     scalarFields.forEach((field) => {
       if (data[field] !== undefined) {
-        if (field === "condition") {
-          const validConditions = ["new", "fair", "good", "acceptable"];
-          const inputCondition = String(data[field])
-            .toLowerCase()
-            .trim();
-          book.condition = validConditions.includes(inputCondition)
-            ? inputCondition
-            : book.condition || "good";
-        } else if (field === "description" || field === "highlights") {
-          // Strip HTML tags
-          book[field] = String(data[field]).replace(/<[^>]*>?/gm, "");
-        } else {
-          book[field] = data[field];
-        }
+        if (field === "description" || field === "highlights") book[field] = String(data[field]).replace(/<[^>]*>?/gm, "");
+        else book[field] = data[field];
       }
     });
 
-    // Propagate language and author (narrator) change to all audiobooks if changed
-    if (data.language) {
-        await Audiobook.update(
-            { language: data.language },
-            { where: { book_id: id } }
-        );
-    }
-    if (data.author) {
-        await Audiobook.update(
-            { narrator: data.author },
-            { where: { book_id: id } }
-        );
-    }
+    if (data.is_active !== undefined) book.is_active = data.is_active === "true" || data.is_active === true;
+    if (book.stock <= 0) book.is_active = false;
+    ["is_premium", "is_bestselling", "is_trending"].forEach(f => {
+      if (data[f] !== undefined) book[f] = String(data[f]) === "true";
+    });
 
-    // Boolean fields
-    if (data.is_active !== undefined) {
-      book.is_active = data.is_active === "true" || data.is_active === true;
-    }
+    // 7. Save Book and Audiobooks (Batch)
+    const finalOps = [book.save()];
 
-    // Auto deactivate if stock reaches 0
-    if (book.stock <= 0) {
-      book.is_active = false;
-    }
-    if (data.is_premium !== undefined)
-      book.is_premium = String(data.is_premium) === "true";
-    if (data.is_bestselling !== undefined)
-      book.is_bestselling = String(data.is_bestselling) === "true";
-    if (data.is_trending !== undefined)
-      book.is_trending = String(data.is_trending) === "true";
-      
-    // Handle Audio Chapters update
-    if (data.audio_chapters) {
-      try {
-        const chapters = typeof data.audio_chapters === "string" 
-          ? JSON.parse(data.audio_chapters) 
-          : data.audio_chapters;
-
-        // Fetch existing chapters
-        const existingAudiobooks = await Audiobook.findAll({ where: { book_id: id } });
-        const existingIds = existingAudiobooks.map(a => parseInt(a.id));
-        const updatedIds = chapters.filter(ch => ch.id).map(ch => parseInt(ch.id));
-
-        // 1. Delete removed chapters
-        const deleteIds = existingIds.filter(eid => !updatedIds.includes(eid));
-        if (deleteIds.length > 0) {
-          for (const did of deleteIds) {
-            const ab = existingAudiobooks.find(a => a.id === did);
-            if (ab?.audio_file?.public_id) {
-              await deleteFromCloudinary(ab.audio_file.public_id).catch(() => {});
-            }
-          }
-          await Audiobook.destroy({ where: { id: deleteIds } });
-        }
-
-        // 2. Sync / Create chapters
-        let audioFileIndex = 0;
-        for (const ch of chapters) {
-          let audioData = ch.audio_file || { url: "", public_id: "", asset_type: "external" };
-
-          // New File Upload?
-          if (ch.use_file && files?.audio_files?.[audioFileIndex]) {
-            const file = files.audio_files[audioFileIndex];
-            // Delete old file if updating existing chapter
-            if (ch.id) {
-                const oldAb = existingAudiobooks.find(a => a.id === ch.id);
-                if (oldAb?.audio_file?.public_id) {
-                  await deleteFromCloudinary(oldAb.audio_file.public_id).catch(() => {});
-                }
-            }
-            const res = await uploadOnCloudinary(file.path, "mindgymbook/audiobooks");
-            if (res) {
-              audioData = { url: res.secure_url, public_id: res.public_id, asset_type: "upload" };
-            }
-            audioFileIndex++;
-          }
-
-          if (ch.id) {
-            // Update existing
-            await Audiobook.update({
-              chapter_number: parseInt(ch.chapter_number) || 1,
-              chapter_title: ch.chapter_title || "Chapter",
-              audio_file: audioData,
-              language: data.language || book.language || "Hindi",
-              status: true
-            }, { where: { id: ch.id } });
-          } else {
-            // Create new
-            await Audiobook.create({
-              book_id: book.id,
-              chapter_number: parseInt(ch.chapter_number) || 1,
-              chapter_title: ch.chapter_title || "Chapter",
-              narrator: data.author || book.author,
-              audio_file: audioData,
-              language: data.language || book.language || "Hindi",
-              status: true
-            });
-          }
-        }
-      } catch (err) {
-        console.error("Error updating audio chapters:", err.message);
-      }
+    if (audioChaptersToSave.length > 0) {
+      audioChaptersToSave.forEach((ch) => {
+        const payload = {
+          book_id: id,
+          chapter_number: parseInt(ch.chapter_number) || 1,
+          chapter_title: ch.chapter_title || "Chapter",
+          audio_file: ch.final_audio_file,
+          language: data.language || book.language || "Hindi",
+          narrator: data.author || book.author,
+          status: true,
+        };
+        if (ch.id) finalOps.push(Audiobook.update(payload, { where: { id: ch.id } }));
+        else finalOps.push(Audiobook.create(payload));
+      });
     }
 
-    await book.save();
+    // Propagate language/author updates if no specific chapter data was provided but fields changed
+    if (!data.audio_chapters && (data.language || data.author)) {
+      const propagate = {};
+      if (data.language) propagate.language = data.language;
+      if (data.author) propagate.narrator = data.author;
+      finalOps.push(Audiobook.update(propagate, { where: { book_id: id } }));
+    }
 
-    // Clear books cache
-    await clearCachePattern("books:*");
+    await Promise.all(finalOps);
 
-    return await Book.findByPk(book.id, {
+    // 8. Final Background Tasks
+    clearCachePattern("books:*").catch(() => {});
+    // Cloud cleanup runs in background independently
+
+    return await Book.findByPk(id, {
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
-        { 
-          model: Audiobook, 
-          as: "audiobooks", 
-          attributes: ["id", "chapter_number", "chapter_title", "audio_file", "narrator"] 
-        }
+        { model: Audiobook, as: "audiobooks", attributes: ["id", "chapter_number", "chapter_title", "audio_file", "narrator"] },
       ],
     });
   }
 
+
   async deleteBook(id) {
     const book = await Book.findByPk(id);
-    if (!book) throw new Error("Book not found");
+    if (!book) throw new Error("The specified book was not found.");
 
     if (book.thumbnail?.public_id)
       await deleteFromCloudinary(book.thumbnail.public_id);
@@ -841,8 +785,8 @@ class BookService {
 
   async getReadPdfUrl(bookId, user) {
     const book = await Book.findByPk(bookId);
-    if (!book) throw new Error("Book not found");
-    if (!book.file_data?.url) throw new Error("Book file not found");
+    if (!book) throw new Error("The specified book was not found.");
+    if (!book.file_data?.url) throw new Error("The file for this book could not be found.");
 
     const hasAccess = await this.hasFullAccess(user, book);
     const baseUrl = (process.env.BASE_URL)

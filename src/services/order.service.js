@@ -1,8 +1,10 @@
 import sequelize from "../config/db.js";
 import { QueryTypes, Op } from "sequelize";
-import { Order, OrderItem, Book, User, Cart, Coupon } from "../models/index.js";
+import { Order, OrderItem, Book, User, Cart, Coupon, Address } from "../models/index.js";
 import notificationService from "./notification.service.js";
 import couponService from "./coupon.service.js";
+import shiprocketService from "./shiprocket.service.js";
+import logger from "../utils/logger.js";
 
 class OrderService {
   async createOrderFromCart(
@@ -31,12 +33,12 @@ class OrderService {
     userId,
     { address_id, payment_method = "prepaid", coupon_code },
   ) {
-    if (!address_id) throw new Error("address_id is required");
+    if (!address_id) throw new Error("Shipping address ID is required.");
 
     const VALID_PAYMENT_METHODS = ["upi", "card", "prepaid", "cod"];
     if (!VALID_PAYMENT_METHODS.includes(payment_method)) {
       throw new Error(
-        `Invalid payment_method. Allowed: ${VALID_PAYMENT_METHODS.join(", ")}`,
+        `Invalid payment method. Allowed methods: ${VALID_PAYMENT_METHODS.join(", ")}`,
       );
     }
 
@@ -53,20 +55,20 @@ class OrderService {
     });
 
     if (!cartItems || cartItems.length === 0) {
-      throw new Error("Cart is empty. Add books before placing an order.");
+      throw new Error("The cart is empty. Please add books to your cart before placing an order.");
     }
 
     // 2. Validate stock and activity
     for (const item of cartItems) {
       if (!item.book)
-        throw new Error(`Book not found for cart item ${item.id}`);
+        throw new Error(`Book not found for cart item #${item.id}.`);
       if (!item.book.is_active)
-        throw new Error(`Book "${item.book.title}" is currently unavailable`);
+        throw new Error(`The book "${item.book.title}" is currently unavailable.`);
 
       const available = (item.book.stock || 0) - (item.book.reserved || 0);
       if (available < item.quantity) {
         throw new Error(
-          `Insufficient available stock for "${item.book.title}". Available: ${available}, Requested: ${item.quantity}`,
+          `Insufficient stock available for "${item.book.title}". Available: ${available}, Requested: ${item.quantity}.`,
         );
       }
     }
@@ -76,7 +78,7 @@ class OrderService {
       "SELECT * FROM addresses WHERE id = :address_id LIMIT 1",
       { replacements: { address_id }, type: QueryTypes.SELECT },
     );
-    if (!address) throw new Error("Shipping address not found");
+    if (!address) throw new Error("The specified shipping address was not found.");
 
     const addressSnapshot = [
       address.name ? `${address.name}, ` : "",
@@ -194,10 +196,12 @@ class OrderService {
 
       return newOrder;
     });
-
     // Notify user
     const orderWithDetails = await this._getOrderWithDetails(order.id);
     try {
+      const payment_method = order.payment_method;
+      const userId = order.user_id;
+
       await notificationService.sendToUser(
         userId,
         "ORDER_CREATED",
@@ -207,9 +211,15 @@ class OrderService {
         `Your order ${orderWithDetails.order_no} has been ${payment_method === "cod" ? "placed" : "successfully paid and recorded"}.`,
         { order_id: String(order.id), order_no: orderWithDetails.order_no },
       );
-    } catch (err) {}
+    } catch (err) {
+      logger.error("Notification failed for order:", order.id, err.message);
+    }
 
-    return orderWithDetails;
+    // 3. AUTOMATION: Sync with Shiprocket automatically
+    await this._syncOrderWithShiprocket(order.id);
+
+    // Return the FINAL updated object
+    return await this._getOrderWithDetails(order.id);
   }
 
   /**
@@ -217,7 +227,7 @@ class OrderService {
    */
   async linkRazorpayOrder(orderId, razorpayOrderId) {
     const order = await Order.findByPk(orderId);
-    if (!order) throw new Error("Order not found");
+    if (!order) throw new Error("The specified order was not found.");
     await order.update({ razorpay_order_id: razorpayOrderId });
     return order;
   }
@@ -242,6 +252,9 @@ class OrderService {
         { order_id: String(order.id), order_no: order.order_no },
       );
     } catch (notifError) {}
+
+    // 2. AUTOMATION: Sync with Shiprocket (if not already synced)
+    await this._syncOrderWithShiprocket(order.id);
 
     return order;
   }
@@ -286,7 +299,7 @@ class OrderService {
     const where = { id: orderId };
     if (userId) where.user_id = userId; // users can only see their own orders
     const order = await this._getOrderWithDetails(orderId, where);
-    if (!order) throw new Error("Order not found");
+    if (!order) throw new Error("The specified order was not found.");
     return order;
   }
 
@@ -418,7 +431,7 @@ class OrderService {
     if (!order) throw new Error("Order not found");
 
     if (!tracking_id) {
-      throw new Error("Tracking ID is required to dispatch the order");
+      throw new Error("Tracking ID is required to dispatch the order.");
     }
 
     // Allow dispatch if:
@@ -426,14 +439,14 @@ class OrderService {
     // 2. Payment method is 'cod' (Amber/Pending status is valid for COD dispatch)
     if (order.payment_status !== "paid" && order.payment_method !== "cod") {
       throw new Error(
-        "Cannot dispatch an unpaid order (only Paid or COD orders can be dispatched)",
+        "Cannot dispatch an unpaid order. Only prepaid or COD orders can be dispatched.",
       );
     }
     if (
       order.delivery_status === "shipped" ||
       order.delivery_status === "delivered"
     ) {
-      throw new Error(`Order already ${order.delivery_status}`);
+      throw new Error(`This order has already been ${order.delivery_status}.`);
     }
 
     await sequelize.transaction(async (t) => {
@@ -479,11 +492,88 @@ class OrderService {
     return await this._getOrderWithDetails(order.id);
   }
 
+  /**
+   * ADMIN: Automated Dispatch via Shiprocket
+   */
+  async dispatchOrderWithShiprocket(orderId) {
+    logger.info(`Attempting Shiprocket dispatch for Order ID: ${orderId}`);
+    const order = await Order.findByPk(orderId, {
+      include: [
+        { model: User, as: "user" },
+        { model: OrderItem, as: "items", include: [{ model: Book, as: "book" }] },
+        { model: Address, as: "address" },
+      ],
+    });
+
+    if (order) {
+      logger.info(`Order found. Address ID: ${order.address_id}, Address Object Loaded: ${!!order.address}`);
+    }
+
+    if (!order) throw new Error("The specified order was not found.");
+    if (order.order_type !== "physical_book") {
+      throw new Error("Only physical book orders can be shipped via Shiprocket.");
+    }
+    if (order.delivery_status !== "processing") {
+      throw new Error(`Cannot ship an order with status: ${order.delivery_status}`);
+    }
+
+    // 1. Create order in Shiprocket
+    const shiprocketResult = await shiprocketService.createCustomOrder(
+      order,
+      order.user,
+      order.address,
+      order.items,
+    );
+
+    // 2. Update DB with Shiprocket details
+    await sequelize.transaction(async (t) => {
+      await order.update(
+        {
+          delivery_status: "shipped",
+          shiprocket_order_id: shiprocketResult.order_id ? String(shiprocketResult.order_id) : null,
+          shiprocket_shipment_id: shiprocketResult.shipment_id ? String(shiprocketResult.shipment_id) : null,
+          tracking_id: shiprocketResult.awb_code || (shiprocketResult.shipment_id ? String(shiprocketResult.shipment_id) : null),
+          tracking_url: shiprocketResult.awb_code ? `https://shiprocket.co/tracking/${shiprocketResult.awb_code}` : null,
+          courier_name: "Shiprocket",
+        },
+        { transaction: t },
+      );
+
+      // Finalize inventory
+      for (const item of order.items) {
+        await Book.update(
+          {
+            stock: sequelize.literal(`stock - ${item.quantity}`),
+            reserved: sequelize.literal(`reserved - ${item.quantity}`),
+          },
+          { where: { id: item.book_id }, transaction: t },
+        );
+      }
+    });
+
+    // 3. Notify user
+    try {
+      await notificationService.sendToUser(
+        order.user_id,
+        "ORDER_SHIPPED",
+        "🚚 Order Dispatched!",
+        `Great news! Your order ${order.order_no} has been shipped via Shiprocket. We'll update you with the tracking details soon.`,
+        {
+          order_id: String(order.id),
+          order_no: order.order_no,
+          shiprocket_order_id: String(shiprocketResult.order_id),
+        },
+      );
+    } catch (e) {}
+
+    return await this._getOrderWithDetails(order.id);
+  }
+
   async updateOrderStatus(orderId, statusData) {
     const order = await Order.findByPk(orderId, {
       include: [{ model: OrderItem, as: "items" }],
     });
-    if (!order) throw new Error("Order not found");
+    if (!order) throw new Error("The specified order was not found.");
 
     const oldStatus = order.delivery_status;
     const newStatus = statusData.delivery_status;
@@ -581,7 +671,7 @@ class OrderService {
    */
   async deleteOrder(orderId) {
     const order = await Order.findByPk(orderId);
-    if (!order) throw new Error("Order not found");
+    if (!order) throw new Error("The specified order was not found.");
     await order.destroy();
     return true;
   }
@@ -593,21 +683,21 @@ class OrderService {
     const order = await Order.findOne({
       where: { id: orderId, user_id: userId },
     });
-    if (!order) throw new Error("Order not found");
+    if (!order) throw new Error("The specified order was not found.");
 
     if (order.refund_requested) {
-      throw new Error("Refund already requested for this order");
+      throw new Error("A refund has already been requested for this order.");
     }
 
     if (!order.delivered_at && order.payment_method === "cod") {
       throw new Error(
-        "COD orders can only be refunded after delivery. For pending orders, please use 'Cancel Order'.",
+        "COD orders can only be refunded after delivery. For pending orders, please use the 'Cancel Order' option.",
       );
     }
 
     if (!order.delivered_at && order.payment_status !== "paid") {
       throw new Error(
-        "Refund can only be requested for paid orders or after delivery.",
+        "A refund can only be requested for prepaid orders or after delivery.",
       );
     }
 
@@ -618,7 +708,7 @@ class OrderService {
 
     if (diffDays > 7) {
       throw new Error(
-        "Refund request window (7 days from delivery) has expired",
+        "The refund request window (7 days from delivery) has expired.",
       );
     }
 
@@ -649,11 +739,11 @@ class OrderService {
       include: [{ model: OrderItem, as: "items" }],
     });
 
-    if (!order) throw new Error("Order not found");
+    if (!order) throw new Error("The specified order was not found.");
 
     if (order.delivery_status !== "processing") {
       throw new Error(
-        `Cannot cancel an order that is already ${order.delivery_status}`,
+        `Cannot cancel an order that is already ${order.delivery_status}.`,
       );
     }
 
@@ -710,6 +800,118 @@ class OrderService {
 
   // ─── Private Helpers ───
 
+  async _syncOrderWithShiprocket(orderId) {
+    try {
+      const order = await Order.findByPk(orderId);
+      if (!order || order.shiprocket_order_id) return; // Skip if already synced or not found
+
+      const orderWithDetails = await this._getOrderWithDetails(order.id);
+      logger.info(`[AUTO-DISPATCH] Attempting Shiprocket sync for Order: ${order.id}`);
+      
+      const shiprocketResult = await shiprocketService.createCustomOrder(
+        orderWithDetails,
+        orderWithDetails.user,
+        orderWithDetails.address,
+        orderWithDetails.items,
+      );
+
+      if (shiprocketResult && (shiprocketResult.order_id || shiprocketResult.shipment_id)) {
+        await order.update({
+          delivery_status: "processing", // Changed from shipped to keep sequence
+          shiprocket_order_id: shiprocketResult.order_id ? String(shiprocketResult.order_id) : null,
+          shiprocket_shipment_id: shiprocketResult.shipment_id ? String(shiprocketResult.shipment_id) : null,
+          tracking_id: shiprocketResult.awb_code || (shiprocketResult.shipment_id ? String(shiprocketResult.shipment_id) : null),
+          tracking_url: (shiprocketResult.awb_code || shiprocketResult.shipment_id) ? `https://shiprocket.co/tracking/${shiprocketResult.awb_code || shiprocketResult.shipment_id}` : null,
+          courier_name: "Shiprocket",
+        });
+        logger.info(`[AUTO-DISPATCH] SUCCESS: Order ${order.id} pushed to Shiprocket.`);
+      }
+    } catch (srErr) {
+      logger.error(`[AUTO-DISPATCH] Shiprocket sync failed for Order ${orderId}:`, srErr.message);
+    }
+  }
+
+  /**
+   * ADMIN: Fetch latest status from Shiprocket and update DB
+   */
+  async refreshShiprocketStatus(orderId) {
+    const order = await Order.findByPk(orderId);
+    if (!order || !order.shiprocket_shipment_id) {
+      throw new Error("Order not synced with Shiprocket or not found.");
+    }
+
+    const trackingData = await shiprocketService.trackOrder(order.shiprocket_shipment_id);
+    if (!trackingData || !trackingData.tracking_data) return order;
+
+    // Use awb if available for better tracking
+    if (trackingData.tracking_data.track_status === 1 && trackingData.tracking_data.shipment_track && trackingData.tracking_data.shipment_track[0]) {
+      const track = trackingData.tracking_data.shipment_track[0];
+      const srStatus = track.current_status?.toLowerCase();
+      
+      let newStatus = order.delivery_status;
+      if (["shipped", "picked up", "in transit", "out for delivery"].includes(srStatus)) {
+        newStatus = "shipped";
+      } else if (srStatus === "delivered") {
+        newStatus = "delivered";
+      } else if (["cancelled", "rto", "returned"].includes(srStatus)) {
+        newStatus = srStatus === "cancelled" ? "cancelled" : "returned";
+      }
+
+      if (newStatus !== order.delivery_status) {
+        await this.updateOrderStatus(orderId, { 
+          delivery_status: newStatus,
+          tracking_id: track.awb_code || order.tracking_id
+        });
+        logger.info(`[AUTO-UPDATE] Order ${orderId} updated to ${newStatus} via Shiprocket refresh.`);
+      }
+    }
+
+    return await this._getOrderWithDetails(orderId);
+  }
+
+  /**
+   * EXTERNAL: Handle Shiprocket Webhook
+   */
+  async handleShiprocketWebhook(payload) {
+    const { order_id, shipment_id, status, awb } = payload;
+    
+    // Find order by Shiprocket shipment_id or order_id
+    const order = await Order.findOne({
+      where: {
+        [sequelize.Op.or]: [
+          { shiprocket_shipment_id: String(shipment_id) },
+          { shiprocket_order_id: String(order_id) }
+        ]
+      }
+    });
+
+    if (!order) {
+      logger.warn(`[SHIPROCKET-WEBHOOK] Order not found for ShipmentID: ${shipment_id}`);
+      return false;
+    }
+
+    const srStatus = status?.toLowerCase();
+    let newStatus = order.delivery_status;
+
+    if (["shipped", "picked up", "in transit", "out for delivery"].includes(srStatus)) {
+      newStatus = "shipped";
+    } else if (srStatus === "delivered") {
+      newStatus = "delivered";
+    } else if (["cancelled", "rto", "returned"].includes(srStatus)) {
+      newStatus = srStatus === "cancelled" ? "cancelled" : "returned";
+    }
+
+    if (newStatus !== order.delivery_status) {
+      await this.updateOrderStatus(order.id, { 
+        delivery_status: newStatus,
+        tracking_id: awb || order.tracking_id
+      });
+      logger.info(`[SHIPROCKET-WEBHOOK] Order ${order.id} updated to ${newStatus}`);
+    }
+
+    return true;
+  }
+
   async _getOrderWithDetails(orderId, extraWhere = {}) {
     return await Order.findOne({
       where: { id: orderId, ...extraWhere },
@@ -741,6 +943,10 @@ class OrderService {
           model: Coupon,
           as: "coupon",
           attributes: ["id", "code", "discount_type", "discount_value"],
+        },
+        {
+          model: Address,
+          as: "address",
         },
       ],
     });

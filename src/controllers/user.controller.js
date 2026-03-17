@@ -133,7 +133,7 @@ export const googleLogin = async (req, res, next) => {
   try {
     const { idToken } = req.body;
     if (!idToken) {
-      return sendResponse(res, 400, false, "Google ID Token is required");
+      return sendResponse(res, 400, false, "Google ID token is required.");
     }
 
     const result = await userService.googleLogin(idToken, getDeviceInfo(req));
@@ -286,7 +286,7 @@ export const resetPassword = async (req, res, next) => {
   try {
     const { token, new_password, confirm_password } = req.body;
     if (new_password !== confirm_password) {
-      return sendResponse(res, 400, false, "Passwords do not match");
+      return sendResponse(res, 400, false, "The passwords do not match.");
     }
     await userService.resetPassword(token, new_password);
     return sendResponse(res, 200, true, "Password has been reset successfully");
@@ -328,7 +328,7 @@ export const getUserById = async (req, res, next) => {
     const { id } = req.params;
     const user = await userService.getUserById(id);
     if (!user) {
-      return sendResponse(res, 404, false, "User not found");
+      return sendResponse(res, 404, false, "User not found.");
     }
     return sendResponse(res, 200, true, "User fetched successfully", user);
   } catch (error) {
@@ -349,7 +349,7 @@ export const searchUsers = async (req, res, next) => {
         res,
         200,
         true,
-        "No users found matches your search",
+        "No users found matching your search.",
         {
           users: [],
           totalItems: 0,

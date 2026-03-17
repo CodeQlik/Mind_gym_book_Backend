@@ -1,18 +1,28 @@
 import { Audiobook, Book, Category } from "../models/index.js";
-import { uploadOnCloudinary, deleteFromCloudinary } from "../config/cloudinary.js";
+import {
+  uploadOnCloudinary,
+  deleteFromCloudinary,
+} from "../config/cloudinary.js";
 
 class AudiobookService {
   async createAudiobook(data, files) {
-    const { book_id, chapter_number, chapter_title, narrator, language, status } = data;
+    const {
+      book_id,
+      chapter_number,
+      chapter_title,
+      narrator,
+      language,
+      status,
+    } = data;
 
     // Check if book exists
     const book = await Book.findByPk(book_id);
     if (!book) {
-      throw new Error("Book not found");
+      throw new Error("The specified book was not found.");
     }
 
     // Default status to true if not provided
-    const isActive = status === 'false' || status === false ? false : true;
+    const isActive = status === "false" || status === false ? false : true;
 
     // Bulk upload logic: if MaxCount > 1 or multiple files are sent
     if (files?.audio_files?.length > 0) {
@@ -22,27 +32,32 @@ class AudiobookService {
     // Single upload logic (Fallback)
     const audioFile = files?.audio_file?.[0] || files?.audio_files?.[0];
     if (!audioFile) {
-      throw new Error("Audio file is required");
+      throw new Error("An audio file is required.");
     }
 
     // Check if this chapter already exists for this book
-    const existingChapter = await Audiobook.findOne({ 
-      where: { book_id, chapter_number: chapter_number || 1 } 
+    const existingChapter = await Audiobook.findOne({
+      where: { book_id, chapter_number: chapter_number || 1 },
     });
     if (existingChapter) {
-      throw new Error(`Chapter ${chapter_number || 1} already exists for this book.`);
+      throw new Error(
+        `Chapter ${chapter_number || 1} already exists for this book.`,
+      );
     }
 
     // Handle audio file upload
-    const res = await uploadOnCloudinary(audioFile.path, "mindgymbook/audiobooks");
+    const res = await uploadOnCloudinary(
+      audioFile.path,
+      "mindgymbook/audiobooks",
+    );
     if (!res) {
-      throw new Error("Failed to upload audio file to Cloudinary");
+      throw new Error("Failed to upload the audio file to Cloudinary.");
     }
 
     return await Audiobook.create({
       book_id,
       chapter_number: chapter_number || 1,
-      chapter_title: chapter_title || audioFile.originalname.split('.')[0],
+      chapter_title: chapter_title || audioFile.originalname.split(".")[0],
       narrator,
       audio_file: { url: res.secure_url, public_id: res.public_id },
       language,
@@ -51,32 +66,54 @@ class AudiobookService {
   }
 
   async createBulkAudiobooks(data, audioFiles) {
-    const { book_id, narrator, language, status, chapter_numbers, chapter_titles } = data;
+    const {
+      book_id,
+      narrator,
+      language,
+      status,
+      chapter_numbers,
+      chapter_titles,
+    } = data;
     const results = [];
 
     // Process each file
     for (let i = 0; i < audioFiles.length; i++) {
       const file = audioFiles[i];
       try {
-        const res = await uploadOnCloudinary(file.path, "mindgymbook/audiobooks");
+        const res = await uploadOnCloudinary(
+          file.path,
+          "mindgymbook/audiobooks",
+        );
         if (res) {
           // Use provided metadata if available (for bulk), otherwise fallback
-          const customNum = Array.isArray(chapter_numbers) ? chapter_numbers[i] : chapter_numbers;
-          const customTitle = Array.isArray(chapter_titles) ? chapter_titles[i] : null;
+          const customNum = Array.isArray(chapter_numbers)
+            ? chapter_numbers[i]
+            : chapter_numbers;
+          const customTitle = Array.isArray(chapter_titles)
+            ? chapter_titles[i]
+            : null;
 
           const newAudiobook = await Audiobook.create({
             book_id,
-            chapter_number: customNum || (i + 1),
-            chapter_title: customTitle || file.originalname.split('.')[0].replace(/_/g, ' ').replace(/-/g, ' '),
+            chapter_number: customNum || i + 1,
+            chapter_title:
+              customTitle ||
+              file.originalname
+                .split(".")[0]
+                .replace(/_/g, " ")
+                .replace(/-/g, " "),
             narrator,
             audio_file: { url: res.secure_url, public_id: res.public_id },
             language,
-            status: status !== 'false' && status !== false,
+            status: status !== "false" && status !== false,
           });
           results.push(newAudiobook);
         }
       } catch (err) {
-        console.error(`Failed to upload/create chapter for file ${file.originalname}:`, err.message);
+        console.error(
+          `Failed to upload/create chapter for file ${file.originalname}:`,
+          err.message,
+        );
       }
     }
 
@@ -91,18 +128,20 @@ class AudiobookService {
     const offset = (page - 1) * limit;
     const { count, rows } = await Audiobook.findAndCountAll({
       include: [
-        { 
-          model: Book, 
-          as: "book", 
+        {
+          model: Book,
+          as: "book",
           attributes: ["id", "title", "author", "cover_image", "thumbnail"],
-          include: [{ model: Category, as: "category", attributes: ["id", "name"] }]
-        }
+          include: [
+            { model: Category, as: "category", attributes: ["id", "name"] },
+          ],
+        },
       ],
       limit,
       offset,
       order: [
         ["createdAt", "DESC"],
-        ["chapter_number", "ASC"]
+        ["chapter_number", "ASC"],
       ],
     });
 
@@ -119,7 +158,7 @@ class AudiobookService {
       include: [{ model: Book, as: "book" }],
     });
     if (!audiobook) {
-      throw new Error("Audiobook not found");
+      throw new Error("The specified audiobook was not found.");
     }
     return audiobook;
   }
@@ -135,7 +174,7 @@ class AudiobookService {
   async updateAudiobook(id, data, files) {
     const audiobook = await Audiobook.findByPk(id);
     if (!audiobook) {
-      throw new Error("Audiobook not found");
+      throw new Error("The specified audiobook was not found.");
     }
 
     // Handle new audio file if provided
@@ -144,8 +183,11 @@ class AudiobookService {
       if (audiobook.audio_file?.public_id) {
         await deleteFromCloudinary(audiobook.audio_file.public_id);
       }
-      
-      const res = await uploadOnCloudinary(files.audio_file[0].path, "mindgymbook/audiobooks");
+
+      const res = await uploadOnCloudinary(
+        files.audio_file[0].path,
+        "mindgymbook/audiobooks",
+      );
       if (res) {
         data.audio_file = { url: res.secure_url, public_id: res.public_id };
       }
@@ -157,7 +199,7 @@ class AudiobookService {
   async deleteAudiobook(id) {
     const audiobook = await Audiobook.findByPk(id);
     if (!audiobook) {
-      throw new Error("Audiobook not found");
+      throw new Error("The specified audiobook was not found.");
     }
 
     // Delete file from Cloudinary
@@ -171,7 +213,7 @@ class AudiobookService {
 
   async toggleAudiobookStatus(id) {
     const audiobook = await Audiobook.findByPk(id);
-    if (!audiobook) throw new Error("Audiobook not found");
+    if (!audiobook) throw new Error("The specified audiobook was not found.");
     audiobook.status = !audiobook.status;
     await audiobook.save();
     return audiobook;
@@ -179,15 +221,19 @@ class AudiobookService {
 
   async toggleBookAudiobooksStatus(bookId) {
     const chapters = await Audiobook.findAll({ where: { book_id: bookId } });
-    if (chapters.length === 0) throw new Error("No chapters found for this book");
+    if (chapters.length === 0)
+      throw new Error("No chapters were found for this book.");
 
     // Check if any chapter is currently active
-    const anyActive = chapters.some(c => c.status);
+    const anyActive = chapters.some((c) => c.status);
     const newStatus = !anyActive;
 
     // Update all chapters to the new status
-    await Audiobook.update({ status: newStatus }, { where: { book_id: bookId } });
-    
+    await Audiobook.update(
+      { status: newStatus },
+      { where: { book_id: bookId } },
+    );
+
     return { book_id: bookId, status: newStatus };
   }
 }
