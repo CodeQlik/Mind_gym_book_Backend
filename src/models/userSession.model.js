@@ -38,7 +38,7 @@ const UserSession = sequelize.define(
     },
     refresh_token: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true,
     },
     last_active: {
       type: DataTypes.DATE,
