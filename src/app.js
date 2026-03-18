@@ -75,31 +75,30 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(requestLogger);
 
-app.use("/api/v1/users", userRoutes);
-app.use("/api/v1/user/addresses", addressRoutes);
-app.use("/api/v1/category", categoryRoutes);
-
-app.use("/api/v1/book", bookRoutes);
-app.use("/api/v1/cart", cartRoutes);
-app.use("/api/v1/wishlist", wishlistRoutes);
-app.use("/api/v1/payment", paymentRoutes);
-app.use("/api/v1/note", noteRoutes);
-app.use("/api/v1/review", reviewRoutes);
-app.use("/api/v1/notifications", notificationRoutes);
-app.use("/api/v1/plans", planRoutes);
-app.use("/api/v1/subscriptions", subscriptionRoutes);
-app.use("/api/v1/analytics", analyticsRoutes);
-app.use("/api/v1/reading-sync", readingSyncRoutes);
-app.use("/api/v1/orders", orderRoutes);
-app.use("/api/v1/coupons", couponRoutes);
-app.use("/api/v1/support", supportRoutes);
-app.use("/api/v1/cms", cmsRoutes);
-app.use("/api/v1/blogs", blogRoutes);
-app.use("/api/v1/testimonials", testimonialRoutes);
-app.use("/api/v1/audiobook", audiobookRoutes);
-app.use("/api/v1/faqs", faqRoutes);
-app.use("/api/v1/settings", settingRoutes);
-app.use("/api/v1/contact", contactRoutes);
+app.use("/api/v1/admin/users", userRoutes);
+app.use("/api/v1/admin/user/addresses", addressRoutes);
+app.use("/api/v1/admin/category", categoryRoutes);
+app.use("/api/v1/admin/book", bookRoutes);
+app.use("/api/v1/admin/cart", cartRoutes);
+app.use("/api/v1/admin/wishlist", wishlistRoutes);
+app.use("/api/v1/admin/payment", paymentRoutes);
+app.use("/api/v1/admin/note", noteRoutes);
+app.use("/api/v1/admin/review", reviewRoutes);
+app.use("/api/v1/admin/notifications", notificationRoutes);
+app.use("/api/v1/admin/plans", planRoutes);
+app.use("/api/v1/admin/subscriptions", subscriptionRoutes);
+app.use("/api/v1/admin/analytics", analyticsRoutes);
+app.use("/api/v1/admin/reading-sync", readingSyncRoutes);
+app.use("/api/v1/admin/orders", orderRoutes);
+app.use("/api/v1/admin/coupons", couponRoutes);
+app.use("/api/v1/admin/support", supportRoutes);
+app.use("/api/v1/admin/cms", cmsRoutes);
+app.use("/api/v1/admin/blogs", blogRoutes);
+app.use("/api/v1/admin/testimonials", testimonialRoutes);
+app.use("/api/v1/admin/audiobook", audiobookRoutes);
+app.use("/api/v1/admin/faqs", faqRoutes);
+app.use("/api/v1/admin/settings", settingRoutes);
+app.use("/api/v1/admin/contact", contactRoutes);
 
 
 app.get("/", (req, res) => {

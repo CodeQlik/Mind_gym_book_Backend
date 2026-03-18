@@ -64,7 +64,7 @@ export const googleLoginValidation = Joi.object({
   }),
   fcm_token: Joi.string().optional().allow(null, ""),
   device_id: Joi.string().optional().allow(null, ""),
-  platform: Joi.string().valid("android", "ios").optional().allow(null, ""),
+  platform: Joi.string().valid("android", "ios", "web").optional().allow(null, ""),
 });
 
 export const updateProfileValidation = Joi.object({

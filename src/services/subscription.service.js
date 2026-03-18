@@ -11,7 +11,9 @@ class SubscriptionService {
 
     const plan = await Plan.findByPk(parseInt(plan_id));
     if (!plan) {
-      throw new Error("Invalid Plan: The plan could not be found with the provided ID.");
+      throw new Error(
+        "Invalid Plan: The plan could not be found with the provided ID.",
+      );
     }
 
     const duration = parseInt(plan.duration_months) || 0;

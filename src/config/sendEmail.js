@@ -10,6 +10,7 @@ const sendEmail = async (
   company,
   attachments,
 ) => {
+  console.log("Sending email to:", recipientEmail);
   let email = process.env.EMAIL_ID;
   let appPass = process.env.APP_PASS;
 
@@ -35,13 +36,14 @@ const sendEmail = async (
         pass: userAppPass,
       },
     });
-
     try {
       await testTransport.verify();
-
+      console.log("Custom SMTP working");
       email = userEmail;
       appPass = userAppPass;
-    } catch (error) {}
+    } catch (error) {
+      console.log("Custom SMTP Error:", error.message);
+    }
   }
 
   const transport = nodemailer.createTransport({
