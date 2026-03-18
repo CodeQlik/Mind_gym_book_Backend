@@ -14557,3 +14557,850 @@
 [2026-03-18T13:21:22.757Z] [INFO] GET /api/v1/analytics/dashboard 200 (498ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":200,"duration":"498ms","ip":"::1","user":26}
 [2026-03-18T13:21:25.025Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (877ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"877ms","ip":"::1","user":26}
 [2026-03-18T13:21:25.063Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (875ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"875ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.527Z] [INFO] GET /api/v1/notifications 200 (66ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"66ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.545Z] [INFO] GET /api/v1/notifications 200 (53ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"53ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.597Z] [INFO] GET /api/v1/users/profile 200 (76ms) {"method":"GET","url":"/api/v1/users/profile","status":200,"duration":"76ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.619Z] [INFO] GET /api/v1/notifications/admin/stats 200 (131ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"131ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.644Z] [INFO] GET /api/v1/notifications/admin/stats 200 (136ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"136ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.691Z] [INFO] GET /api/v1/users/profile 200 (10ms) {"method":"GET","url":"/api/v1/users/profile","status":200,"duration":"10ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.839Z] [INFO] GET /api/v1/notifications 200 (11ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"11ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.868Z] [INFO] GET /api/v1/notifications/admin/stats 200 (22ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"22ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.895Z] [INFO] GET /api/v1/notifications 200 (10ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"10ms","ip":"::1","user":26}
+[2026-03-18T13:29:40.973Z] [INFO] GET /api/v1/notifications/admin/stats 200 (41ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"41ms","ip":"::1","user":26}
+[2026-03-18T13:29:41.036Z] [INFO] GET /api/v1/notifications 200 (10ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"10ms","ip":"::1","user":26}
+[2026-03-18T13:29:41.051Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (567ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"567ms","ip":"::1","user":26}
+[2026-03-18T13:29:41.258Z] [INFO] GET /api/v1/notifications/admin/stats 200 (180ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"180ms","ip":"::1","user":26}
+[2026-03-18T13:29:41.344Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (501ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"501ms","ip":"::1","user":26}
+[2026-03-18T13:29:41.349Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (425ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"425ms","ip":"::1","user":26}
+[2026-03-18T13:29:41.351Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (677ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"677ms","ip":"::1","user":26}
+[2026-03-18T15:18:09.175Z] [ERROR] Redis Client Error {"errno":-4077,"code":"ECONNRESET","syscall":"read"}
+[2026-03-18T15:18:09.203Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:09.286Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:09.551Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:09.845Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:10.503Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:11.447Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:13.074Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:15.217Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:17.413Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:19.577Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:21.781Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:23.968Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:26.015Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:28.110Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:30.273Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:32.424Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:34.586Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:36.645Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:38.669Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:40.724Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:42.854Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:45.026Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:47.211Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:49.243Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:51.390Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:53.554Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:55.683Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:18:57.835Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:00.031Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:02.232Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:04.437Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:06.571Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:08.680Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:10.714Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:12.770Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:14.874Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:17.067Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:19.167Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:21.284Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:23.322Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:25.421Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:27.617Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:29.680Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:31.756Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:33.776Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:35.858Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:37.971Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:40.023Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:42.091Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T15:19:49.342Z] [ERROR] Redis Client Error {}
+[2026-03-18T15:19:56.501Z] [ERROR] Redis Client Error {}
+[2026-03-18T15:20:03.763Z] [ERROR] Redis Client Error {}
+[2026-03-18T15:20:06.065Z] [INFO] Redis Client Connected 
+[2026-03-18T16:01:13.995Z] [ERROR] Redis Client Error {"errno":-4077,"code":"ECONNRESET","syscall":"read"}
+[2026-03-18T16:01:19.018Z] [ERROR] Redis Client Error {}
+[2026-03-18T16:01:19.106Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:19.243Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:19.565Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:20.166Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:21.098Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:22.743Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:24.801Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:26.968Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:29.023Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:31.101Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:33.203Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:35.355Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:37.557Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:39.598Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:41.799Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:43.830Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:45.843Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:47.895Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:50.053Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:52.215Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:54.321Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:56.550Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:01:58.684Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:00.729Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:02.837Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:04.936Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:07.142Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:09.180Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:11.401Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:13.479Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:15.656Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:17.873Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:19.943Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:21.992Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:24.135Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:26.224Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:28.358Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:30.404Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:32.557Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:34.687Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:36.832Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:38.994Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:41.093Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:43.183Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:45.225Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:47.400Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:49.467Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:51.605Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:53.673Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:55.707Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:57.718Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:02:59.855Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:01.968Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:04.033Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:06.191Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:08.323Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:10.459Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:12.621Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:14.652Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:16.839Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:19.028Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:21.236Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:23.297Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:25.390Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:27.539Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:29.556Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:31.704Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:33.728Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:35.875Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:38.049Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:40.106Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:42.244Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:44.388Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:46.604Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:48.823Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:50.966Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:53.094Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:55.155Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:57.340Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:03:59.727Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:01.850Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:03.969Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:06.158Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:08.278Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:10.421Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:12.628Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:14.682Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:16.833Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:19.010Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:21.175Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:23.237Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:25.378Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:27.398Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:29.526Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:31.656Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:33.844Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:35.864Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:37.973Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:40.173Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:42.228Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:44.373Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:46.395Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:48.572Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:50.762Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:52.852Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:55.024Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:57.221Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:04:59.342Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:01.543Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:03.582Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:05.644Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:07.790Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:09.973Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:12.147Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:14.464Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:16.548Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:18.632Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:20.743Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:22.832Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:24.958Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:27.094Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:29.297Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:31.343Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:33.360Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:35.540Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:37.689Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:39.905Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:42.043Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:44.410Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:46.480Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:48.616Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:50.720Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:52.845Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:55.047Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:57.177Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:05:59.371Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:01.422Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:03.452Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:05.583Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:07.710Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:09.753Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:11.851Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:14.021Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:16.120Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:18.327Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:20.449Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:22.623Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:24.666Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:26.835Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:28.953Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:30.992Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:33.130Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:35.198Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:37.234Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:39.347Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:41.451Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:43.548Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:45.714Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:47.783Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:49.806Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:52.013Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:54.128Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:56.217Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:06:58.315Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:00.413Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:02.580Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:04.658Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:06.767Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:08.972Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:11.138Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:13.216Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:15.461Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:17.624Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:19.648Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:21.679Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:23.754Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:25.952Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:28.050Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:30.234Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:32.411Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:34.664Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:36.803Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:39.003Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:41.052Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:43.144Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:45.392Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:47.495Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:49.679Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:51.712Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:53.879Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:55.961Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:07:58.068Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:00.247Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:02.316Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:04.433Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:06.606Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:08.637Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:10.813Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:12.956Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:15.006Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:17.147Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:19.289Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:21.518Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:23.547Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:25.629Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:27.836Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:29.862Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:32.153Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:34.343Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:36.390Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:38.533Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:40.595Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:42.749Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:44.916Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:47.013Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:49.093Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:51.248Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:53.357Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:55.458Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:57.535Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:08:59.681Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:01.702Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:03.877Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:05.992Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:08.049Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:10.068Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:12.222Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:14.243Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:16.300Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:18.420Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:20.456Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:22.579Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:24.766Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:26.831Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:29.019Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:31.056Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:33.167Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:35.287Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:37.446Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:39.519Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:41.619Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:43.706Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:45.767Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:47.986Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:50.113Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:52.284Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:54.496Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:56.517Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:09:58.614Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:00.685Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:02.831Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:04.878Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:06.996Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:09.044Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:11.154Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:13.312Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:15.350Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:17.378Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:19.489Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:21.561Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:23.643Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:25.751Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:27.883Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:29.947Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:31.982Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:34.165Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:36.337Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:38.471Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:40.673Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:42.874Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:45.003Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:47.035Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:49.108Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:51.270Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:53.345Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:55.485Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:57.612Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:10:59.771Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:01.942Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:03.969Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:05.998Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:08.132Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:10.337Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:12.423Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:14.546Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:16.594Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:18.750Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:20.919Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:22.944Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:24.977Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:27.168Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:29.360Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:31.394Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:33.625Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:35.694Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:37.760Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:39.936Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:42.061Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:44.177Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:46.285Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:48.337Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:50.509Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:52.575Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:54.752Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:56.852Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:11:58.994Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:01.088Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:03.163Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:05.192Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:07.377Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:09.495Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:11.707Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:14.041Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:16.140Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:18.310Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:20.342Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:22.395Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:24.407Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:26.529Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:28.706Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:30.876Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:33.076Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:35.245Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:37.403Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:39.484Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:41.613Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:43.678Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:45.755Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:47.926Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:49.989Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:52.114Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:54.285Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:56.434Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:12:58.570Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:00.777Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:02.902Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:05.104Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:07.302Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:09.337Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:11.458Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:13.551Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:15.644Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:17.690Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:19.720Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:21.874Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:23.965Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:26.153Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:28.266Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:30.305Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:32.385Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:34.571Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:36.778Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:38.820Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:40.897Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:43.022Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:45.186Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:47.335Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:49.464Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:51.565Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:53.591Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:55.731Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:57.866Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:13:59.941Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:02.010Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:04.061Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:06.247Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:08.322Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:10.530Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:12.609Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:14.629Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:16.751Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:18.954Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:21.045Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:23.253Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:25.441Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:27.604Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:29.807Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:31.949Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:34.137Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:36.237Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:38.288Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:40.395Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:42.537Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:44.667Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:46.683Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:48.854Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:50.994Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:53.199Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:55.234Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:57.336Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:14:59.437Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:01.531Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:03.654Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:05.691Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:07.836Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:09.972Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:12.061Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:14.140Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:16.306Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:18.473Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:20.658Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:22.823Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:24.969Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:27.018Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:29.184Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:31.255Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:33.424Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:35.503Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:37.627Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:39.742Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:41.910Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:44.029Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:46.103Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:48.136Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:50.333Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:52.507Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:54.664Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:56.732Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:15:58.881Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:01.063Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:03.135Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:05.274Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:07.315Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:09.460Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:11.503Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:13.659Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:15.789Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:17.815Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:19.900Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:21.963Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:24.059Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:26.211Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:28.368Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:30.517Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:32.599Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:34.678Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:36.702Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:38.799Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:40.989Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:43.104Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:45.306Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:47.460Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:49.528Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:51.719Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:53.890Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:55.913Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:16:58.088Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:00.122Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:02.252Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:04.349Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:06.402Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:08.534Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:10.549Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:12.732Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:14.874Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:16.926Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:19.118Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:21.219Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:23.338Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:25.355Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:27.416Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:29.560Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:31.702Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:33.906Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:35.949Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:38.075Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:40.142Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:42.328Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:44.465Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:46.526Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:48.637Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:50.817Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:52.920Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:54.936Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:57.000Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:17:59.116Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:01.224Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:03.389Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:05.588Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:07.773Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:09.851Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:11.991Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:14.096Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:16.138Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:18.227Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:20.353Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:22.362Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:24.440Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:26.542Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:28.609Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:30.663Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:32.682Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:34.885Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:36.939Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:39.001Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:41.110Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:43.154Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:45.218Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:47.340Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:49.449Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:51.626Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:53.694Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:55.846Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:18:58.007Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:00.052Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:02.169Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:04.233Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:06.402Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:08.477Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:10.522Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:12.613Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:14.710Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:16.874Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:19.020Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:21.117Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:23.260Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:25.276Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:27.415Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:29.448Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:31.561Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:33.750Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:35.932Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:37.948Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:40.027Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:42.191Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:44.290Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:46.442Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:48.617Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:50.682Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:52.690Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:54.859Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:56.867Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:19:58.935Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:00.965Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:03.150Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:05.243Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:07.272Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:09.372Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:11.533Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:13.613Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:15.724Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:17.872Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:19.883Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:21.897Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:24.054Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:26.267Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:28.472Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:30.581Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:32.785Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:34.937Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:36.962Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:39.044Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:41.182Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:43.218Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:45.268Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:47.434Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:49.527Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:51.578Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:53.715Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:55.743Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:20:57.900Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:00.040Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:02.151Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:04.440Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:06.609Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:08.809Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:10.874Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:12.973Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:15.038Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:17.142Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:19.326Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:21.480Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:23.574Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:25.751Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:27.825Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:29.966Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:32.094Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:34.189Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:36.321Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:38.395Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:40.565Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:42.760Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:44.848Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:47.020Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:49.069Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:51.090Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:53.187Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:55.389Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:21:57.502Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-18T16:44:58.147Z] [INFO] Redis Client Connected 
+[2026-03-18T16:52:16.214Z] [ERROR] GET /api/v1/book/29 {"message":"No book was found with ID: 29.","stack":"Error: No book was found with ID: 29.\n    at BookService.getBookById (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/book.service.js:394:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/book.controller.js:225:16","body":{},"params":{},"query":{},"user":55}
+[2026-03-18T16:52:16.230Z] [WARN] GET /api/v1/book/29 500 (52ms) {"method":"GET","url":"/api/v1/book/29","status":500,"duration":"52ms","ip":"::1","user":55}
+[2026-03-18T16:55:00.247Z] [INFO] GET /api/v1/notifications 200 (167ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"167ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.255Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 200 (85ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":200,"duration":"85ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.278Z] [INFO] GET /api/v1/users/profile 200 (73ms) {"method":"GET","url":"/api/v1/users/profile","status":200,"duration":"73ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.294Z] [INFO] GET /api/v1/notifications/admin/stats 200 (202ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"202ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.339Z] [INFO] GET /api/v1/analytics/dashboard 200 (215ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":200,"duration":"215ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.459Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (25ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"25ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.480Z] [INFO] GET /api/v1/notifications 304 (60ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"60ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.548Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (60ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"60ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.574Z] [INFO] GET /api/v1/notifications 304 (70ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"70ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.648Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (54ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"54ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.665Z] [INFO] GET /api/v1/notifications/admin/stats 304 (253ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"253ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.713Z] [INFO] GET /api/v1/notifications 304 (87ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"87ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.724Z] [INFO] GET /api/v1/analytics/dashboard 304 (308ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"308ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.778Z] [INFO] GET /api/v1/analytics/dashboard 304 (45ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"45ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.782Z] [INFO] GET /api/v1/notifications/admin/stats 304 (53ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"53ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.845Z] [INFO] GET /api/v1/notifications/admin/stats 304 (51ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"51ms","ip":"::1","user":26}
+[2026-03-18T16:55:00.855Z] [INFO] GET /api/v1/analytics/dashboard 304 (67ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"67ms","ip":"::1","user":26}
+[2026-03-18T16:55:03.988Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (995ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"995ms","ip":"::1","user":26}
+[2026-03-18T16:55:04.513Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (518ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"518ms","ip":"::1","user":26}
+[2026-03-18T16:55:05.694Z] [INFO] GET /api/v1/book/the-geforce-rtxo 200 (13ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":200,"duration":"13ms","ip":"::1","user":26}
+[2026-03-18T16:55:05.711Z] [INFO] GET /api/v1/book/the-geforce-rtxo 304 (13ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":304,"duration":"13ms","ip":"::1","user":26}
+[2026-03-18T16:56:27.719Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (737ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"737ms","ip":"::1","user":26}
+[2026-03-18T16:56:28.015Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (289ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"289ms","ip":"::1","user":26}
+[2026-03-18T16:58:14.321Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (494ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"494ms","ip":"::1","user":26}
+[2026-03-18T16:58:14.644Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (312ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"312ms","ip":"::1","user":26}
+[2026-03-18T16:58:15.427Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 200 (10ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":200,"duration":"10ms","ip":"::1","user":26}
+[2026-03-18T16:58:15.472Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (18ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"18ms","ip":"::1","user":26}
+[2026-03-18T16:58:16.031Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (48ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"48ms","ip":"::1","user":26}
+[2026-03-18T16:59:23.677Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (657ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"657ms","ip":"::1","user":26}
+[2026-03-18T16:59:23.719Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (657ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"657ms","ip":"::1","user":26}
+[2026-03-18T17:01:38.531Z] [INFO] GET /api/v1/users/profile 200 (13ms) {"method":"GET","url":"/api/v1/users/profile","status":200,"duration":"13ms","ip":"::1","user":26}
+[2026-03-18T17:01:38.792Z] [INFO] GET /api/v1/notifications 200 (49ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"49ms","ip":"::1","user":26}
+[2026-03-18T17:01:38.840Z] [INFO] GET /api/v1/notifications 200 (32ms) {"method":"GET","url":"/api/v1/notifications","status":200,"duration":"32ms","ip":"::1","user":26}
+[2026-03-18T17:01:38.855Z] [INFO] GET /api/v1/notifications/admin/stats 200 (97ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"97ms","ip":"::1","user":26}
+[2026-03-18T17:01:38.863Z] [INFO] GET /api/v1/notifications/admin/stats 200 (49ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"49ms","ip":"::1","user":26}
+[2026-03-18T17:01:39.381Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (546ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"546ms","ip":"::1","user":26}
+[2026-03-18T17:01:39.389Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (571ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"571ms","ip":"::1","user":26}
+[2026-03-18T17:07:44.192Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 200 (21ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":200,"duration":"21ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:07:44.203Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 304 (8ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":304,"duration":"8ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:07:49.973Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (597ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"597ms","ip":"::1","user":26}
+[2026-03-18T17:07:50.294Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (303ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"303ms","ip":"::1","user":26}
+[2026-03-18T17:08:31.277Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 304 (17ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":304,"duration":"17ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:08:31.296Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 304 (12ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":304,"duration":"12ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:08:33.922Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (651ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"651ms","ip":"::1","user":26}
+[2026-03-18T17:08:34.223Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (294ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"294ms","ip":"::1","user":26}
+[2026-03-18T17:10:01.284Z] [INFO] GET /api/v1/book/the-geforce-rtxo 304 (15ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":304,"duration":"15ms","ip":"::1","user":26}
+[2026-03-18T17:10:01.303Z] [INFO] GET /api/v1/book/the-geforce-rtxo 304 (14ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":304,"duration":"14ms","ip":"::1","user":26}
+[2026-03-18T17:11:56.083Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (592ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"592ms","ip":"::1","user":26}
+[2026-03-18T17:11:56.379Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (285ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"285ms","ip":"::1","user":26}
+[2026-03-18T17:12:13.510Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (541ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"541ms","ip":"::1","user":26}
+[2026-03-18T17:12:13.846Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (319ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"319ms","ip":"::1","user":26}
+[2026-03-18T17:12:14.425Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (278ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"278ms","ip":"::1","user":26}
+[2026-03-18T17:12:14.722Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (285ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"285ms","ip":"::1","user":26}
+[2026-03-18T17:12:39.541Z] [ERROR] GET /api/v1/book/a-tale-of-two-cities {"message":"No book was found with the slug: a-tale-of-two-cities.","stack":"Error: No book was found with the slug: a-tale-of-two-cities.\n    at BookService.getBookBySlug (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/book.service.js:369:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/book.controller.js:248:16","body":{},"params":{},"query":{},"user":26}
+[2026-03-18T17:12:39.548Z] [WARN] GET /api/v1/book/a-tale-of-two-cities 500 (23ms) {"method":"GET","url":"/api/v1/book/a-tale-of-two-cities","status":500,"duration":"23ms","ip":"::1","user":26}
+[2026-03-18T17:12:39.602Z] [ERROR] GET /api/v1/book/a-tale-of-two-cities {"message":"No book was found with the slug: a-tale-of-two-cities.","stack":"Error: No book was found with the slug: a-tale-of-two-cities.\n    at BookService.getBookBySlug (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/book.service.js:369:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/book.controller.js:248:16","body":{},"params":{},"query":{},"user":26}
+[2026-03-18T17:12:39.605Z] [WARN] GET /api/v1/book/a-tale-of-two-cities 500 (40ms) {"method":"GET","url":"/api/v1/book/a-tale-of-two-cities","status":500,"duration":"40ms","ip":"::1","user":26}
+[2026-03-18T17:12:49.848Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (587ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"587ms","ip":"::1","user":26}
+[2026-03-18T17:12:50.148Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (293ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"293ms","ip":"::1","user":26}
+[2026-03-18T17:12:50.805Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (341ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"341ms","ip":"::1","user":26}
+[2026-03-18T17:12:51.133Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (315ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"315ms","ip":"::1","user":26}
+[2026-03-18T17:12:52.677Z] [ERROR] GET /api/v1/book/a-tale-of-two-cities {"message":"No book was found with the slug: a-tale-of-two-cities.","stack":"Error: No book was found with the slug: a-tale-of-two-cities.\n    at BookService.getBookBySlug (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/book.service.js:369:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/book.controller.js:248:16","body":{},"params":{},"query":{},"user":26}
+[2026-03-18T17:12:52.688Z] [WARN] GET /api/v1/book/a-tale-of-two-cities 500 (32ms) {"method":"GET","url":"/api/v1/book/a-tale-of-two-cities","status":500,"duration":"32ms","ip":"::1","user":26}
+[2026-03-18T17:12:52.733Z] [ERROR] GET /api/v1/book/a-tale-of-two-cities {"message":"No book was found with the slug: a-tale-of-two-cities.","stack":"Error: No book was found with the slug: a-tale-of-two-cities.\n    at BookService.getBookBySlug (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/book.service.js:369:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/book.controller.js:248:16","body":{},"params":{},"query":{},"user":26}
+[2026-03-18T17:12:52.738Z] [WARN] GET /api/v1/book/a-tale-of-two-cities 500 (25ms) {"method":"GET","url":"/api/v1/book/a-tale-of-two-cities","status":500,"duration":"25ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.578Z] [INFO] POST /api/v1/users/login 200 (129ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"129ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:16:00.636Z] [INFO] GET /api/v1/users/profile 304 (16ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"16ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.748Z] [INFO] GET /api/v1/notifications 304 (33ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"33ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.756Z] [INFO] GET /api/v1/users/profile 304 (28ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"28ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.759Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (27ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"27ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.783Z] [INFO] GET /api/v1/notifications 304 (18ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"18ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.827Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (38ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"38ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.845Z] [INFO] GET /api/v1/notifications/admin/stats 304 (123ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"123ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.848Z] [INFO] GET /api/v1/notifications 304 (31ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"31ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.888Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (38ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"38ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.892Z] [INFO] GET /api/v1/analytics/dashboard 304 (167ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"167ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.950Z] [INFO] GET /api/v1/notifications 304 (63ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"63ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.977Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (64ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"64ms","ip":"::1","user":26}
+[2026-03-18T17:16:00.998Z] [INFO] GET /api/v1/notifications/admin/stats 304 (132ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"132ms","ip":"::1","user":26}
+[2026-03-18T17:16:01.039Z] [INFO] GET /api/v1/analytics/dashboard 304 (117ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"117ms","ip":"::1","user":26}
+[2026-03-18T17:16:01.067Z] [INFO] GET /api/v1/notifications/admin/stats 304 (52ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"52ms","ip":"::1","user":26}
+[2026-03-18T17:16:01.096Z] [INFO] GET /api/v1/analytics/dashboard 304 (53ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"53ms","ip":"::1","user":26}
+[2026-03-18T17:16:01.112Z] [INFO] GET /api/v1/notifications/admin/stats 304 (33ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"33ms","ip":"::1","user":26}
+[2026-03-18T17:16:01.164Z] [INFO] GET /api/v1/analytics/dashboard 304 (66ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"66ms","ip":"::1","user":26}
+[2026-03-18T17:16:07.148Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (593ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"593ms","ip":"::1","user":26}
+[2026-03-18T17:16:07.464Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (301ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"301ms","ip":"::1","user":26}
+[2026-03-18T17:16:09.794Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 304 (12ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":304,"duration":"12ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:16:09.820Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 304 (11ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":304,"duration":"11ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:16:12.686Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (644ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"644ms","ip":"::1","user":26}
+[2026-03-18T17:16:13.073Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (379ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"379ms","ip":"::1","user":26}
+[2026-03-18T17:16:14.940Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (11ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"11ms","ip":"::1","user":26}
+[2026-03-18T17:16:14.968Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (10ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"10ms","ip":"::1","user":26}
+[2026-03-18T17:16:14.984Z] [INFO] GET /api/v1/analytics/dashboard 304 (57ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"57ms","ip":"::1","user":26}
+[2026-03-18T17:16:15.033Z] [INFO] GET /api/v1/analytics/dashboard 304 (31ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"31ms","ip":"::1","user":26}
+[2026-03-18T17:16:26.519Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (550ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"550ms","ip":"::1","user":26}
+[2026-03-18T17:16:26.831Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (290ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"290ms","ip":"::1","user":26}
+[2026-03-18T17:20:31.768Z] [INFO] POST /api/v1/users/login 200 (144ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"144ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:20:31.844Z] [INFO] GET /api/v1/users/profile 304 (6ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"6ms","ip":"::1","user":26}
+[2026-03-18T17:20:31.946Z] [INFO] GET /api/v1/notifications 304 (43ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"43ms","ip":"::1","user":26}
+[2026-03-18T17:20:31.965Z] [INFO] GET /api/v1/users/profile 304 (37ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"37ms","ip":"::1","user":26}
+[2026-03-18T17:20:31.976Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (41ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"41ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.029Z] [INFO] GET /api/v1/notifications/admin/stats 304 (120ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"120ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.043Z] [INFO] GET /api/v1/notifications 304 (66ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"66ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.126Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (62ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"62ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.147Z] [INFO] GET /api/v1/analytics/dashboard 304 (218ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"218ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.192Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (16ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"16ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.197Z] [INFO] GET /api/v1/notifications 304 (115ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"115ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.227Z] [INFO] GET /api/v1/notifications/admin/stats 304 (145ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"145ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.262Z] [INFO] GET /api/v1/notifications 304 (30ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"30ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.272Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (37ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"37ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.295Z] [INFO] GET /api/v1/analytics/dashboard 304 (120ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"120ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.322Z] [INFO] GET /api/v1/notifications/admin/stats 304 (67ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"67ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.413Z] [INFO] GET /api/v1/analytics/dashboard 304 (91ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"91ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.472Z] [INFO] GET /api/v1/notifications/admin/stats 304 (109ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"109ms","ip":"::1","user":26}
+[2026-03-18T17:20:32.577Z] [INFO] GET /api/v1/analytics/dashboard 304 (161ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"161ms","ip":"::1","user":26}
+[2026-03-18T17:20:39.015Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (524ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"524ms","ip":"::1","user":26}
+[2026-03-18T17:20:39.304Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (279ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"279ms","ip":"::1","user":26}
+[2026-03-18T17:21:19.100Z] [INFO] Redis Client Connected 
+[2026-03-18T17:21:38.097Z] [INFO] Redis Client Connected 
+[2026-03-18T17:22:26.792Z] [INFO] GET /api/v1/notifications 304 (69ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"69ms","ip":"::1","user":26}
+[2026-03-18T17:22:26.797Z] [INFO] GET /api/v1/users/profile 304 (59ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"59ms","ip":"::1","user":26}
+[2026-03-18T17:22:26.873Z] [INFO] GET /api/v1/notifications 304 (50ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"50ms","ip":"::1","user":26}
+[2026-03-18T17:22:26.885Z] [INFO] GET /api/v1/users/profile 304 (57ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"57ms","ip":"::1","user":26}
+[2026-03-18T17:22:26.949Z] [INFO] GET /api/v1/notifications 304 (23ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"23ms","ip":"::1","user":26}
+[2026-03-18T17:22:26.997Z] [INFO] GET /api/v1/notifications/admin/stats 304 (297ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"297ms","ip":"::1","user":26}
+[2026-03-18T17:22:27.027Z] [INFO] GET /api/v1/notifications 304 (33ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"33ms","ip":"::1","user":26}
+[2026-03-18T17:22:27.067Z] [INFO] GET /api/v1/notifications 304 (33ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"33ms","ip":"::1","user":26}
+[2026-03-18T17:22:27.101Z] [INFO] GET /api/v1/notifications/admin/stats 304 (70ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"70ms","ip":"::1","user":26}
+[2026-03-18T17:22:27.159Z] [INFO] GET /api/v1/notifications/admin/stats 304 (41ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"41ms","ip":"::1","user":26}
+[2026-03-18T17:22:27.229Z] [INFO] GET /api/v1/notifications/admin/stats 304 (54ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"54ms","ip":"::1","user":26}
+[2026-03-18T17:22:27.308Z] [INFO] GET /api/v1/notifications/admin/stats 304 (73ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"73ms","ip":"::1","user":26}
+[2026-03-18T17:22:27.835Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (1102ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"1102ms","ip":"::1","user":26}
+[2026-03-18T17:22:28.474Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (632ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"632ms","ip":"::1","user":26}
+[2026-03-18T17:22:28.784Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (307ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"307ms","ip":"::1","user":26}
+[2026-03-18T17:22:29.104Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (300ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"300ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.219Z] [INFO] GET /api/v1/users/profile 304 (22ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"22ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.229Z] [INFO] GET /api/v1/notifications 304 (53ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"53ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.390Z] [INFO] GET /api/v1/notifications 304 (37ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"37ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.409Z] [INFO] GET /api/v1/users/profile 304 (165ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"165ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.418Z] [INFO] GET /api/v1/notifications/admin/stats 304 (238ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"238ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.505Z] [INFO] GET /api/v1/notifications 304 (60ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"60ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.537Z] [INFO] GET /api/v1/notifications 304 (27ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"27ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.558Z] [INFO] GET /api/v1/notifications/admin/stats 304 (118ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"118ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.588Z] [INFO] GET /api/v1/notifications 304 (39ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"39ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.636Z] [INFO] GET /api/v1/notifications/admin/stats 304 (63ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"63ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.672Z] [INFO] GET /api/v1/notifications/admin/stats 304 (31ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"31ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.701Z] [INFO] GET /api/v1/notifications/admin/stats 304 (26ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"26ms","ip":"::1","user":26}
+[2026-03-18T17:22:47.849Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (663ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"663ms","ip":"::1","user":26}
+[2026-03-18T17:22:48.161Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (297ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"297ms","ip":"::1","user":26}
+[2026-03-18T17:22:48.485Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (310ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"310ms","ip":"::1","user":26}
+[2026-03-18T17:22:48.822Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (330ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"330ms","ip":"::1","user":26}
+[2026-03-18T17:22:57.862Z] [INFO] GET /api/v1/book/the-geforce-rtxo 200 (25ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":200,"duration":"25ms","ip":"::1","user":26}
+[2026-03-18T17:22:57.887Z] [INFO] GET /api/v1/book/the-geforce-rtxo 304 (20ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":304,"duration":"20ms","ip":"::1","user":26}
+[2026-03-18T17:23:29.107Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (622ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"622ms","ip":"::1","user":26}
+[2026-03-18T17:23:29.476Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (364ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"364ms","ip":"::1","user":26}
+[2026-03-18T17:23:30.647Z] [INFO] GET /api/v1/category/all 200 (11ms) {"method":"GET","url":"/api/v1/category/all","status":200,"duration":"11ms","ip":"::1","user":26}
+[2026-03-18T17:23:30.720Z] [INFO] GET /api/v1/category/all 304 (48ms) {"method":"GET","url":"/api/v1/category/all","status":304,"duration":"48ms","ip":"::1","user":26}
+[2026-03-18T17:24:38.740Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 200 (27ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":200,"duration":"27ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:24:38.847Z] [INFO] GET /api/v1/audiobook/all?page=1&limit=10 304 (27ms) {"method":"GET","url":"/api/v1/audiobook/all?page=1&limit=10","status":304,"duration":"27ms","ip":"::1","user":"Guest"}
+[2026-03-18T17:24:40.754Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (541ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"541ms","ip":"::1","user":26}
+[2026-03-18T17:24:41.024Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (261ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"261ms","ip":"::1","user":26}
+[2026-03-18T17:29:37.647Z] [INFO] Redis Client Connected 
+[2026-03-18T17:30:04.235Z] [INFO] Redis Client Connected 
+[2026-03-18T17:30:49.706Z] [INFO] GET /api/v1/category/all 304 (28ms) {"method":"GET","url":"/api/v1/category/all","status":304,"duration":"28ms","ip":"::1","user":26}
+[2026-03-18T17:30:49.732Z] [INFO] GET /api/v1/category/all 304 (11ms) {"method":"GET","url":"/api/v1/category/all","status":304,"duration":"11ms","ip":"::1","user":26}
+[2026-03-18T17:31:08.307Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (632ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"632ms","ip":"::1","user":26}
+[2026-03-18T17:31:08.623Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (292ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"292ms","ip":"::1","user":26}
+[2026-03-18T17:31:10.489Z] [INFO] GET /api/v1/category/all 304 (20ms) {"method":"GET","url":"/api/v1/category/all","status":304,"duration":"20ms","ip":"::1","user":26}
+[2026-03-18T17:31:10.513Z] [INFO] GET /api/v1/book/the-geforce-rtxo 200 (39ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":200,"duration":"39ms","ip":"::1","user":26}
+[2026-03-18T17:31:10.553Z] [INFO] GET /api/v1/category/all 304 (47ms) {"method":"GET","url":"/api/v1/category/all","status":304,"duration":"47ms","ip":"::1","user":26}
+[2026-03-18T17:31:10.558Z] [INFO] GET /api/v1/book/the-geforce-rtxo 304 (31ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":304,"duration":"31ms","ip":"::1","user":26}
+[2026-03-18T17:31:21.035Z] [INFO] PUT /api/v1/book/update/93 200 (67ms) {"method":"PUT","url":"/api/v1/book/update/93","status":200,"duration":"67ms","ip":"::1","user":26}
+[2026-03-18T17:31:21.817Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (654ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"654ms","ip":"::1","user":26}
+[2026-03-18T17:31:22.869Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (1050ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"1050ms","ip":"::1","user":26}
+[2026-03-18T17:31:24.325Z] [INFO] GET /api/v1/book/the-geforce-rtxo 200 (9ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":200,"duration":"9ms","ip":"::1","user":26}
+[2026-03-18T17:31:24.349Z] [INFO] GET /api/v1/book/the-geforce-rtxo 304 (16ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":304,"duration":"16ms","ip":"::1","user":26}
+[2026-03-18T17:32:23.143Z] [INFO] GET /api/v1/book/93 200 (15ms) {"method":"GET","url":"/api/v1/book/93","status":200,"duration":"15ms","ip":"::1","user":55}
+[2026-03-18T17:34:07.440Z] [INFO] Redis Client Connected 
+[2026-03-18T17:34:18.945Z] [INFO] GET /api/v1/book/93 200 (27ms) {"method":"GET","url":"/api/v1/book/93","status":200,"duration":"27ms","ip":"::1","user":55}
+[2026-03-18T17:34:53.759Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (660ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"660ms","ip":"::1","user":26}
+[2026-03-18T17:34:54.071Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (294ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"294ms","ip":"::1","user":26}
+[2026-03-18T17:34:55.566Z] [INFO] GET /api/v1/book/the-geforce-rtxo 304 (17ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":304,"duration":"17ms","ip":"::1","user":26}
+[2026-03-18T17:34:55.665Z] [INFO] GET /api/v1/book/the-geforce-rtxo 304 (72ms) {"method":"GET","url":"/api/v1/book/the-geforce-rtxo","status":304,"duration":"72ms","ip":"::1","user":26}

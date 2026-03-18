@@ -4,8 +4,7 @@ import logger from "./logger.js";
 const DEFAULT_TTL = process.env.REDIS_TTL || 3600;
 
 const getPrefix = () => {
-  const baseUrl = process.env.BASE_URL;
-  return baseUrl.includes("localhost") ? "local:" : "live:";
+  return (process.env.NODE_ENV === "production" || process.env.NODE_ENV === "live") ? "live:" : "local:";
 };
 
 export const setCache = async (key, data, ttl = DEFAULT_TTL) => {

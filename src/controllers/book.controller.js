@@ -39,6 +39,13 @@ const cleanBookData = (
       ? { id: data.category.id, name: data.category.name }
       : null,
     images: data.images || [],
+    dimensions: data.dimensions || "",
+    weight: data.weight || "",
+    is_premium: data.is_premium || false,
+    stock: data.stock || 0,
+    condition: data.condition || "good",
+    published_date: data.published_date || "",
+    isbn: data.isbn || "",
   };
 
   // 1. Handle Audio Book structure (Middle)
@@ -187,8 +194,7 @@ export const getAllBooks = asyncHandler(async (req, res) => {
     books[catName] = cleanedBooks;
   });
 
-  // Clear cache for books to reflect changes immediately
-  await clearCachePattern("books:*");
+  // Cache handles by service
 
   return sendResponse(res, 200, true, "Books fetched successfully", {
     totalItems: result.totalItems,
