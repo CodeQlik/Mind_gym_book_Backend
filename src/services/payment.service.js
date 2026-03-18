@@ -11,6 +11,7 @@ import {
 } from "../models/index.js";
 import orderService from "./order.service.js";
 import { redisClient } from "../config/redis.js";
+import logger from "../utils/logger.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -161,16 +162,21 @@ class PaymentService {
       .digest("hex");
 
     const isSignatureValid = expectedSignature === razorpay_signature;
+    const isTestMode = process.env.RAZORPAY_KEY_ID?.startsWith('rzp_test_');
+    const isDevBypass = isTestMode && razorpay_signature === 'test_signature';
 
-    // DEV ONLY: Allow 'test_signature' to bypass for Postman testing
-    if (!isSignatureValid && razorpay_signature !== "test_signature") {
+    if (!isSignatureValid && !isDevBypass) {
       throw new Error("Invalid payment signature - potential fraud attempt");
     }
-    if (razorpay_signature === "test_signature") {
-      console.warn(
-        " [PAYMENT]: Signature verification bypassed using 'test_signature'",
-      );
+
+    if (isDevBypass) {
+      logger.warn(" [PAYMENT]: Signature verification bypassed using 'test_signature' (RAZORPAY TEST MODE)");
     }
+
+    /**
+     * NOTE: For high-volume production systems, consider using Razorpay Webhooks 
+     * in addition to this direct verification for improved reliability.
+     */
 
     // 2. Find payment record
     const payment = await Payment.findOne({
@@ -357,6 +363,68 @@ class PaymentService {
       currentPage: page,
       payments: rows,
     };
+  }
+
+  // ─── ADMIN: Process actual refund via Razorpay
+  async processRefund(orderId) {
+    const order = await Order.findByPk(orderId);
+    if (!order) throw new Error("The specified order was not found.");
+
+    if (!order.refund_requested) {
+      throw new Error("No refund request has been made for this order.");
+    }
+
+    if (order.payment_status === "refunded") {
+      throw new Error("This order has already been refunded.");
+    }
+
+    // Find the successful payment record for this order
+    const payment = await Payment.findOne({
+      where: {
+        order_id: order.razorpay_order_id,
+        status: "captured",
+      },
+    });
+
+    if (!payment || !payment.payment_id) {
+      throw new Error(
+        "No successful transaction record found to process the refund.",
+      );
+    }
+
+    // Call Razorpay Refund API
+    // Note: Razorpay uses paise (amt * 100)
+    const refund = await razorpay.payments.refund(payment.payment_id, {
+      amount: Math.round(parseFloat(order.total_amount) * 100),
+      notes: {
+        reason: order.refund_reason || "Refund processed by admin",
+        order_no: order.order_no,
+      },
+    });
+
+    // Update DB
+    await payment.update({ status: "refunded" });
+    await order.update({
+      refund_requested: false,
+      payment_status: "refunded",
+    });
+
+    // Notify user about refund success
+    try {
+      const notificationService = (await import("./notification.service.js"))
+        .default;
+      await notificationService.sendToUser(
+        order.user_id,
+        "REFUND_PROCESSED",
+        "💰 Refund Processed!",
+        `Your refund for order ${order.order_no} has been processed successfully. The amount will be credited to your original payment source within 5-7 working days.`,
+        { order_id: String(order.id), order_no: order.order_no },
+      );
+    } catch (notifErr) {
+      console.error("Failed to send refund success notification:", notifErr);
+    }
+
+    return refund;
   }
 }
 

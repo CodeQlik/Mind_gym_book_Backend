@@ -64,7 +64,7 @@ class UserService {
       "SELECT id FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
     );
-    if (existing) throw new Error("User with this email already exists");
+    if (existing) throw new Error("An account with this email address already exists.");
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const profileData = JSON.stringify({
@@ -123,7 +123,7 @@ class UserService {
       "SELECT id FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
     );
-    if (existing) throw new Error("Email is already registered. Please login.");
+    if (existing) throw new Error("This email address is already registered. Please log in to your account.");
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -148,10 +148,10 @@ class UserService {
       "SELECT * FROM email_verifications WHERE email = :email AND otp = :otp LIMIT 1",
       { replacements: { email, otp }, type: QueryTypes.SELECT },
     );
-    if (!record) throw new Error("Invalid OTP");
+    if (!record) throw new Error("The OTP entered is invalid.");
 
     const expiryTime = new Date(record.updated_at).getTime() + 2 * 60 * 1000;
-    if (Date.now() > expiryTime) throw new Error("OTP has expired.");
+    if (Date.now() > expiryTime) throw new Error("The OTP has expired. Please request a new one.");
 
     const verificationToken = jwt.sign(
       { email, type: "email_verified" },
@@ -164,13 +164,13 @@ class UserService {
   //  Register User (Session Aware)
   async registerUser(data, files, verificationToken, deviceInfo = {}) {
     const { device_id } = deviceInfo;
-    if (!device_id) throw new Error("device_id is required for registration");
+    if (!device_id) throw new Error("Device ID is required for registration.");
 
     const { email, password, name, phone, additional_phone, user_type } = data;
 
     if (!verificationToken) {
       throw new Error(
-        "Email verification required. Please verify your email first.",
+        "Email verification required. Please verify your email to proceed.",
       );
     }
 
@@ -181,16 +181,16 @@ class UserService {
         process.env.JWT_SECRET || "secret",
       );
       if (decoded.type !== "email_verified")
-        throw new Error("Invalid verification token.");
+        throw new Error("The verification token is invalid.");
       verifiedEmail = decoded.email;
     } catch {
       throw new Error(
-        "Invalid or expired verification token. Please verify your email again.",
+        "The verification token is invalid or has expired. Please verify your email again.",
       );
     }
 
     if (verifiedEmail !== email) {
-      throw new Error("Email mismatch. Please use the verified email address.");
+      throw new Error("Email address mismatch. Please use the email address that was verified.");
     }
 
     // Check email duplicate
@@ -198,7 +198,7 @@ class UserService {
       "SELECT id FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
     );
-    if (existingEmail) throw new Error("Email is already registered.");
+    if (existingEmail) throw new Error("This email address is already registered.");
 
     // Check phone duplicate
     if (phone) {
@@ -207,7 +207,7 @@ class UserService {
         { replacements: { phone }, type: QueryTypes.SELECT },
       );
       if (existingPhone)
-        throw new Error("Phone number is already in use by another account.");
+        throw new Error("This phone number is already associated with another account.");
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -304,7 +304,7 @@ class UserService {
 
     if (sessions.length >= deviceLimit) {
       throw new Error(
-        `Device limit reached. Your plan allows max ${deviceLimit} device(s). Please log out from other devices.`,
+        `Device limit reached. Your subscription plan allows a maximum of ${deviceLimit} device(s). Please log out from another device to continue.`,
       );
     }
 
@@ -367,18 +367,18 @@ class UserService {
   // ─── Login
   async login(email, password, deviceInfo = {}) {
     const { device_id } = deviceInfo;
-    if (!device_id) throw new Error("device_id is required for login");
+    if (!device_id) throw new Error("Device ID is required for login.");
 
     const [user] = await sequelize.query(
       "SELECT * FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
     );
-    if (!user) throw new Error("Invalid email or password");
+    if (!user) throw new Error("Invalid email address or password.");
     if (!user.is_active)
-      throw new Error("Your account is deactivated. Please contact support.");
+      throw new Error("Your account has been deactivated. Please contact support for assistance.");
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) throw new Error("Invalid email or password");
+    if (!isMatch) throw new Error("Invalid email address or password.");
 
     // Enforce Device Limit
     await this.enforceSessionLimit(user.id, device_id);
@@ -413,7 +413,7 @@ class UserService {
   // ─── Google Login
   async googleLogin(idToken, deviceInfo = {}) {
     const { device_id } = deviceInfo;
-    if (!device_id) throw new Error("device_id is required for login");
+    if (!device_id) throw new Error("Device ID is required for login.");
 
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
     const ticket = await client.verifyIdToken({
@@ -536,7 +536,7 @@ class UserService {
       );
 
       if (!session) {
-        throw new Error("Invalid or expired session. Please login again.");
+        throw new Error("Invalid or expired session. Please log in again.");
       }
 
       // 2. Validate user status
@@ -545,9 +545,9 @@ class UserService {
         { replacements: { id: decodedToken.id }, type: QueryTypes.SELECT },
       );
 
-      if (!user) throw new Error("User not found.");
+      if (!user) throw new Error("User account not found.");
       if (!user.is_active)
-        throw new Error("Your account is deactivated. Please contact support.");
+        throw new Error("Your account has been deactivated. Please contact support for assistance.");
 
       // 3. Generate new tokens
       const accessToken = generateAccessToken(user.id);
@@ -573,7 +573,7 @@ class UserService {
 
       return { accessToken, refreshToken: newRefreshToken };
     } catch (error) {
-      throw new Error(error?.message || "Invalid refresh token");
+      throw new Error(error?.message || "The refresh token is invalid.");
     }
   }
 
@@ -688,7 +688,7 @@ class UserService {
         "SELECT id FROM users WHERE email = :email AND id != :id LIMIT 1",
         { replacements: { email, id: userId }, type: QueryTypes.SELECT },
       );
-      if (conflict) throw new Error("Email is already in use.");
+      if (conflict) throw new Error("This email address is already in use by another account.");
     }
 
     // Handle profile image
@@ -780,16 +780,16 @@ class UserService {
   async changePassword(userId, data) {
     const { old_password, new_password, confirm_password } = data;
     if (new_password !== confirm_password)
-      throw new Error("Passwords do not match");
+      throw new Error("The passwords do not match.");
 
     const [user] = await sequelize.query(
       "SELECT id, password FROM users WHERE id = :id LIMIT 1",
       { replacements: { id: userId }, type: QueryTypes.SELECT },
     );
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("User account not found.");
 
     const isMatch = await bcrypt.compare(old_password, user.password);
-    if (!isMatch) throw new Error("Invalid old password");
+    if (!isMatch) throw new Error("The current password you entered is incorrect.");
 
     const hashedPassword = await bcrypt.hash(new_password, 10);
     await sequelize.query(
@@ -808,7 +808,7 @@ class UserService {
       "SELECT id, email FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
     );
-    if (!user) throw new Error("No account found with this email");
+    if (!user) throw new Error("No account was found with this email address.");
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -861,11 +861,11 @@ class UserService {
       "SELECT * FROM email_verifications WHERE email = :email AND otp = :otp LIMIT 1",
       { replacements: { email, otp }, type: QueryTypes.SELECT },
     );
-    if (!record) throw new Error("Invalid OTP. Please check and try again.");
+    if (!record) throw new Error("The OTP entered is invalid. Please check and try again.");
 
     const expiryTime = new Date(record.updated_at).getTime() + 2 * 60 * 1000;
     if (Date.now() > expiryTime)
-      throw new Error("OTP has expired. Please request a new one.");
+      throw new Error("The OTP has expired. Please request a new one.");
 
     // Generate a short-lived reset token
     const resetToken = jwt.sign(
@@ -995,7 +995,7 @@ class UserService {
       { replacements: { id: userId }, type: QueryTypes.SELECT },
     );
 
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("User account not found.");
 
     const newStatus = user.is_active ? 0 : 1;
 
@@ -1022,7 +1022,7 @@ class UserService {
       { replacements: { id: userId }, type: QueryTypes.SELECT },
     );
 
-    if (!user) throw new Error("User not found");
+    if (!user) throw new Error("User account not found.");
 
     // 1. Delete profile image from Cloudinary
     let profile = user.profile;

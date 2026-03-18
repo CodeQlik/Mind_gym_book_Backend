@@ -16,7 +16,7 @@ class AddressService {
       is_default,
     } = addressData;
 
-    const [insertId] = await sequelize.query(
+    const [newAddressId] = await sequelize.query(
       `INSERT INTO addresses (name, phone, address_line1, address_line2, city, state, pincode, country, addresstype, is_default, created_at, updated_at)
        VALUES (:name, :phone, :address_line1, :address_line2, :city, :state, :pincode, :country, :addresstype, :is_default, NOW(), NOW())`,
       {
@@ -35,8 +35,6 @@ class AddressService {
         type: QueryTypes.INSERT,
       },
     );
-
-    const newAddressId = insertId;
 
     // Get current user address_ids
     const [user] = await sequelize.query(

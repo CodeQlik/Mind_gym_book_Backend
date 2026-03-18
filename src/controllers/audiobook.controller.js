@@ -4,20 +4,22 @@ import { asyncHandler } from "../utils/asyncHandler.js";
 import sendResponse from "../utils/responseHandler.js";
 import ffmpeg from "fluent-ffmpeg";
 import ffmpegInstaller from "@ffmpeg-installer/ffmpeg";
-import { encryptId, decryptId } from "../utils/cryptoUtils.js";
-
 
 ffmpeg.setFfmpegPath(ffmpegInstaller.path);
 
 const createAudiobook = asyncHandler(async (req, res) => {
   const audiobook = await audiobookService.createAudiobook(req.body, req.files);
-  return sendResponse(res, 201, true, "Audiobook created successfully", audiobook);
+  return sendResponse(
+    res,
+    201,
+    true,
+    "Audiobook created successfully",
+    audiobook,
+  );
 });
 
 const getCleanBaseUrl = () => {
-  return (process.env.BASE_URL)
-    .replace(/\/+$/, "")
-    .replace(/\/api\/v1$/, "");
+  return process.env.BASE_URL.replace(/\/+$/, "").replace(/\/api\/v1$/, "");
 };
 
 const getAllAudiobooks = asyncHandler(async (req, res) => {
@@ -43,9 +45,15 @@ const getAllAudiobooks = asyncHandler(async (req, res) => {
           title: bookInfo.title,
           author: bookInfo.author,
           categoryName: catName,
-          thumbnail: (bookInfo.thumbnail === 0 || bookInfo.thumbnail === "0") ? null : bookInfo.thumbnail,
-          cover_image: (bookInfo.cover_image === 0 || bookInfo.cover_image === "0") ? null : bookInfo.cover_image,
-          chapters: []
+          thumbnail:
+            bookInfo.thumbnail === 0 || bookInfo.thumbnail === "0"
+              ? null
+              : bookInfo.thumbnail,
+          cover_image:
+            bookInfo.cover_image === 0 || bookInfo.cover_image === "0"
+              ? null
+              : bookInfo.cover_image,
+          chapters: [],
         });
       }
 
@@ -53,20 +61,21 @@ const getAllAudiobooks = asyncHandler(async (req, res) => {
         id: audioData.id,
         chapter_number: audioData.chapter_number,
         title: audioData.chapter_title,
-        audio_url: `${baseUrl}/api/v1/audiobook/stream/${encryptId(audioData.id)}`,
+        audio_url: `${baseUrl}/api/v1/audiobook/stream/${audioData.id}`,
+
         status: audioData.status,
 
         narrator: audioData.narrator,
         language: audioData.language,
         updatedAt: audioData.updatedAt || audioData.updated_at,
-        createdAt: audioData.createdAt || audioData.created_at
+        createdAt: audioData.createdAt || audioData.created_at,
       };
 
       if (isAdmin) {
         chapter.audio_file = {
           ...audioData.audio_file,
           url: audioData.audio_file?.url,
-          is_encrypted: false
+          is_encrypted: false,
         };
       }
 
@@ -99,25 +108,29 @@ const getAudiobookById = asyncHandler(async (req, res) => {
 
   const structuredData = {
     book: book,
-    audio_url: `${baseUrl}/api/v1/audiobook/stream/${encryptId(audioData.id)}`,
-    audio_file: {
+    audio_url: `${baseUrl}/api/v1/audiobook/stream/${audioData.id}`,
 
+    audio_file: {
       ...audio_file,
       url: audio_file?.url,
-      is_encrypted: false
+      is_encrypted: false,
     },
-    ...rest
+    ...rest,
   };
 
-  return sendResponse(res, 200, true, "Audiobook fetched successfully", structuredData);
+  return sendResponse(
+    res,
+    200,
+    true,
+    "Audiobook fetched successfully",
+    structuredData,
+  );
 });
 
 const streamAudiobook = asyncHandler(async (req, res) => {
-  const { id: encryptedId } = req.params;
-  const id = decryptId(encryptedId);
+  const { id } = req.params;
   const audiobook = await audiobookService.getAudiobookById(id);
 
-  
   if (!audiobook || !audiobook.audio_file?.url) {
     return res.status(404).json({ message: "Audio file not found" });
   }
@@ -127,7 +140,7 @@ const streamAudiobook = asyncHandler(async (req, res) => {
   const fullAccess = await bookService.hasFullAccess(user, book);
 
   res.setHeader("Content-Type", "audio/mpeg");
-  
+
   let stream = ffmpeg(audiobook.audio_file.url)
     .format("mp3")
     .on("error", (err) => {
@@ -148,8 +161,18 @@ const streamAudiobook = asyncHandler(async (req, res) => {
 });
 
 const updateAudiobook = asyncHandler(async (req, res) => {
-  const audiobook = await audiobookService.updateAudiobook(req.params.id, req.body, req.files);
-  return sendResponse(res, 200, true, "Audiobook updated successfully", audiobook);
+  const audiobook = await audiobookService.updateAudiobook(
+    req.params.id,
+    req.body,
+    req.files,
+  );
+  return sendResponse(
+    res,
+    200,
+    true,
+    "Audiobook updated successfully",
+    audiobook,
+  );
 });
 
 const deleteAudiobook = asyncHandler(async (req, res) => {
@@ -163,8 +186,16 @@ const toggleAudiobookStatus = asyncHandler(async (req, res) => {
 });
 
 const toggleBookAudiobooksStatus = asyncHandler(async (req, res) => {
-  const result = await audiobookService.toggleBookAudiobooksStatus(req.params.bookId);
-  return sendResponse(res, 200, true, "Book audiobooks status updated successfully", result);
+  const result = await audiobookService.toggleBookAudiobooksStatus(
+    req.params.bookId,
+  );
+  return sendResponse(
+    res,
+    200,
+    true,
+    "Book audiobooks status updated successfully",
+    result,
+  );
 });
 
 export default {

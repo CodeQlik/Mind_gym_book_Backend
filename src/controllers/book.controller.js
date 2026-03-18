@@ -12,8 +12,6 @@ import fs from "fs";
 import path from "path";
 import axios from "axios";
 import { cloudinary } from "../config/cloudinary.js";
-import { encryptId, decryptId } from "../utils/cryptoUtils.js";
-
 
 const getCleanBaseUrl = () => {
   return process.env.BASE_URL.replace(/\/+$/, "").replace(/\/api\/v1$/, "");
@@ -59,12 +57,11 @@ const cleanBookData = (
         title: chapter.chapter_title || `Chapter ${chapter.chapter_number}`,
         audio_url:
           chapter.audio_file && chapter.audio_file.url
-            ? `${baseUrl}/api/v1/audiobook/stream/${encryptId(chapter.id)}`
+            ? `${baseUrl}/api/v1/audiobook/stream/${chapter.id}`
             : "",
-        is_encrypted: true,
+        is_encrypted: false,
       })),
     };
-
   }
 
   // 2. Heavy fields at the BOTTOM
@@ -225,7 +222,9 @@ export const getAdminBooks = asyncHandler(async (req, res) => {
 
 export const getBookById = asyncHandler(async (req, res) => {
   const userRole = (req.user?.user_type || "").toLowerCase();
-  const isAdminRequest = ["admin", "system admin", "master admin"].includes(userRole);
+  const isAdminRequest = ["admin", "system admin", "master admin"].includes(
+    userRole,
+  );
   const book = await bookService.getBookById(req.params.id, !isAdminRequest);
 
   let isBookmarked = false;
@@ -246,7 +245,9 @@ export const getBookById = asyncHandler(async (req, res) => {
 
 export const getBookBySlug = asyncHandler(async (req, res) => {
   const userRole = (req.user?.user_type || "").toLowerCase();
-  const isAdminRequest = ["admin", "system admin", "master admin"].includes(userRole);
+  const isAdminRequest = ["admin", "system admin", "master admin"].includes(
+    userRole,
+  );
   const book = await bookService.getBookBySlug(
     req.params.slug,
     !isAdminRequest,
@@ -376,8 +377,8 @@ export const searchBooks = asyncHandler(async (req, res) => {
 });
 
 export const readBookPdf = asyncHandler(async (req, res) => {
-  const { id: encryptedId } = req.params;
-  const bookId = decryptId(encryptedId);
+  const { id: bookId } = req.params;
+
   const user = req.user;
 
   const book = await Book.findByPk(bookId);
@@ -570,7 +571,7 @@ export const extractBookPageText = asyncHandler(async (req, res) => {
 
   const book = await Book.findByPk(bookId);
   if (!book) {
-    return sendResponse(res, 404, false, "Book nahi mili.");
+    return sendResponse(res, 404, false, "Book Not Found.");
   }
 
   const fileData = book.file_data;
@@ -671,16 +672,16 @@ export const getBookContent = asyncHandler(async (req, res) => {
         audioUrl = ch.audio_file.url;
       } else {
         // Enforce 30-second preview via internal stream endpoint
-        audioUrl = `${baseUrl}/api/v1/audiobook/stream/${encryptId(ch.id)}`;
+        audioUrl = `${baseUrl}/api/v1/audiobook/stream/${ch.id}`;
       }
-
     }
 
     return {
+      id: ch.id,
       chapter_number: ch.chapter_number,
       chapter_title: ch.chapter_title || `Chapter ${ch.chapter_number}`,
       audio_url: audioUrl,
-      is_preview: !fullAccess,
+      is_premium: fullAccess,
     };
   });
 
@@ -713,9 +714,8 @@ export const getBookContent = asyncHandler(async (req, res) => {
         fileUrl = sourceUrl;
       } else {
         // Enforce 5-page preview via internal read endpoint
-        fileUrl = `${baseUrl}/api/v1/book/readBook/${encryptId(id)}`;
+        fileUrl = `${baseUrl}/api/v1/book/readBook/${id}`;
       }
-
     }
   }
 
@@ -727,7 +727,8 @@ export const getBookContent = asyncHandler(async (req, res) => {
     book_id: parseInt(id),
     file_url: fileUrl,
     file_type: fileType,
-    is_preview: !fullAccess,
+    is_premium: fullAccess,
     audio_chapters: audioChapters,
   });
 });
+

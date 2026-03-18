@@ -43,7 +43,7 @@ class PlanService {
   async updatePlan(id, data) {
     const plan = await Plan.findByPk(id);
     if (!plan) {
-      throw new Error("Plan not found");
+      throw new Error("The specified subscription plan was not found.");
     }
     await plan.update(data);
     return plan;
@@ -52,7 +52,7 @@ class PlanService {
   async deletePlan(id) {
     const plan = await Plan.findByPk(id);
     if (!plan) {
-      throw new Error("Plan not found");
+      throw new Error("The specified subscription plan was not found.");
     }
     await plan.update({ status: "inactive" });
     return plan;

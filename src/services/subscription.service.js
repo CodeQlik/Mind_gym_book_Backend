@@ -6,12 +6,12 @@ class SubscriptionService {
     const { user_id, plan_id, payment_id, payment_record_id } = data;
 
     if (!plan_id) {
-      throw new Error("plan_id is required to create a subscription");
+      throw new Error("Plan ID is required to create a subscription.");
     }
 
     const plan = await Plan.findByPk(parseInt(plan_id));
     if (!plan) {
-      throw new Error("Invalid Plan: Plan not found with the provided ID");
+      throw new Error("Invalid Plan: The plan could not be found with the provided ID.");
     }
 
     const duration = parseInt(plan.duration_months) || 0;
@@ -99,7 +99,7 @@ class SubscriptionService {
     const subscription = await Subscription.findByPk(id);
 
     if (!subscription) {
-      throw new Error("Subscription not found");
+      throw new Error("Subscription not found.");
     }
 
     // allowed ENUM values
@@ -111,7 +111,7 @@ class SubscriptionService {
     if (status === "inactive" || status === "deactivated") status = "expired";
 
     if (!allowedStatus.includes(status)) {
-      throw new Error(`Invalid status value: ${status}`);
+      throw new Error(`Invalid status value: ${status}.`);
     }
 
     await subscription.update({ status });

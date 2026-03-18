@@ -82,6 +82,14 @@ const Order = sequelize.define(
       type: DataTypes.TEXT,
       allowNull: true,
     },
+    shiprocket_order_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
+    shiprocket_shipment_id: {
+      type: DataTypes.STRING,
+      allowNull: true,
+    },
     delivered_at: {
       type: DataTypes.DATE,
       allowNull: true,

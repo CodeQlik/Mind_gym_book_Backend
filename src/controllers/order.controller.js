@@ -161,6 +161,57 @@ export const dispatchOrder = async (req, res, next) => {
   }
 };
 
+// ─── ADMIN: Automated Dispatch via Shiprocket ─────────────────────────────────
+export const dispatchWithShiprocket = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await orderService.dispatchOrderWithShiprocket(orderId);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Order dispatched via Shiprocket successfully.",
+      order,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── ADMIN: Refresh status from Shiprocket ────────────────────────────────────
+export const refreshShiprocketStatus = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const order = await orderService.refreshShiprocketStatus(orderId);
+    return sendResponse(res, 200, true, "Order status refreshed from Shiprocket.", order);
+  } catch (error) {
+    next(error);
+  }
+};
+
+// ─── EXTERNAL: Shiprocket Webhook ──────────────────────────────────────────────
+export const handleShiprocketWebhook = async (req, res, next) => {
+  try {
+    // Security Check: Match token with x-api-key header
+    const token = req.headers["x-api-key"];
+    const secureToken = "mindgym_secure_2026"; // Match this in Shiprocket Panel
+
+    if (token !== secureToken) {
+      logger.warn(`[SHIPROCKET-WEBHOOK] Unauthorized access attempt with token: ${token}`);
+      return res.status(200).json({ success: false, message: "Unauthorized" });
+    }
+
+    // Shiprocket sends data in req.body
+    await orderService.handleShiprocketWebhook(req.body);
+    // Shiprocket expects a 200/OK response to stop retrying
+    return res.status(200).json({ success: true });
+  } catch (error) {
+    // Log error but don't necessarily send 500 to Shiprocket unless we want them to retry
+    console.error("Webhook Error:", error.message);
+    return res.status(200).json({ success: false, message: error.message });
+  }
+};
+
 // ─── ADMIN: Update order status ───────────────────────────────────────────────
 export const updateOrderStatus = async (req, res, next) => {
   try {
@@ -183,6 +234,23 @@ export const deleteOrder = async (req, res, next) => {
     next(error);
   }
 };
+
+// ─── ADMIN: Approve and process refund ─────────────────────────────────────────
+export const approveRefund = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const result = await paymentService.processRefund(orderId);
+    return sendResponse(
+      res,
+      200,
+      true,
+      "Refund processed successfully and money has been returned.",
+      result,
+    );
+  } catch (error) {
+    next(error);
+  }
+};
 // ─── SHARED: Download Invoice ──────────────────────────────────────────────────
 export const downloadInvoice = async (req, res, next) => {
   try {
@@ -194,7 +262,7 @@ export const downloadInvoice = async (req, res, next) => {
       req.user.user_type !== "admin" &&
       String(order.user_id) !== String(req.user.id)
     ) {
-      return sendResponse(res, 403, false, "Unauthorized to view this invoice");
+      return sendResponse(res, 403, false, "You are not authorized to view this invoice.");
     }
 
     const pdfBuffer = await invoiceService.generateOrderInvoice(orderId);

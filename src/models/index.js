@@ -28,6 +28,9 @@ import Testimonial from "./testimonial.model.js";
 import Audiobook from "./audiobook.model.js";
 import Faq from "./faq.model.js";
 import Setting from "./setting.model.js";
+import ContactQuery from "./contactQuery.model.js";
+import logger from "../utils/logger.js";
+
 
 // Associations
 
@@ -135,6 +138,9 @@ Highlight.belongsTo(Book, { foreignKey: "book_id", as: "book" });
 User.hasMany(Order, { foreignKey: "user_id", as: "orders" });
 Order.belongsTo(User, { foreignKey: "user_id", as: "user" });
 
+Address.hasMany(Order, { foreignKey: "address_id", as: "orders" });
+Order.belongsTo(Address, { foreignKey: "address_id", as: "address" });
+
 // OrderItem Associations
 Order.hasMany(OrderItem, { foreignKey: "order_id", as: "items" });
 OrderItem.belongsTo(Order, { foreignKey: "order_id", as: "order" });
@@ -207,4 +213,5 @@ export {
   Audiobook,
   Faq,
   Setting,
+  ContactQuery,
 };
