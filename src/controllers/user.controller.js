@@ -131,12 +131,12 @@ export const login = async (req, res, next) => {
 
 export const googleLogin = async (req, res, next) => {
   try {
-    const { idToken } = req.body;
-    if (!idToken) {
+    const { id_token } = req.body;
+    if (!id_token) {
       return sendResponse(res, 400, false, "Google ID token is required.");
     }
 
-    const result = await userService.googleLogin(idToken, getDeviceInfo(req));
+    const result = await userService.googleLogin(id_token, getDeviceInfo(req));
 
     const accessTokenOptions = {
       expires: new Date(Date.now() + 1 * 24 * 60 * 60 * 1000), // 1 day

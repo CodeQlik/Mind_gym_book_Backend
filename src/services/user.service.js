@@ -411,13 +411,13 @@ class UserService {
   }
 
   // ─── Google Login
-  async googleLogin(idToken, deviceInfo = {}) {
+  async googleLogin(id_token, deviceInfo = {}) {
     const { device_id } = deviceInfo;
     if (!device_id) throw new Error("Device ID is required for login.");
 
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
     const ticket = await client.verifyIdToken({
-      idToken,
+      idToken: id_token,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
 

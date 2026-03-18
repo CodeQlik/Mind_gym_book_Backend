@@ -543,13 +543,13 @@ class BookService {
         const chapters = typeof data.audio_chapters === "string" ? JSON.parse(data.audio_chapters) : data.audio_chapters;
         const existingAudiobooks = await Audiobook.findAll({ where: { book_id: id }, attributes: ["id", "audio_file"] });
         const existingMap = new Map(existingAudiobooks.map((a) => [parseInt(a.id), a]));
-        
+
         const updatedIds = chapters.filter((ch) => ch.id).map((ch) => parseInt(ch.id));
         existingAudiobooks.forEach((ab) => {
           if (!updatedIds.includes(parseInt(ab.id))) {
             addToCleanup(ab.audio_file?.public_id);
             // Non-blocking destroy
-            Audiobook.destroy({ where: { id: ab.id } }).catch(() => {});
+            Audiobook.destroy({ where: { id: ab.id } }).catch(() => { });
           }
         });
 
@@ -627,7 +627,7 @@ class BookService {
     await Promise.all(finalOps);
 
     // 8. Final Background Tasks
-    clearCachePattern("books:*").catch(() => {});
+    clearCachePattern("books:*").catch(() => { });
     // Cloud cleanup runs in background independently
 
     return await Book.findByPk(id, {
