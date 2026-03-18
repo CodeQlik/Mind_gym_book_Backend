@@ -40,6 +40,9 @@ const cleanBookData = (
     category: data.category
       ? { id: data.category.id, name: data.category.name }
       : null,
+    is_trending: !!data.is_trending,
+    is_premium: !!data.is_premium,
+    is_bestselling: !!data.is_bestselling,
     images: data.images || [],
   };
 

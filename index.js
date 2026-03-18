@@ -20,7 +20,7 @@ const startServer = async () => {
     // 2. Connect Redis
     await connectRedis();
 
-    // 2. Sync models (Create tables if not exist)
+    // 2. Sync models
     await sequelize.sync();
 
     // 3. Seed admin user

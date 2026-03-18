@@ -144,11 +144,15 @@ class BookService {
       ? inputCondition
       : "good";
 
+    // Strip HTML tags for database cleanliness
+    const cleanDescription = (description || "").replace(/<[^>]*>?/gm, "");
+    const cleanHighlights = (highlights || "").replace(/<[^>]*>?/gm, "");
+
     const bookDataForCreation = {
       title,
       slug,
       author,
-      description,
+      description: cleanDescription,
       price: parseFloat(price) || 0,
       original_price: original_price ? parseFloat(original_price) : null,
       condition: sanitizedCondition,
@@ -166,7 +170,7 @@ class BookService {
       is_premium: is_premium === "true" || is_premium === true,
       is_bestselling: is_bestselling === "true" || is_bestselling === true,
       is_trending: is_trending === "true" || is_trending === true,
-      highlights,
+      highlights: cleanHighlights,
       isbn,
       language,
       page_count: 0,
@@ -180,14 +184,14 @@ class BookService {
     // If audio chapters are provided, create them
     if (data.audio_chapters) {
       try {
-        const chapters = typeof data.audio_chapters === "string" 
-          ? JSON.parse(data.audio_chapters) 
+        const chapters = typeof data.audio_chapters === "string"
+          ? JSON.parse(data.audio_chapters)
           : data.audio_chapters;
 
         if (Array.isArray(chapters) && chapters.length > 0) {
           const narrator = data.audio_narrator || author;
           const language = data.language || "Hindi";
-          
+
           let audioFileIndex = 0;
           for (const ch of chapters) {
             let audioData = {
@@ -268,11 +272,11 @@ class BookService {
             where: filters,
             attributes: ["id", "title", "author", "price", "description", "highlights", "slug", "cover_image", "thumbnail", "images", "language", "file_data", "is_active", "stock", "reserved"],
             include: [
-              { 
-                model: Audiobook, 
-                as: "audiobooks", 
+              {
+                model: Audiobook,
+                as: "audiobooks",
                 attributes: ["id", "chapter_number", "chapter_title", "audio_file", "narrator"],
-                order: [["chapter_number", "ASC"]] 
+                order: [["chapter_number", "ASC"]]
               }
             ],
             required: true
@@ -296,10 +300,10 @@ class BookService {
         where: filters,
         include: [
           { model: Category, as: "category", attributes: ["id", "name", "slug"] },
-          { 
-            model: Audiobook, 
-            as: "audiobooks", 
-            attributes: ["id", "chapter_number", "chapter_title", "audio_file", "narrator"] 
+          {
+            model: Audiobook,
+            as: "audiobooks",
+            attributes: ["id", "chapter_number", "chapter_title", "audio_file", "narrator"]
           }
         ],
         order: [["created_at", "DESC"]],
@@ -357,11 +361,11 @@ class BookService {
       where: { slug },
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
-        { 
-          model: Audiobook, 
-          as: "audiobooks", 
+        {
+          model: Audiobook,
+          as: "audiobooks",
           attributes: ["id", "chapter_number", "chapter_title", "audio_file", "narrator"],
-          order: [["chapter_number", "ASC"]] 
+          order: [["chapter_number", "ASC"]]
         }
       ],
     });
@@ -382,11 +386,11 @@ class BookService {
       where: { id },
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
-        { 
-          model: Audiobook, 
-          as: "audiobooks", 
+        {
+          model: Audiobook,
+          as: "audiobooks",
           attributes: ["id", "chapter_number", "chapter_title", "audio_file", "narrator"],
-          order: [["chapter_number", "ASC"]] 
+          order: [["chapter_number", "ASC"]]
         }
       ],
     });
@@ -456,7 +460,7 @@ class BookService {
     const updateThumbnail = async () => {
       if (files?.thumbnail?.[0]) {
         if (book.thumbnail?.public_id) {
-          deleteFromCloudinary(book.thumbnail.public_id).catch(()=>console.warn("Could not delete old thumbnail"));
+          deleteFromCloudinary(book.thumbnail.public_id).catch(() => console.warn("Could not delete old thumbnail"));
         }
         const res = await uploadOnCloudinary(files.thumbnail[0].path, "mindgymbook/books/thumbnails");
         if (res) {
@@ -468,7 +472,7 @@ class BookService {
     const updateCoverImage = async () => {
       if (files?.cover_image?.[0]) {
         if (book.cover_image?.public_id) {
-          deleteFromCloudinary(book.cover_image.public_id).catch(()=>console.warn("Could not delete old cover"));
+          deleteFromCloudinary(book.cover_image.public_id).catch(() => console.warn("Could not delete old cover"));
         }
         const res = await uploadOnCloudinary(files.cover_image[0].path, "mindgymbook/books/covers");
         if (res) {
@@ -483,7 +487,7 @@ class BookService {
         const rawFileData = book.getDataValue("file_data");
         const existingFile = typeof rawFileData === "string" ? JSON.parse(rawFileData) : rawFileData;
         if (existingFile?.public_id) {
-          deleteFromCloudinary(existingFile.public_id).catch(()=>console.warn("Could not delete old book file"));
+          deleteFromCloudinary(existingFile.public_id).catch(() => console.warn("Could not delete old book file"));
         }
 
         const ext = path.extname(newBookFile.originalname).toLowerCase().replace(".", "");
@@ -499,7 +503,7 @@ class BookService {
     const updateGalleryImages = async () => {
       let gallery = [];
       if (data.images) {
-        try { gallery = typeof data.images === "string" ? JSON.parse(data.images) : data.images; } 
+        try { gallery = typeof data.images === "string" ? JSON.parse(data.images) : data.images; }
         catch (e) { gallery = book.images || []; }
       } else {
         gallery = book.images || [];
@@ -510,7 +514,7 @@ class BookService {
         const currentPublicIds = gallery.map((img) => img.public_id);
         const deletionPromises = book.images.map(async (oldImg) => {
           if (oldImg.public_id && !currentPublicIds.includes(oldImg.public_id)) {
-            await deleteFromCloudinary(oldImg.public_id).catch(()=>console.warn("Failed deleting gallery image"));
+            await deleteFromCloudinary(oldImg.public_id).catch(() => console.warn("Failed deleting gallery image"));
           }
         });
         await Promise.all(deletionPromises);
@@ -524,7 +528,7 @@ class BookService {
         });
         await Promise.all(uploadPromises);
       }
-      
+
       book.images = gallery;
     };
 
@@ -562,6 +566,9 @@ class BookService {
           book.condition = validConditions.includes(inputCondition)
             ? inputCondition
             : book.condition || "good";
+        } else if (field === "description" || field === "highlights") {
+          // Strip HTML tags
+          book[field] = String(data[field]).replace(/<[^>]*>?/gm, "");
         } else {
           book[field] = data[field];
         }
@@ -570,16 +577,16 @@ class BookService {
 
     // Propagate language and author (narrator) change to all audiobooks if changed
     if (data.language) {
-        await Audiobook.update(
-            { language: data.language },
-            { where: { book_id: id } }
-        );
+      await Audiobook.update(
+        { language: data.language },
+        { where: { book_id: id } }
+      );
     }
     if (data.author) {
-        await Audiobook.update(
-            { narrator: data.author },
-            { where: { book_id: id } }
-        );
+      await Audiobook.update(
+        { narrator: data.author },
+        { where: { book_id: id } }
+      );
     }
 
     // Boolean fields
@@ -597,12 +604,12 @@ class BookService {
       book.is_bestselling = String(data.is_bestselling) === "true";
     if (data.is_trending !== undefined)
       book.is_trending = String(data.is_trending) === "true";
-      
+
     // Handle Audio Chapters update
     if (data.audio_chapters) {
       try {
-        const chapters = typeof data.audio_chapters === "string" 
-          ? JSON.parse(data.audio_chapters) 
+        const chapters = typeof data.audio_chapters === "string"
+          ? JSON.parse(data.audio_chapters)
           : data.audio_chapters;
 
         // Fetch existing chapters
@@ -616,7 +623,7 @@ class BookService {
           for (const did of deleteIds) {
             const ab = existingAudiobooks.find(a => a.id === did);
             if (ab?.audio_file?.public_id) {
-              await deleteFromCloudinary(ab.audio_file.public_id).catch(() => {});
+              await deleteFromCloudinary(ab.audio_file.public_id).catch(() => { });
             }
           }
           await Audiobook.destroy({ where: { id: deleteIds } });
@@ -632,10 +639,10 @@ class BookService {
             const file = files.audio_files[audioFileIndex];
             // Delete old file if updating existing chapter
             if (ch.id) {
-                const oldAb = existingAudiobooks.find(a => a.id === ch.id);
-                if (oldAb?.audio_file?.public_id) {
-                  await deleteFromCloudinary(oldAb.audio_file.public_id).catch(() => {});
-                }
+              const oldAb = existingAudiobooks.find(a => a.id === ch.id);
+              if (oldAb?.audio_file?.public_id) {
+                await deleteFromCloudinary(oldAb.audio_file.public_id).catch(() => { });
+              }
             }
             const res = await uploadOnCloudinary(file.path, "mindgymbook/audiobooks");
             if (res) {
@@ -679,10 +686,10 @@ class BookService {
     return await Book.findByPk(book.id, {
       include: [
         { model: Category, as: "category", attributes: ["id", "name", "slug"] },
-        { 
-          model: Audiobook, 
-          as: "audiobooks", 
-          attributes: ["id", "chapter_number", "chapter_title", "audio_file", "narrator"] 
+        {
+          model: Audiobook,
+          as: "audiobooks",
+          attributes: ["id", "chapter_number", "chapter_title", "audio_file", "narrator"]
         }
       ],
     });

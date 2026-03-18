@@ -207,7 +207,7 @@ class OrderService {
         `Your order ${orderWithDetails.order_no} has been ${payment_method === "cod" ? "placed" : "successfully paid and recorded"}.`,
         { order_id: String(order.id), order_no: orderWithDetails.order_no },
       );
-    } catch (err) {}
+    } catch (err) { }
 
     return orderWithDetails;
   }
@@ -595,15 +595,18 @@ class OrderService {
     });
     if (!order) throw new Error("Order not found");
 
-    if (order.refund_requested) {
-      throw new Error("Refund already requested for this order");
+    // If already requested, we just update the reason rather than throwing an error, 
+    // especially since auto-cancellation might have set a default reason.
+
+    if (!order.delivered_at && order.payment_method === "cod") {
+      throw new Error(
+        "COD orders can only be refunded after delivery. For pending orders, please use 'Cancel Order'.",
+      );
     }
 
-    const isPrepaidCancelled = order.delivery_status === "cancelled" && order.payment_method !== "cod";
-    
-    if (!order.delivered_at && !isPrepaidCancelled) {
+    if (!order.delivered_at && order.payment_status !== "paid") {
       throw new Error(
-        "Refund can only be requested after delivery or if a prepaid order is cancelled.",
+        "Refund can only be requested for paid orders or after delivery.",
       );
     }
 
@@ -641,7 +644,7 @@ class OrderService {
   /**
    * USER: Cancel an order (only if it is still 'processing')
    */
-  async cancelOrder(userId, orderId) {
+  async cancelOrder(userId, orderId, reason) {
     const order = await Order.findOne({
       where: { id: orderId, user_id: userId },
       include: [{ model: OrderItem, as: "items" }],
@@ -665,6 +668,28 @@ class OrderService {
           { reserved: sequelize.literal(`reserved - ${item.quantity}`) },
           { where: { id: item.book_id }, transaction: t },
         );
+      }
+
+      // If it's a prepaid and PAID order, automatically mark it for refund
+      if (order.payment_status === "paid" && order.payment_method !== "cod") {
+        await order.update(
+          {
+            refund_requested: true,
+            refund_reason: reason || "Order cancelled before delivery",
+          },
+          { transaction: t }
+        );
+
+        // Notify admin about this auto-refund request
+        try {
+          await notificationService.saveNotification(
+            null,
+            "REFUND_REQUEST",
+            "🔄 Prepaid Order Cancelled - Refund Needed",
+            `Order ${order.order_no} was cancelled by user #${userId} and needs a refund. Reason: ${reason || "Cancelled before delivery."}`,
+            { order_id: order.id, order_no: order.order_no, user_id: userId },
+          );
+        } catch (e) { }
       }
     });
 

@@ -127,7 +127,7 @@ class AnalyticsService {
     );
     startOfWeek.setHours(0, 0, 0, 0);
 
-    const stats = await OrderItem.findAll({
+    let stats = await OrderItem.findAll({
       attributes: [
         "book_id",
         [sequelize.fn("SUM", sequelize.col("quantity")), "sales_count"],
@@ -151,12 +151,34 @@ class AnalyticsService {
       raw: true,
     });
 
+    // FALLBACK: If no sales this week, fetch top sellers of ALL TIME
+    if (!stats || stats.length === 0) {
+      stats = await OrderItem.findAll({
+        attributes: [
+          "book_id",
+          [sequelize.fn("SUM", sequelize.col("quantity")), "sales_count"],
+        ],
+        include: [
+          {
+            model: Order,
+            as: "order",
+            where: { payment_status: "paid" },
+            attributes: [],
+          },
+        ],
+        group: ["book_id"],
+        order: [[sequelize.literal("sales_count"), "DESC"]],
+        limit,
+        raw: true,
+      });
+    }
+
     if (!stats || stats.length === 0) return [];
 
     const bookIds = stats.map((s) => s.book_id);
     const books = await Book.findAll({
       where: { id: bookIds },
-      attributes: ["id", "title", "author", "thumbnail", "slug", "price", "description"],
+      attributes: ["id", "title", "author", "thumbnail", "slug", "price", "description", "page_count", "rating"],
     });
 
     return stats

@@ -17,6 +17,7 @@ class CategoryService {
 
   async createCategory(data, file) {
     const { name, description } = data;
+    const cleanDescription = (description || "").replace(/<[^>]*>?/gm, "");
     const slug = this.generateSlug(name);
 
     const [existing] = await sequelize.query(
@@ -55,7 +56,7 @@ class CategoryService {
       {
         replacements: {
           name,
-          description: description || null,
+          description: cleanDescription || null,
           slug,
           image: JSON.stringify(imageData),
         },
@@ -88,7 +89,7 @@ class CategoryService {
     }
     if (description !== undefined) {
       setClauses.push("description = :description");
-      replacements.description = description;
+      replacements.description = String(description).replace(/<[^>]*>?/gm, "");
     }
     if (is_active !== undefined) {
       setClauses.push("is_active = :is_active");
