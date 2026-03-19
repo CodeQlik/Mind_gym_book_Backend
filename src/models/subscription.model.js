@@ -28,18 +28,9 @@ const Subscription = sequelize.define(
       onDelete: "SET NULL",
     },
     plan_type: {
-      type: DataTypes.ENUM(
-        "monthly",
-        "annual",
-        "one_month",
-        "three_month",
-        "one_year",
-        "free",
-        "premium",
-        "",
-      ),
+      type: DataTypes.ENUM("monthly", "three_month", "annual"),
       allowNull: false,
-      defaultValue: "free",
+      defaultValue: "monthly",
     },
     amount: {
       type: DataTypes.DECIMAL(10, 2),

@@ -18,16 +18,7 @@ const Plan = sequelize.define(
       allowNull: false,
     },
     plan_type: {
-      type: DataTypes.ENUM(
-        "monthly",
-        "annual",
-        "one_month",
-        "three_month",
-        "one_year",
-        "free",
-        "premium",
-        "",
-      ),
+      type: DataTypes.ENUM("monthly", "three_month", "annual"),
       allowNull: false,
     },
     duration_months: {
