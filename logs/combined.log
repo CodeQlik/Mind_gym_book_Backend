@@ -16037,3 +16037,42 @@
 [2026-03-19T09:28:35.514Z] [INFO] PUT /api/v1/plans/11 200 (47ms) {"method":"PUT","url":"/api/v1/plans/11","status":200,"duration":"47ms","ip":"::1","user":26}
 [2026-03-19T09:28:35.686Z] [INFO] GET /api/v1/plans 200 (14ms) {"method":"GET","url":"/api/v1/plans","status":200,"duration":"14ms","ip":"::1","user":"Guest"}
 [2026-03-19T09:28:35.702Z] [INFO] GET /api/v1/plans 200 (67ms) {"method":"GET","url":"/api/v1/plans","status":200,"duration":"67ms","ip":"::1","user":"Guest"}
+[2026-03-19T09:31:29.592Z] [INFO] GET /api/v1/plans 304 (10ms) {"method":"GET","url":"/api/v1/plans","status":304,"duration":"10ms","ip":"::1","user":"Guest"}
+[2026-03-19T09:31:29.602Z] [INFO] GET /api/v1/plans 304 (3ms) {"method":"GET","url":"/api/v1/plans","status":304,"duration":"3ms","ip":"::1","user":"Guest"}
+[2026-03-19T09:37:50.057Z] [INFO] GET /api/v1/subscriptions/admin/all 200 (63ms) {"method":"GET","url":"/api/v1/subscriptions/admin/all","status":200,"duration":"63ms","ip":"::1","user":26}
+[2026-03-19T09:37:50.108Z] [INFO] GET /api/v1/subscriptions/admin/all 304 (38ms) {"method":"GET","url":"/api/v1/subscriptions/admin/all","status":304,"duration":"38ms","ip":"::1","user":26}
+[2026-03-19T09:42:47.816Z] [ERROR] POST /api/v1/users/login {"message":"Invalid email address or password.","stack":"Error: Invalid email address or password.\n    at UserService.login (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/user.service.js:376:22)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async login (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/user.controller.js:107:20)","body":{"email":"testkids04@gmail.com","password":"12345678"},"params":{},"query":{},"user":"Guest"}
+[2026-03-19T09:42:47.852Z] [WARN] POST /api/v1/users/login 500 (14ms) {"method":"POST","url":"/api/v1/users/login","status":500,"duration":"14ms","ip":"::1","user":"Guest"}
+[2026-03-19T09:46:58.815Z] [INFO] Redis Client Connected 
+[2026-03-19T09:47:07.313Z] [INFO] Redis Client Connected 
+[2026-03-19T09:53:08.948Z] [INFO] Redis Client Connected 
+[2026-03-19T10:00:21.461Z] [INFO] POST /api/v1/users/login 200 (214ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"214ms","ip":"::1","user":"Guest"}
+[2026-03-19T10:00:43.150Z] [INFO] GET /api/v1/notifications/ 200 (35ms) {"method":"GET","url":"/api/v1/notifications/","status":200,"duration":"35ms","ip":"::1","user":54}
+[2026-03-19T10:01:00.098Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 200 (11ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":200,"duration":"11ms","ip":"::1","user":26}
+[2026-03-19T10:01:00.115Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (14ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"14ms","ip":"::1","user":26}
+[2026-03-19T10:01:00.594Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (14ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"14ms","ip":"::1","user":26}
+[2026-03-19T10:01:03.453Z] [INFO] GET /api/v1/users/admin/sessions/54 200 (13ms) {"method":"GET","url":"/api/v1/users/admin/sessions/54","status":200,"duration":"13ms","ip":"::1","user":26}
+[2026-03-19T10:01:51.655Z] [INFO] GET /api/v1/subscriptions/admin/all 304 (57ms) {"method":"GET","url":"/api/v1/subscriptions/admin/all","status":304,"duration":"57ms","ip":"::1","user":26}
+[2026-03-19T10:01:51.721Z] [INFO] GET /api/v1/subscriptions/admin/all 304 (61ms) {"method":"GET","url":"/api/v1/subscriptions/admin/all","status":304,"duration":"61ms","ip":"::1","user":26}
+[2026-03-19T10:02:14.239Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (19ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"19ms","ip":"::1","user":26}
+[2026-03-19T10:02:14.318Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (29ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"29ms","ip":"::1","user":26}
+[2026-03-19T10:02:14.725Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (17ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"17ms","ip":"::1","user":26}
+[2026-03-19T10:02:18.653Z] [INFO] GET /api/v1/users/admin/sessions/54 304 (25ms) {"method":"GET","url":"/api/v1/users/admin/sessions/54","status":304,"duration":"25ms","ip":"::1","user":26}
+[2026-03-19T10:02:25.857Z] [INFO] GET /api/v1/users/profile 304 (64ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"64ms","ip":"::1","user":26}
+[2026-03-19T10:02:25.887Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (64ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"64ms","ip":"::1","user":26}
+[2026-03-19T10:02:25.900Z] [INFO] GET /api/v1/notifications 304 (108ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"108ms","ip":"::1","user":26}
+[2026-03-19T10:02:25.947Z] [INFO] GET /api/v1/users/profile 304 (18ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"18ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.140Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (225ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"225ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.171Z] [INFO] GET /api/v1/notifications 304 (34ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"34ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.203Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (53ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"53ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.207Z] [INFO] GET /api/v1/notifications/admin/stats 200 (400ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"400ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.221Z] [INFO] GET /api/v1/notifications 304 (44ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"44ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.269Z] [INFO] GET /api/v1/notifications 304 (24ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"24ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.285Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (38ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"38ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.314Z] [INFO] GET /api/v1/notifications 304 (20ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"20ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.323Z] [INFO] GET /api/v1/notifications/admin/stats 304 (71ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"71ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.353Z] [INFO] GET /api/v1/notifications/admin/stats 304 (21ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"21ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.390Z] [INFO] GET /api/v1/notifications/admin/stats 304 (32ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"32ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.416Z] [INFO] GET /api/v1/notifications/admin/stats 304 (24ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"24ms","ip":"::1","user":26}
+[2026-03-19T10:02:26.468Z] [INFO] GET /api/v1/users/all-users?page=1&limit=10 304 (12ms) {"method":"GET","url":"/api/v1/users/all-users?page=1&limit=10","status":304,"duration":"12ms","ip":"::1","user":26}
+[2026-03-19T10:02:28.829Z] [INFO] GET /api/v1/users/admin/sessions/54 304 (11ms) {"method":"GET","url":"/api/v1/users/admin/sessions/54","status":304,"duration":"11ms","ip":"::1","user":26}

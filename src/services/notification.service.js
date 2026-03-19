@@ -594,12 +594,9 @@ class NotificationService {
       where[Op.or] = [
         { userId: userId },
         { 
+          userId: null,
           [Op.and]: [
-            { userId: null },
-            sequelize.where(
-              sequelize.fn('JSON_EXTRACT', sequelize.col('metadata'), '$.target'),
-              'ALL'
-            )
+            sequelize.literal("JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.target')) = 'ALL'")
           ]
         }
       ];
@@ -633,12 +630,9 @@ class NotificationService {
       where[Op.or] = [
         { userId: userId },
         { 
+          userId: null,
           [Op.and]: [
-            { userId: null },
-            sequelize.where(
-              sequelize.fn('JSON_EXTRACT', sequelize.col('metadata'), '$.target'),
-              'ALL'
-            )
+            sequelize.literal("JSON_UNQUOTE(JSON_EXTRACT(metadata, '$.target')) = 'ALL'")
           ]
         }
       ];
