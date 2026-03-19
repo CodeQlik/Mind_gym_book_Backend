@@ -48,11 +48,14 @@ const sendEmail = async (
 
   const transport = nodemailer.createTransport({
     host: process.env.NODEMAILER_HOST,
-    port: process.env.NODEMAILER_PORT,
-    secure: true,
+    port: parseInt(process.env.NODEMAILER_PORT), // Convert to number
+    secure: parseInt(process.env.NODEMAILER_PORT) === 465, // True for 465, false for 587
     auth: {
       user: email,
       pass: appPass,
+    },
+    tls: {
+      rejectUnauthorized: false, // Avoid SSL verification issues on some servers
     },
     socketTimeout: 60000,
   });
