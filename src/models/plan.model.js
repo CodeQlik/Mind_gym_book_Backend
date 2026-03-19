@@ -31,7 +31,7 @@ const Plan = sequelize.define(
       allowNull: true,
     },
     features: {
-      type: DataTypes.STRING(255),
+      type: DataTypes.JSON,
       allowNull: true,
     },
     device_limit: {
