@@ -135,8 +135,11 @@ class UserService {
       { replacements: { email, otp }, type: QueryTypes.INSERT },
     );
 
-    const message = `<h2>Registration Verification Code</h2><p>Your OTP is:</p><h1>${otp}</h1><p>This code is valid for 2 minutes.</p>`;
-    await sendEmail(email, "Verify Your Email", message);
+    const message = `<h2>Registration Verification Code</h2><p>Your OTP is:</p><h1>${otp}</h1><p>This code is valid for 5 minutes.</p>`;
+    const isSent = await sendEmail(email, "Verify Your Email", message);
+    if (!isSent) {
+      throw new Error("Unable to send OTP. Please check your email and try again.");
+    }
     return true;
   }
 
@@ -150,13 +153,13 @@ class UserService {
     );
     if (!record) throw new Error("The OTP entered is invalid.");
 
-    const expiryTime = new Date(record.updated_at).getTime() + 2 * 60 * 1000;
+    const expiryTime = new Date(record.updated_at).getTime() + 5 * 60 * 1000;
     if (Date.now() > expiryTime) throw new Error("The OTP has expired. Please request a new one.");
 
     const verificationToken = jwt.sign(
       { email, type: "email_verified" },
       process.env.JWT_SECRET || "secret",
-      { expiresIn: "2m" },
+      { expiresIn: "10m" },
     );
     return verificationToken;
   }
@@ -835,7 +838,7 @@ class UserService {
             <span style="display: inline-block; background-color: #007bff; color: white; padding: 14px 40px; border-radius: 8px; font-size: 32px; font-weight: bold; letter-spacing: 8px;">${otp}</span>
           </div>
           <p style="color: #888; font-size: 14px; text-align: center;">
-            This OTP is valid for <strong>2 minutes</strong>. Do not share it with anyone.<br>
+            This OTP is valid for <strong>5 minutes</strong>. Do not share it with anyone.<br>
             If you didn't request this, you can safely ignore this email.
           </p>
         </div>
@@ -845,11 +848,14 @@ class UserService {
       </div>
     `;
 
-    await sendEmail(
+    const isSent = await sendEmail(
       user.email,
       "Your Password Reset OTP - Mind Gym Book",
       message,
     );
+    if (!isSent) {
+      throw new Error("Unable to send OTP. Please check your email and try again.");
+    }
     return true;
   }
 
