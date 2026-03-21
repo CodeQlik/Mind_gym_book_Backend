@@ -45,8 +45,11 @@ const cleanBookData = (
     stock: data.stock || 0,
     condition: data.condition || "good",
     published_date: data.published_date || "",
-    isbn: data.isbn || "",
-  };
+     isbn: data.isbn || "",
+     tax_applicable: data.tax_applicable || false,
+     tax_type: data.tax_type || "none",
+     tax_rate: data.tax_rate ? parseFloat(data.tax_rate).toFixed(2) : "0.00",
+   };
 
   // 1. Handle Audio Book structure (Middle)
   if (

@@ -59,6 +59,13 @@ export const bookValidation = Joi.object({
   highlights: Joi.string().optional().trim().allow(null, ""),
   dimensions: Joi.string().optional().trim().allow(null, ""),
   weight: Joi.number().optional().allow(null),
+  tax_applicable: Joi.alternatives()
+    .try(Joi.boolean(), Joi.string().valid("true", "false"))
+    .optional(),
+  tax_type: Joi.string()
+    .valid("inclusive", "exclusive", "none")
+    .optional(),
+  tax_rate: Joi.number().optional().allow(null),
 }).unknown(true);
 
 export const updateBookValidation = Joi.object({
@@ -113,4 +120,11 @@ export const updateBookValidation = Joi.object({
   highlights: Joi.string().optional().trim().allow(null, ""),
   dimensions: Joi.string().optional().trim().allow(null, ""),
   weight: Joi.number().optional().allow(null),
+  tax_applicable: Joi.alternatives()
+    .try(Joi.boolean(), Joi.string().valid("true", "false"))
+    .optional(),
+  tax_type: Joi.string()
+    .valid("inclusive", "exclusive", "none")
+    .optional(),
+  tax_rate: Joi.number().optional().allow(null),
 }).unknown(true);

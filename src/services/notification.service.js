@@ -693,6 +693,14 @@ class NotificationService {
     return true;
   }
 
+  // Delete all notifications for a user
+  async deleteAllNotifications(userId) {
+    await Notification.destroy({
+      where: { userId: userId },
+    });
+    return true;
+  }
+
   // Register / Update FCM Token
   async registerFCMToken(userId, fcmToken) {
     const user = await User.findByPk(userId);

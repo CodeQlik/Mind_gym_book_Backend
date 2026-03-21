@@ -96,6 +96,15 @@ export const deleteNotification = async (req, res, next) => {
   }
 };
 
+export const deleteAllNotifications = async (req, res, next) => {
+  try {
+    await notificationService.deleteAllNotifications(req.user.id);
+    return sendResponse(res, 200, true, "All notifications deleted successfully");
+  } catch (error) {
+    next(error);
+  }
+};
+
 export const getFavoriteCategories = async (req, res, next) => {
   try {
     const categories = await notificationService.getFavoriteCategories(

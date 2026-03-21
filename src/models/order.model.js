@@ -17,7 +17,7 @@ const Order = sequelize.define(
     // Address snapshot at time of order (denormalized for reliability)
     shipping_address: {
       type: DataTypes.TEXT,
-      allowNull: false,
+      allowNull: true, // Optional for digital books
     },
     // Link to user's address record (optional convenience FK)
     address_id: {
@@ -33,6 +33,10 @@ const Order = sequelize.define(
       type: DataTypes.DECIMAL(10, 2),
       defaultValue: 0,
     },
+    total_tax: {
+      type: DataTypes.DECIMAL(10, 2),
+      defaultValue: 0.0,
+    },
     total_amount: {
       type: DataTypes.DECIMAL(10, 2),
       allowNull: false,
@@ -43,7 +47,7 @@ const Order = sequelize.define(
       references: { model: "coupons", key: "id" },
     },
     order_type: {
-      type: DataTypes.ENUM("physical_book", "marketplace_book"),
+      type: DataTypes.ENUM("physical_book", "marketplace_book", "digital_book"),
       allowNull: false,
       defaultValue: "physical_book",
     },
