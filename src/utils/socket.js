@@ -4,27 +4,35 @@ let io;
 
 export const initSocket = (server) => {
   io = new Server(server, {
+    path: "/socket.io/",
     cors: {
-      origin: "*", // Adjust this for production
+      origin: [
+        "http://localhost:5173",
+        "https://mindgymbook.ductfabrication.in",
+      ],
       methods: ["GET", "POST"],
+      credentials: false,
     },
   });
 
   io.on("connection", (socket) => {
-    // Join a room based on userId for private notifications
+    console.log("Socket connected:", socket.id);
+
     socket.on("join", (data) => {
       const { userId, isAdmin } =
         typeof data === "object" ? data : { userId: data };
+
       if (userId) {
         socket.join(`user_${userId}`);
       }
+
       if (isAdmin) {
         socket.join("admins");
       }
     });
 
     socket.on("disconnect", () => {
-      console.log("User disconnected");
+      console.log("User disconnected:", socket.id);
     });
   });
 
@@ -44,19 +52,16 @@ export const emitNotification = (userId, data, senderId = null) => {
   const senderRoom = senderId ? `user_${senderId}` : null;
 
   if (userId) {
-    // 1. Send to the specific user (if not the sender)
     if (userId !== senderId) {
       io.to(`user_${userId}`).emit("notification", data);
     }
 
-    // 2. Alert admins (excluding the sender AND the targeted user to avoid double-notify)
     let adminDest = io.to("admins");
     if (senderRoom) adminDest = adminDest.except(senderRoom);
-    adminDest = adminDest.except(`user_${userId}`); // Exclude the target user who already got it above
+    adminDest = adminDest.except(`user_${userId}`);
 
     adminDest.emit("notification", data);
   } else {
-    // 3. Broadcast to all (excluding the sender)
     const broadcastDest = senderRoom ? io.except(senderRoom) : io;
     broadcastDest.emit("notification", data);
   }
