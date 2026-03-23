@@ -231,10 +231,14 @@ export const getUserProfile = async (req, res, next) => {
 
 export const updateProfile = async (req, res, next) => {
   try {
+    const verificationToken =
+      req.cookies?.verificationToken || req.body.verificationToken;
+
     const user = await userService.updateProfile(
       req.user.id,
       req.body,
       req.files,
+      verificationToken,
     );
     return sendResponse(res, 200, true, "Profile updated successfully", user);
   } catch (error) {
@@ -316,7 +320,18 @@ export const getAllUsers = async (req, res, next) => {
 export const updateUser = async (req, res, next) => {
   try {
     const { id } = req.params;
-    const user = await userService.updateProfile(id, req.body, req.files);
+    const verificationToken =
+      req.cookies?.verificationToken || req.body.verificationToken;
+
+    const isSelfUpdate = req.user.id.toString() === id.toString();
+
+    const user = await userService.updateProfile(
+      id,
+      req.body,
+      req.files,
+      verificationToken,
+      !isSelfUpdate, // skipVerification ONLY if updating someone else
+    );
     return sendResponse(res, 200, true, "User updated successfully", user);
   } catch (error) {
     next(error);

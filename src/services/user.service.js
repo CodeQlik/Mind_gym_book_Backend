@@ -1,6 +1,5 @@
 import sequelize from "../config/db.js";
 import { QueryTypes } from "sequelize";
-import { OAuth2Client } from "google-auth-library";
 import bcrypt from "bcryptjs";
 import {
   uploadOnCloudinary,
@@ -13,6 +12,7 @@ import {
 import jwt from "jsonwebtoken";
 import sendEmail from "../config/sendEmail.js";
 import notificationService from "./notification.service.js";
+import { OAuth2Client } from "google-auth-library";
 
 class UserService {
   //  Helper: Format user response
@@ -64,7 +64,8 @@ class UserService {
       "SELECT id FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
     );
-    if (existing) throw new Error("An account with this email address already exists.");
+    if (existing)
+      throw new Error("An account with this email address already exists.");
 
     const hashedPassword = await bcrypt.hash(password, 10);
     const profileData = JSON.stringify({
@@ -123,7 +124,10 @@ class UserService {
       "SELECT id FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
     );
-    if (existing) throw new Error("This email address is already registered. Please log in to your account.");
+    if (existing)
+      throw new Error(
+        "This email address is already registered. Please log in to your account.",
+      );
 
     const otp = Math.floor(100000 + Math.random() * 900000).toString();
 
@@ -138,7 +142,9 @@ class UserService {
     const message = `<h2>Registration Verification Code</h2><p>Your OTP is:</p><h1>${otp}</h1><p>This code is valid for 5 minutes.</p>`;
     const isSent = await sendEmail(email, "Verify Your Email", message);
     if (!isSent) {
-      throw new Error("Unable to send OTP. Please check your email and try again.");
+      throw new Error(
+        "Unable to send OTP. Please check your email and try again.",
+      );
     }
     return true;
   }
@@ -154,7 +160,8 @@ class UserService {
     if (!record) throw new Error("The OTP entered is invalid.");
 
     const expiryTime = new Date(record.updated_at).getTime() + 5 * 60 * 1000;
-    if (Date.now() > expiryTime) throw new Error("The OTP has expired. Please request a new one.");
+    if (Date.now() > expiryTime)
+      throw new Error("The OTP has expired. Please request a new one.");
 
     const verificationToken = jwt.sign(
       { email, type: "email_verified" },
@@ -193,7 +200,9 @@ class UserService {
     }
 
     if (verifiedEmail !== email) {
-      throw new Error("Email address mismatch. Please use the email address that was verified.");
+      throw new Error(
+        "Email address mismatch. Please use the email address that was verified.",
+      );
     }
 
     // Check email duplicate
@@ -201,7 +210,8 @@ class UserService {
       "SELECT id FROM users WHERE email = :email LIMIT 1",
       { replacements: { email }, type: QueryTypes.SELECT },
     );
-    if (existingEmail) throw new Error("This email address is already registered.");
+    if (existingEmail)
+      throw new Error("This email address is already registered.");
 
     // Check phone duplicate
     if (phone) {
@@ -210,7 +220,9 @@ class UserService {
         { replacements: { phone }, type: QueryTypes.SELECT },
       );
       if (existingPhone)
-        throw new Error("This phone number is already associated with another account.");
+        throw new Error(
+          "This phone number is already associated with another account.",
+        );
     }
 
     const hashedPassword = await bcrypt.hash(password, 10);
@@ -378,7 +390,9 @@ class UserService {
     );
     if (!user) throw new Error("Invalid email address or password.");
     if (!user.is_active)
-      throw new Error("Your account has been deactivated. Please contact support for assistance.");
+      throw new Error(
+        "Your account has been deactivated. Please contact support for assistance.",
+      );
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch) throw new Error("Invalid email address or password.");
@@ -418,13 +432,14 @@ class UserService {
     const { device_id } = deviceInfo;
     if (!device_id) throw new Error("Device ID is required for login.");
 
+    // Verify Google ID Token using google-auth-library
     const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
     const ticket = await client.verifyIdToken({
-      idToken,
+      idToken: idToken,
       audience: process.env.GOOGLE_CLIENT_ID,
     });
-
     const payload = ticket.getPayload();
+
     const { email, name, picture } = payload;
 
     let [user] = await sequelize.query(
@@ -550,7 +565,9 @@ class UserService {
 
       if (!user) throw new Error("User account not found.");
       if (!user.is_active)
-        throw new Error("Your account has been deactivated. Please contact support for assistance.");
+        throw new Error(
+          "Your account has been deactivated. Please contact support for assistance.",
+        );
 
       // 3. Generate new tokens
       const accessToken = generateAccessToken(user.id);
@@ -665,7 +682,13 @@ class UserService {
   }
 
   // ─── Update Profile
-  async updateProfile(userId, data, files) {
+  async updateProfile(
+    userId,
+    data,
+    files,
+    verificationToken = null,
+    skipVerification = false,
+  ) {
     const [user] = await sequelize.query(
       "SELECT * FROM users WHERE id = :id LIMIT 1",
       { replacements: { id: userId }, type: QueryTypes.SELECT },
@@ -685,13 +708,46 @@ class UserService {
       subscription_end_date,
     } = data;
 
-    // Check email conflict
+    // Check email conflict and verify if changing
     if (email && email !== user.email) {
       const [conflict] = await sequelize.query(
         "SELECT id FROM users WHERE email = :email AND id != :id LIMIT 1",
         { replacements: { email, id: userId }, type: QueryTypes.SELECT },
       );
-      if (conflict) throw new Error("This email address is already in use by another account.");
+      if (conflict)
+        throw new Error(
+          "This email address is already in use by another account.",
+        );
+
+      // Verify email if token is required (Self-update case)
+      if (!verificationToken && !skipVerification) {
+        throw new Error(
+          "Email verification required. Please verify your new email to proceed.",
+        );
+      }
+
+      if (verificationToken && !skipVerification) {
+        let verifiedEmail;
+        try {
+          const decoded = jwt.verify(
+            verificationToken,
+            process.env.JWT_SECRET || "secret",
+          );
+          if (decoded.type !== "email_verified")
+            throw new Error("The verification token is invalid.");
+          verifiedEmail = decoded.email;
+        } catch {
+          throw new Error(
+            "The verification token is invalid or has expired. Please verify your email again.",
+          );
+        }
+
+        if (verifiedEmail !== email) {
+          throw new Error(
+            "Email address mismatch. Please use the email address that was verified.",
+          );
+        }
+      }
     }
 
     // Handle profile image
@@ -792,7 +848,8 @@ class UserService {
     if (!user) throw new Error("User account not found.");
 
     const isMatch = await bcrypt.compare(old_password, user.password);
-    if (!isMatch) throw new Error("The current password you entered is incorrect.");
+    if (!isMatch)
+      throw new Error("The current password you entered is incorrect.");
 
     const hashedPassword = await bcrypt.hash(new_password, 10);
     await sequelize.query(
@@ -854,7 +911,9 @@ class UserService {
       message,
     );
     if (!isSent) {
-      throw new Error("Unable to send OTP. Please check your email and try again.");
+      throw new Error(
+        "Unable to send OTP. Please check your email and try again.",
+      );
     }
     return true;
   }
@@ -867,7 +926,10 @@ class UserService {
       "SELECT * FROM email_verifications WHERE email = :email AND otp = :otp LIMIT 1",
       { replacements: { email, otp }, type: QueryTypes.SELECT },
     );
-    if (!record) throw new Error("The OTP entered is invalid. Please check and try again.");
+    if (!record)
+      throw new Error(
+        "The OTP entered is invalid. Please check and try again.",
+      );
 
     const expiryTime = new Date(record.updated_at).getTime() + 2 * 60 * 1000;
     if (Date.now() > expiryTime)

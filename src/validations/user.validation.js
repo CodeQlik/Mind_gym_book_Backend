@@ -74,6 +74,7 @@ export const updateProfileValidation = Joi.object({
   email: Joi.string().email().lowercase().trim().optional().messages({
     "string.email": "Please provide a valid email",
   }),
+  verificationToken: Joi.string().optional().allow(null, ""),
   phone: Joi.string()
     .pattern(/^[0-9]{10}$/)
     .optional()
