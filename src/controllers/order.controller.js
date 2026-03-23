@@ -214,6 +214,48 @@ export const handleShiprocketWebhook = async (req, res, next) => {
   }
 };
 
+// ─── ADMIN: Shiprocket Order Management ──────────────────────────────────────
+export const shiprocketAssignAWB = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const { courierId } = req.body;
+    const result = await orderService.assignAWB(orderId, courierId);
+    return sendResponse(res, 200, true, "AWB Assigned Successfully", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const shiprocketSchedulePickup = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const result = await orderService.schedulePickup(orderId);
+    return sendResponse(res, 200, true, "Pickup Scheduled Successfully", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const shiprocketGetLabel = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const result = await orderService.getLabel(orderId);
+    return sendResponse(res, 200, true, "Label Generated Successfully", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
+export const shiprocketGetManifest = async (req, res, next) => {
+  try {
+    const { orderId } = req.params;
+    const result = await orderService.getManifest(orderId);
+    return sendResponse(res, 200, true, "Manifest Generated Successfully", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ─── ADMIN: Update order status ───────────────────────────────────────────────
 export const updateOrderStatus = async (req, res, next) => {
   try {

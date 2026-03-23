@@ -1,6 +1,7 @@
 import sequelize from "../config/db.js";
 import { QueryTypes } from "sequelize";
 
+
 class CartService {
   async addToCart(userId, data) {
     const book_id = data.book_id || data.bookId;
@@ -40,36 +41,32 @@ class CartService {
           type: QueryTypes.UPDATE,
         },
       );
+    } else {
+      if (parseInt(quantity) > availableStock) {
+        throw new Error(
+          `Only ${availableStock} units of "${book.title}" are available in stock.`,
+        );
+      }
 
-      const [updated] = await sequelize.query(
-        "SELECT * FROM carts WHERE id = :id LIMIT 1",
-        { replacements: { id: existingItem.id }, type: QueryTypes.SELECT },
+      await sequelize.query(
+        "INSERT INTO carts (user_id, book_id, quantity, created_at, updated_at) VALUES (:userId, :book_id, :quantity, NOW(), NOW())",
+        { replacements: { userId, book_id, quantity }, type: QueryTypes.INSERT },
       );
-      return updated;
     }
 
-    if (parseInt(quantity) > availableStock) {
-      throw new Error(
-        `Only ${availableStock} units of "${book.title}" are available in stock.`,
-      );
-    }
-
-    const [, meta] = await sequelize.query(
-      "INSERT INTO carts (user_id, book_id, quantity, created_at, updated_at) VALUES (:userId, :book_id, :quantity, NOW(), NOW())",
-      { replacements: { userId, book_id, quantity }, type: QueryTypes.INSERT },
+    // Always fetch the latest item by user_id and book_id to return reliable data
+    const [resultItem] = await sequelize.query(
+      "SELECT * FROM carts WHERE user_id = :userId AND book_id = :book_id LIMIT 1",
+      { replacements: { userId, book_id }, type: QueryTypes.SELECT },
     );
-
-    const [newItem] = await sequelize.query(
-      "SELECT * FROM carts WHERE id = :id LIMIT 1",
-      { replacements: { id: meta }, type: QueryTypes.SELECT },
-    );
-    return newItem;
+    
+    return resultItem;
   }
 
   async getCart(userId) {
-    return await sequelize.query(
+    const items = await sequelize.query(
       `SELECT c.*, 
-        b.id AS book_id, b.title, b.slug, b.price, b.thumbnail,
+        b.id AS book_id, b.title, b.slug, b.price, b.thumbnail, b.weight,
         b.tax_applicable, b.tax_type, b.tax_rate,
         cat.name AS category_name
        FROM carts c
@@ -79,6 +76,39 @@ class CartService {
        ORDER BY c.created_at DESC`,
       { replacements: { userId }, type: QueryTypes.SELECT },
     );
+
+    let subtotal = 0;
+    let totalTax = 0;
+    let totalWeight = 0;
+
+    items.forEach((item) => {
+      const price = parseFloat(item.price) || 0;
+      const qty = parseInt(item.quantity) || 0;
+      const weight = parseFloat(item.weight) || 0.5; // Default 500g if not specified
+      const taxRate = parseFloat(item.tax_rate) || 0;
+
+      subtotal += price * qty;
+      totalWeight += weight * qty;
+
+      if (item.tax_applicable && item.tax_type === "exclusive") {
+        totalTax += (price * qty * taxRate) / 100;
+      }
+    });
+
+    const shippingCharge = 0;
+    const addressFound = false;
+
+    return {
+      items,
+      summary: {
+        subtotal: subtotal.toFixed(2),
+        total_tax: totalTax.toFixed(2),
+        shipping_charge: shippingCharge.toFixed(2),
+        total_amount: (subtotal + totalTax + shippingCharge).toFixed(2),
+        address_found: addressFound,
+        total_weight: totalWeight.toFixed(3)
+      }
+    };
   }
 
   async updateQuantity(userId, cartId, quantity) {

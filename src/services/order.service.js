@@ -121,6 +121,7 @@ class OrderService {
     // 4. Calculate total with Tax
     let orderSubtotal = 0; 
     let orderTotalTax = 0; 
+    let totalWeight = 0; 
 
     const orderItems = itemsToProcess.map((item) => {
       const unitPrice = parseFloat(item.book.price);
@@ -144,12 +145,15 @@ class OrderService {
         taxAmountPerUnit = itemTotalPerUnit - basePrice;
       }
 
-      const totalBase = basePrice * item.quantity;
-      const totalTax = taxAmountPerUnit * item.quantity;
+      const totalBase = parseFloat(basePrice.toFixed(2)) * item.quantity;
+      const totalTax = parseFloat(taxAmountPerUnit.toFixed(2)) * item.quantity;
       const totalFinal = itemTotalPerUnit * item.quantity;
+
+      const weight = parseFloat(item.book.weight) || 0.5; // Default 500g
 
       orderSubtotal += totalBase;
       orderTotalTax += totalTax;
+      totalWeight += weight * item.quantity; // Accumulate total weight
 
       return {
         book_id: item.book_id,
@@ -161,6 +165,42 @@ class OrderService {
         subtotal: totalFinal.toFixed(2),
       };
     });
+
+    let shippingCharge = 0.0;
+    let shippingTax = 0.0;
+    let shippingBase = 0.0;
+
+    if (isPhysical && addressSnapshot) {
+      try {
+        // Fetch real-time shipping cost from Shiprocket
+        const addressRepo = await Address.findByPk(address_id);
+        const destPincode = String(addressRepo?.pincode || "").trim();
+        
+        if (destPincode && destPincode !== "") {
+           const srCost = await shiprocketService.getShippingCost({
+             delivery_pincode: destPincode,
+             weight: totalWeight, // In kg
+             cod: payment_method.toLowerCase() === "cod" ? 1 : 0,
+             order_amount: (orderSubtotal + orderTotalTax)
+           });
+
+           // Use the Shiprocket response directly (The Golden Rule)
+           shippingBase = srCost.base;
+           shippingTax = srCost.tax;
+           shippingCharge = srCost.total; 
+        } else {
+           logger.warn(`[ORDER-SERVICE] Dest pincode missing for Order, using fallback 50.`);
+           shippingBase = 47.62;
+           shippingTax = 2.38;
+           shippingCharge = 50.0;
+        }
+      } catch (err) {
+        logger.error("[ORDER-SERVICE] Dynamic shipping calculation failed, using fallback 50:", err.message);
+        shippingBase = 47.62;
+        shippingTax = 2.38;
+        shippingCharge = 50.0;
+      }
+    }
 
     let discountAmount = 0;
     let couponId = null;
@@ -174,20 +214,27 @@ class OrderService {
       discountAmount = validation.discount_amount;
     }
 
-    const totalAmount = orderSubtotal + orderTotalTax - discountAmount;
+    // Add shipping tax to orderTotalTax for accounting
+    // The sum should exactly match Shiprocket's final total
+    const finalTotalTax = orderTotalTax + shippingTax;
+    const finalSubtotal = orderSubtotal;
+    const finalShippingCharge = shippingBase; 
+
+    const totalAmount = finalSubtotal + finalTotalTax + finalShippingCharge - discountAmount;
 
     return {
       userId,
       address_id: isPhysical ? address_id : null,
       shipping_address: addressSnapshot,
-      subtotal_amount: orderSubtotal.toFixed(2),
-      total_tax: orderTotalTax.toFixed(2),
+      subtotal_amount: finalSubtotal.toFixed(2),
+      total_tax: finalTotalTax.toFixed(2),
+      shipping_charge: finalShippingCharge.toFixed(2),
       discount_amount: discountAmount.toFixed(2),
-      total_amount: Math.max(0, totalAmount).toFixed(2),
+      total_amount: Math.round(totalAmount * 100) / 100, // Round to 2 decimals properly
       coupon_id: couponId,
       order_type: fixedOrderType,
       payment_method,
-      book_id: book_id || null, // Top level book_id for payment record
+      book_id: book_id || null, 
       items: orderItems,
     };
   }
@@ -202,6 +249,7 @@ class OrderService {
       shipping_address,
       subtotal_amount,
       total_tax,
+      shipping_charge,
       discount_amount,
       total_amount,
       coupon_id,
@@ -219,6 +267,7 @@ class OrderService {
           shipping_address,
           subtotal_amount,
           total_tax,
+          shipping_charge,
           discount_amount,
           total_amount,
           coupon_id,
@@ -304,8 +353,8 @@ class OrderService {
       await this._syncOrderWithShiprocket(order.id);
     }
 
-    // Return the FINAL updated object
-    return orderWithDetails;
+    // Return the FINAL updated object with Shiprocket IDs
+    return await this._getOrderWithDetails(order.id);
   }
 
   /**
@@ -494,8 +543,12 @@ class OrderService {
     };
 
     for (const row of statusCounts) {
-      if (stats.hasOwnProperty(row.delivery_status)) {
-        stats[row.delivery_status] = parseInt(row.count);
+      const statusKey = row.delivery_status?.toLowerCase();
+      // Map 'canceled' to 'cancelled' for stats consistency
+      const mappedKey = statusKey === "canceled" ? "cancelled" : statusKey;
+
+      if (stats.hasOwnProperty(mappedKey)) {
+        stats[mappedKey] += parseInt(row.count);
       }
     }
 
@@ -655,6 +708,70 @@ class OrderService {
     return await this._getOrderWithDetails(order.id);
   }
 
+  /**
+   * ADMIN: Assign AWB to shipment
+   */
+  async assignAWB(orderId, courierId = null) {
+    const order = await Order.findByPk(orderId);
+    if (!order || !order.shiprocket_shipment_id) {
+      throw new Error("Shipment ID not found for this order. Is it synced with Shiprocket?");
+    }
+
+    const shiprocketResult = await shiprocketService.assignAWB(
+      order.shiprocket_shipment_id,
+      courierId
+    );
+
+    if (shiprocketResult.status === 1 || shiprocketResult.awb_assigned === 1) {
+      const awb = shiprocketResult.response?.data?.awb_code || shiprocketResult.awb_code;
+      await order.update({
+        tracking_id: awb || order.tracking_id,
+        tracking_url: awb ? `https://shiprocket.co/tracking/${awb}` : order.tracking_url,
+      });
+    }
+
+    return shiprocketResult;
+  }
+
+  /**
+   * ADMIN: Schedule pickup
+   */
+  async schedulePickup(orderId) {
+    const order = await Order.findByPk(orderId);
+    if (!order || !order.shiprocket_shipment_id) {
+      throw new Error("Shipment ID not found for this order.");
+    }
+
+    const result = await shiprocketService.schedulePickup(order.shiprocket_shipment_id);
+    return result;
+  }
+
+  /**
+   * ADMIN: Get Shipping Label
+   */
+  async getLabel(orderId) {
+    const order = await Order.findByPk(orderId);
+    if (!order || !order.shiprocket_shipment_id) {
+      throw new Error("Shipment ID not found for this order.");
+    }
+
+    const result = await shiprocketService.generateLabel(order.shiprocket_shipment_id);
+    return result;
+  }
+
+  /**
+   * ADMIN: Get Manifest PDF
+   */
+  async getManifest(orderId) {
+    const order = await Order.findByPk(orderId);
+    if (!order || !order.shiprocket_shipment_id) {
+      throw new Error("Shipment ID not found for this order.");
+    }
+
+    const result = await shiprocketService.generateManifest(order.shiprocket_shipment_id);
+    return result;
+  }
+
   async updateOrderStatus(orderId, statusData) {
     const order = await Order.findByPk(orderId, {
       include: [{ model: OrderItem, as: "items" }],
@@ -662,7 +779,8 @@ class OrderService {
     if (!order) throw new Error("The specified order was not found.");
 
     const oldStatus = order.delivery_status;
-    const newStatus = statusData.delivery_status;
+    let newStatus = statusData.delivery_status;
+    if (newStatus === "canceled") newStatus = "cancelled";
 
     const allowed = [
       "delivery_status",
@@ -676,6 +794,7 @@ class OrderService {
     for (const key of allowed) {
       if (statusData[key] !== undefined) updates[key] = statusData[key];
     }
+    if (updates.delivery_status === "canceled") updates.delivery_status = "cancelled";
 
     // Automatic Payment Status for COD: Mark as PAID when DELIVERED
     if (
@@ -692,16 +811,18 @@ class OrderService {
 
     // Handle restocking if status changes to 'returned'
     // Only restock if the previous status was NOT 'returned' or 'cancelled'
-    const needsRestock =
-      newStatus === "returned" &&
-      oldStatus !== "returned" &&
-      oldStatus !== "cancelled";
+    // Restocking Logic:
+    // 1. Regular Return (RTO) OR Cancellation after Shipping -> Add back to stock
+    const isReturning = (newStatus === "returned" && oldStatus !== "returned" && oldStatus !== "cancelled") || 
+                       (newStatus === "cancelled" && oldStatus === "shipped");
 
-    if (needsRestock) {
+    // 2. Cancellation while still Processing -> Just clear reservation
+    const isCancelledFromProcessing = newStatus === "cancelled" && oldStatus === "processing";
+
+    if (isReturning) {
       await sequelize.transaction(async (t) => {
         await order.update(updates, { transaction: t });
-
-        // Restock items (Return to STOCK)
+        // Restock items (Add back to STOCK)
         for (const item of order.items) {
           await Book.update(
             { stock: sequelize.literal(`stock + ${item.quantity}`) },
@@ -709,10 +830,10 @@ class OrderService {
           );
         }
       });
-    } else if (newStatus === "cancelled" && oldStatus === "processing") {
-      // Manual/Admin cancel from processing: Clear reservation
+    } else if (isCancelledFromProcessing) {
       await sequelize.transaction(async (t) => {
         await order.update(updates, { transaction: t });
+        // Clear reserved stock
         for (const item of order.items) {
           await Book.update(
             { reserved: sequelize.literal(`reserved - ${item.quantity}`) },
@@ -744,6 +865,8 @@ class OrderService {
             order_id: String(order.id),
             order_no: order.order_no,
             status: newStatus,
+            tracking_id: order.tracking_id || "",
+            tracking_url: order.tracking_url || "",
           },
         );
       } catch (notifError) {}
@@ -935,12 +1058,18 @@ class OrderService {
       const srStatus = track.current_status?.toLowerCase();
       
       let newStatus = order.delivery_status;
-      if (["shipped", "picked up", "in transit", "out for delivery"].includes(srStatus)) {
+      const srCancelled = ["cancelled", "canceled", "voided"];
+      const srRTO = ["rto", "rto initiated", "rto delivered", "returned", "undelivered", "rto undelivered"];
+      const srShipped = ["shipped", "picked up", "in transit", "out for delivery", "pickup generated", "pickup scheduled"];
+
+      if (srShipped.includes(srStatus)) {
         newStatus = "shipped";
       } else if (srStatus === "delivered") {
         newStatus = "delivered";
-      } else if (["cancelled", "rto", "returned"].includes(srStatus)) {
-        newStatus = srStatus === "cancelled" ? "cancelled" : "returned";
+      } else if (srCancelled.includes(srStatus)) {
+        newStatus = "cancelled";
+      } else if (srRTO.includes(srStatus)) {
+        newStatus = "returned";
       }
 
       if (newStatus !== order.delivery_status) {
@@ -978,13 +1107,18 @@ class OrderService {
 
     const srStatus = status?.toLowerCase();
     let newStatus = order.delivery_status;
+    const srCancelled = ["cancelled", "canceled", "voided"];
+    const srRTO = ["rto", "rto initiated", "rto delivered", "returned", "undelivered", "rto undelivered"];
+    const srShipped = ["shipped", "picked up", "in transit", "out for delivery", "pickup generated", "pickup scheduled"];
 
-    if (["shipped", "picked up", "in transit", "out for delivery"].includes(srStatus)) {
+    if (srShipped.includes(srStatus)) {
       newStatus = "shipped";
     } else if (srStatus === "delivered") {
       newStatus = "delivered";
-    } else if (["cancelled", "rto", "returned"].includes(srStatus)) {
-      newStatus = srStatus === "cancelled" ? "cancelled" : "returned";
+    } else if (srCancelled.includes(srStatus)) {
+      newStatus = "cancelled";
+    } else if (srRTO.includes(srStatus)) {
+      newStatus = "returned";
     }
 
     if (newStatus !== order.delivery_status) {

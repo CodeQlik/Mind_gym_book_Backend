@@ -18,6 +18,10 @@ import {
   approveRefund,
   refreshShiprocketStatus,
   handleShiprocketWebhook,
+  shiprocketAssignAWB,
+  shiprocketSchedulePickup,
+  shiprocketGetLabel,
+  shiprocketGetManifest,
 } from "../controllers/order.controller.js";
 
 const router = express.Router();
@@ -47,6 +51,10 @@ router.patch("/admin/status/:orderId", verifyJWT, isAdmin, updateOrderStatus);
 router.post("/admin/approve-refund/:orderId", verifyJWT, isAdmin, approveRefund);
 router.get("/admin/refresh-shiprocket/:orderId", verifyJWT, isAdmin, refreshShiprocketStatus);
 router.delete("/admin/delete/:orderId", verifyJWT, isAdmin, deleteOrder);
+router.post("/admin/shiprocket/assign-awb/:orderId", verifyJWT, isAdmin, shiprocketAssignAWB);
+router.post("/admin/shiprocket/schedule-pickup/:orderId", verifyJWT, isAdmin, shiprocketSchedulePickup);
+router.get("/admin/shiprocket/label/:orderId", verifyJWT, isAdmin, shiprocketGetLabel);
+router.get("/admin/shiprocket/manifest/:orderId", verifyJWT, isAdmin, shiprocketGetManifest);
 
 // ─── EXTERNAL Webhooks ───
 router.post("/fulfillment-update", handleShiprocketWebhook);

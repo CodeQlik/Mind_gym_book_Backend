@@ -119,12 +119,9 @@ class AnalyticsService {
     const today = new Date();
     const day = today.getDay(); // 0 is Sunday, 1 is Monday...
 
-    // Calculate start of current week (Monday 00:00:00)
-    const startOfWeek = new Date(
-      today.getFullYear(),
-      today.getMonth(),
-      today.getDate() - (day === 0 ? 6 : day - 1),
-    );
+    // Calculate 7 days ago from today for a rolling week view
+    const startOfWeek = new Date(today);
+    startOfWeek.setDate(today.getDate() - 7);
     startOfWeek.setHours(0, 0, 0, 0);
 
     const stats = await OrderItem.findAll({

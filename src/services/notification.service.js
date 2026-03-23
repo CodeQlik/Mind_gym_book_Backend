@@ -270,7 +270,15 @@ class NotificationService {
                   <div class="content">
                     <h2>${title}</h2>
                     <p>${formattedMessage}</p>
-                    ${metadata?.order_id ? `<a href="#" class="button">Track Your Order</a>` : ""}
+                    ${
+                      metadata?.tracking_url
+                        ? `<a href="${metadata.tracking_url}" class="button">Track Your Order</a>`
+                        : metadata?.tracking_id
+                          ? `<a href="https://shiprocket.co/tracking/${metadata.tracking_id}" class="button">Track Your Order</a>`
+                          : metadata?.order_id
+                            ? `<a href="${process.env.CLIENT_URL || "http://localhost:5173"}/orders/view/${metadata.order_id}" class="button">View Order Details</a>`
+                            : ""
+                    }
                   </div>
                   <div class="footer">
                     <span class="brand">Mind Gym Book Publication</span>
