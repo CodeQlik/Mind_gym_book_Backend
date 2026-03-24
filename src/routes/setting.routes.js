@@ -17,6 +17,7 @@ router.post(
   upload.fields([
     { name: "logo", maxCount: 1 },
     { name: "favicon", maxCount: 1 },
+    { name: "admin_signature", maxCount: 1 },
   ]),
   updateSettings
 );

@@ -33,6 +33,15 @@ export const updateSettings = async (req, res, next) => {
       };
     }
 
+    // Handle Admin Signature Upload
+    if (req.files && req.files.admin_signature) {
+      const signatureResult = await uploadOnCloudinary(req.files.admin_signature[0].path, "settings/signature");
+      updateData.admin_signature = {
+        url: signatureResult.secure_url,
+        public_id: signatureResult.public_id,
+      };
+    }
+
     const settings = await settingService.updateSettings(updateData);
     return sendResponse(res, 200, true, "Settings updated successfully", settings);
   } catch (error) {

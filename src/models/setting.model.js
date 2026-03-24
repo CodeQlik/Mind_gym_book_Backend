@@ -37,6 +37,10 @@ const Setting = sequelize.define(
       type: DataTypes.STRING,
       allowNull: true,
     },
+    admin_signature: {
+      type: DataTypes.JSON, // To store Cloudinary URL and public_id
+      allowNull: true,
+    },
   },
   {
     timestamps: true,

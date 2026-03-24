@@ -1,5 +1,7 @@
 import { PDFDocument, rgb, StandardFonts } from "pdf-lib";
 import orderService from "./order.service.js";
+import Setting from "../models/setting.model.js";
+import axios from "axios";
 
 class InvoiceService {
   async generateOrderInvoice(orderId) {
@@ -294,51 +296,52 @@ class InvoiceService {
     });
 
     // ─── Signature & Footer ───────────────────────────────────────────────
-    yPos -= 50;
+    yPos = 130; // Use a fixed Y position near the bottom for the signature block
+    
     page.drawText("Thanks for your business", {
       x: 40,
-      y: yPos,
+      y: yPos + 30,
       size: 14,
       font: fontBold,
       color: navyColor,
     });
-    yPos -= 25;
-    page.drawText(
-      "Disclaimer: This is a system generated order invoice and does not require",
-      { x: 40, y: yPos, size: 8, font: fontRegular, color: textGray },
-    );
-    page.drawText("a physical signature.", {
-      x: 40,
-      y: yPos - 10,
-      size: 8,
-      font: fontRegular,
-      color: textGray,
-    });
-
-    // Signature Line
+    
+    // Signature Line elements (Only the Image is kept for a clean look)
     const sigX = 420;
-    page.drawText("Mind Gym Book", {
-      x: sigX,
-      y: yPos - 15,
-      size: 11,
-      font: fontBold,
-      color: textDark,
-    });
-    page.drawLine({
-      start: { x: sigX, y: yPos - 20 },
-      end: { x: sigX + 120, y: yPos - 20 },
-      thickness: 1.5,
-      color: textDark,
-    });
-    page.drawText("SIGNATURE", {
-      x: sigX + 35,
-      y: yPos - 33,
-      size: 9,
-      font: fontBold,
-      color: textDark,
-    });
+    try {
+      const setting = await Setting.findOne();
+      if (setting) {
+        const plainSetting = setting.get ? setting.get({ plain: true }) : setting;
+        let sigData = plainSetting.admin_signature;
+        
+        if (typeof sigData === "string") {
+          try { sigData = JSON.parse(sigData); } catch(e) {}
+        }
 
-    // Bottom Slant Accent (SVG Paths)
+        if (sigData && sigData.url) {
+          const sigResponse = await axios.get(sigData.url, { responseType: "arraybuffer" });
+          const signatureBuffer = Buffer.from(sigResponse.data);
+          
+          let sigImage;
+          try {
+            sigImage = await pdfDoc.embedPng(signatureBuffer);
+          } catch (pngErr) {
+            sigImage = await pdfDoc.embedJpg(signatureBuffer);
+          }
+          
+          page.drawImage(sigImage, {
+            x: sigX - 10,
+            y: yPos - 5,
+            width: 140,
+            height: 60,
+          });
+        }
+      }
+    } catch (e) {
+      console.warn("[Invoice] Signature image embed failed:", e.message);
+    }
+
+    // Slants at the bottom
     page.drawSvgPath(`M 0 0 L 300 0 L 400 30 L 350 60 L 0 60 Z`, {
       color: navyColor,
     });
