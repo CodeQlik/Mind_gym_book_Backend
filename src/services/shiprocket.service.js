@@ -339,8 +339,10 @@ class ShiprocketService {
         // Return the first available courier's full charge details
         const bestMatch = serviceabilityData.available_courier_companies[0];
         const total = parseFloat(bestMatch.rate || bestMatch.freight_charge || 50);
-        const base = parseFloat(bestMatch.freight_charge || total);
-        const tax = total - base;
+        
+        // India standard: 18% GST on shipping services
+        const base = parseFloat((total / 1.18).toFixed(2));
+        const tax = parseFloat((total - base).toFixed(2));
 
         logger.info(
           `SHIPROCKET: Calculated dynamic charge for ${delivery_pincode} is Total:${total}, Base:${base}`,

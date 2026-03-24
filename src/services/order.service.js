@@ -218,9 +218,9 @@ class OrderService {
     // The sum should exactly match Shiprocket's final total
     const finalTotalTax = orderTotalTax + shippingTax;
     const finalSubtotal = orderSubtotal;
-    const finalShippingCharge = shippingBase; 
+    const finalShippingBase = shippingBase; 
 
-    const totalAmount = finalSubtotal + finalTotalTax + finalShippingCharge - discountAmount;
+    const totalAmount = finalSubtotal + finalTotalTax + finalShippingBase - discountAmount;
 
     return {
       userId,
@@ -228,7 +228,7 @@ class OrderService {
       shipping_address: addressSnapshot,
       subtotal_amount: finalSubtotal.toFixed(2),
       total_tax: finalTotalTax.toFixed(2),
-      shipping_charge: finalShippingCharge.toFixed(2),
+      shipping_charge: (shippingBase + shippingTax).toFixed(2),
       discount_amount: discountAmount.toFixed(2),
       total_amount: Math.round(totalAmount * 100) / 100, // Round to 2 decimals properly
       coupon_id: couponId,
