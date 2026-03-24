@@ -19,6 +19,10 @@ class CartService {
 
     const availableStock = (book.stock || 0) - (book.reserved || 0);
 
+    if (availableStock <= 0) {
+      throw new Error(`The book "${book.title}" is currently out of stock.`);
+    }
+
     // Check if item already exists in cart
     const [existingItem] = await sequelize.query(
       "SELECT id, quantity FROM carts WHERE user_id = :userId AND book_id = :book_id LIMIT 1",

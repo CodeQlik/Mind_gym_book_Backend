@@ -7528,3 +7528,42 @@
 [2026-03-23T12:25:50.661Z] [ERROR] PUT /api/v1/users/update-profile {"message":"Email verification required. Please verify your new email to proceed.","stack":"Error: Email verification required. Please verify your new email to proceed.\n    at UserService.updateProfile (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/user.service.js:724:15)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async updateProfile (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/user.controller.js:237:18)","body":{"phone":"8865873236","email":"asasa@gmail.com"},"params":{},"query":{},"user":56}
 [2026-03-23T12:26:13.703Z] [ERROR] Redis Client Error {}
 [2026-03-23T12:26:13.719Z] [ERROR] Error setting cache for key: books:list:{}:1:10:false {}
+[2026-03-23T12:57:40.708Z] [ERROR] Redis Client Error {}
+[2026-03-23T12:57:40.715Z] [ERROR] Error setting cache for key: books:list:{}:1:10:false {}
+[2026-03-23T12:57:40.723Z] [ERROR] Error setting cache for key: books:list:{}:1:10:false {}
+[2026-03-23T13:05:05.793Z] [ERROR] Redis Client Error {"errno":-4077,"code":"ECONNRESET","syscall":"read"}
+[2026-03-23T13:05:10.885Z] [ERROR] Redis Client Error {}
+[2026-03-24T04:43:35.540Z] [ERROR] Redis Client Error {"errno":-4077,"code":"ECONNRESET","syscall":"read"}
+[2026-03-24T04:43:35.579Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:35.705Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:36.010Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:36.339Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:36.938Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:37.923Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:39.663Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:41.857Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:44.053Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:46.131Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:48.312Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:50.369Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:52.661Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:54.754Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:56.953Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:43:59.043Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:01.139Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:03.287Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:05.331Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:07.401Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:09.410Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:11.419Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:13.462Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:15.627Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:17.813Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:19.942Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:22.133Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:24.189Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:26.229Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:28.299Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T04:44:30.479Z] [ERROR] Redis Client Error {"errno":-3008,"code":"ENOTFOUND","syscall":"getaddrinfo","hostname":"redis-15209.c258.us-east-1-4.ec2.cloud.redislabs.com"}
+[2026-03-24T06:04:35.336Z] [ERROR] POST /api/v1/users/change-password {"message":"The current password you entered is incorrect.","stack":"Error: The current password you entered is incorrect.\n    at UserService.changePassword (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/user.service.js:852:13)\n    at async changePassword (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/user.controller.js:251:5)","body":{"old_password":"12345678","new_password":"123456789","confirm_password":"123456789"},"params":{},"query":{},"user":26}
+[2026-03-24T06:45:09.810Z] [ERROR] POST /api/v1/cart/add {"message":"The book \"Chapter Danger\" is currently out of stock.","stack":"Error: The book \"Chapter Danger\" is currently out of stock.\n    at CartService.addToCart (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/services/cart.service.js:23:13)\n    at process.processTicksAndRejections (node:internal/process/task_queues:105:5)\n    at async addToCart (file:///E:/Mind_gym_book_Backend-main/Mind_gym_book_Backend-main/src/controllers/cart.controller.js:6:18)","body":{"book_id":96,"quantity":2},"params":{},"query":{},"user":56}
