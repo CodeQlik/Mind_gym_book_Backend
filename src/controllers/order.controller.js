@@ -4,6 +4,16 @@ import sendResponse from "../utils/responseHandler.js";
 
 import paymentService from "../services/payment.service.js";
 
+// ─── USER: Preview order details before checkout ──────────────────────────────
+export const previewOrder = async (req, res, next) => {
+  try {
+    const result = await orderService.prepareOrderData(req.user.id, req.body);
+    return sendResponse(res, 200, true, "Order preview generated", result);
+  } catch (error) {
+    next(error);
+  }
+};
+
 // ─── USER: Place order from cart ───────────────────────────────────────────────
 export const checkoutFromCart = async (req, res, next) => {
   try {

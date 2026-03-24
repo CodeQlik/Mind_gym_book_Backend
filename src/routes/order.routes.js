@@ -22,12 +22,13 @@ import {
   shiprocketSchedulePickup,
   shiprocketGetLabel,
   shiprocketGetManifest,
+  previewOrder,
 } from "../controllers/order.controller.js";
 
 const router = express.Router();
 
 //USER Routes
-
+router.post("/preview", verifyJWT, previewOrder);
 router.post("/checkout", verifyJWT, checkoutFromCart);
 router.get("/my-orders", verifyJWT, getMyOrders);
 router.get("/my-orders/:orderId", verifyJWT, getMyOrderById);
