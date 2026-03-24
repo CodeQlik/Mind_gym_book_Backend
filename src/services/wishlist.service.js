@@ -31,7 +31,7 @@ class WishlistService {
   async getWishlist(userId) {
     return await sequelize.query(
       `SELECT w.*,
-        b.id AS book_id, b.title, b.slug, b.price, b.thumbnail, b.author, b.is_active,
+        b.id AS book_id, b.title, b.slug, b.price, b.thumbnail, b.author, b.is_active, b.tax_applicable, b.tax_type, b.tax_rate,
         cat.name AS category_name
        FROM wishlists w
        LEFT JOIN books b ON w.book_id = b.id

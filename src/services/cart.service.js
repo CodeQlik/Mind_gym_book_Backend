@@ -69,7 +69,7 @@ class CartService {
   async getCart(userId) {
     return await sequelize.query(
       `SELECT c.*, 
-        b.id AS book_id, b.title, b.slug, b.price, b.thumbnail,
+        b.id AS book_id, b.title, b.author, b.slug, b.price, b.thumbnail,
         b.tax_applicable, b.tax_type, b.tax_rate,
         cat.name AS category_name
        FROM carts c

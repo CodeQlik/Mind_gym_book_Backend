@@ -130,15 +130,19 @@ class OrderService {
 
       let basePrice, taxAmountPerUnit, itemTotalPerUnit;
 
-      if (!isTaxApplicable || taxType === "none" || taxRate === 0) {
+      // Lenient tax calculation: if tax_rate > 0 but applicable is false or type is none, assume it's exclusive
+      const effectiveTaxApplicable = isTaxApplicable || taxRate > 0;
+      const effectiveTaxType = (taxType === "none" && taxRate > 0) ? "exclusive" : taxType;
+
+      if (!effectiveTaxApplicable || effectiveTaxType === "none" || taxRate === 0) {
         basePrice = unitPrice;
         taxAmountPerUnit = 0;
         itemTotalPerUnit = unitPrice;
-      } else if (taxType === "exclusive") {
+      } else if (effectiveTaxType === "exclusive") {
         basePrice = unitPrice;
         taxAmountPerUnit = (unitPrice * taxRate) / 100;
         itemTotalPerUnit = unitPrice + taxAmountPerUnit;
-      } else if (taxType === "inclusive") {
+      } else if (effectiveTaxType === "inclusive") {
         itemTotalPerUnit = unitPrice;
         basePrice = unitPrice / (1 + taxRate / 100);
         taxAmountPerUnit = itemTotalPerUnit - basePrice;
@@ -360,7 +364,7 @@ class OrderService {
             {
               model: Book,
               as: "book",
-              attributes: ["id", "title", "slug", "author", "thumbnail"],
+              attributes: ["id", "title", "slug", "author", "thumbnail", "price", "tax_applicable", "tax_type", "tax_rate"],
             },
           ],
         },
@@ -445,7 +449,7 @@ class OrderService {
             {
               model: Book,
               as: "book",
-              attributes: ["id", "title", "slug", "author", "thumbnail"],
+              attributes: ["id", "title", "slug", "author", "thumbnail", "price", "tax_applicable", "tax_type", "tax_rate"],
             },
           ],
         },
@@ -1023,6 +1027,9 @@ class OrderService {
                 "author",
                 "thumbnail",
                 "price",
+                "tax_applicable",
+                "tax_type",
+                "tax_rate",
               ],
             },
           ],
