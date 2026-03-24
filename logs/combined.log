@@ -20108,3 +20108,31 @@
 [2026-03-24T07:27:41.982Z] [INFO] SHIPROCKET: Checking serviceability to 302020, weight 0.500kg 
 [2026-03-24T07:27:42.427Z] [INFO] SHIPROCKET: Calculated dynamic charge for 302020 is Total:51, Base:43.22 
 [2026-03-24T07:27:42.434Z] [INFO] POST /api/v1/orders/preview 200 (699ms) {"method":"POST","url":"/api/v1/orders/preview","status":200,"duration":"699ms","ip":"::1","user":56}
+[2026-03-24T08:48:59.295Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (886ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"886ms","ip":"::1","user":26}
+[2026-03-24T08:48:59.784Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (479ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"479ms","ip":"::1","user":26}
+[2026-03-24T08:49:06.703Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (466ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"466ms","ip":"::1","user":26}
+[2026-03-24T08:49:07.005Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (291ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"291ms","ip":"::1","user":26}
+[2026-03-24T08:49:10.603Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (469ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"469ms","ip":"::1","user":26}
+[2026-03-24T08:49:10.851Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (238ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"238ms","ip":"::1","user":26}
+[2026-03-24T08:50:38.634Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (570ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"570ms","ip":"::1","user":26}
+[2026-03-24T08:51:33.508Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (464ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"464ms","ip":"::1","user":26}
+[2026-03-24T08:51:44.196Z] [INFO] GET /api/v1/book/chapter-danger 200 (46ms) {"method":"GET","url":"/api/v1/book/chapter-danger","status":200,"duration":"46ms","ip":"::1","user":26}
+[2026-03-24T08:51:44.225Z] [INFO] GET /api/v1/book/chapter-danger 304 (16ms) {"method":"GET","url":"/api/v1/book/chapter-danger","status":304,"duration":"16ms","ip":"::1","user":26}
+[2026-03-24T08:52:01.488Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (490ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"490ms","ip":"::1","user":26}
+[2026-03-24T08:52:01.754Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (252ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"252ms","ip":"::1","user":26}
+[2026-03-24T08:52:04.436Z] [INFO] GET /api/v1/category/all 304 (20ms) {"method":"GET","url":"/api/v1/category/all","status":304,"duration":"20ms","ip":"::1","user":26}
+[2026-03-24T08:52:04.459Z] [INFO] GET /api/v1/book/chapter-danger 304 (36ms) {"method":"GET","url":"/api/v1/book/chapter-danger","status":304,"duration":"36ms","ip":"::1","user":26}
+[2026-03-24T08:52:04.484Z] [INFO] GET /api/v1/category/all 304 (36ms) {"method":"GET","url":"/api/v1/category/all","status":304,"duration":"36ms","ip":"::1","user":26}
+[2026-03-24T08:52:04.506Z] [INFO] GET /api/v1/book/chapter-danger 304 (37ms) {"method":"GET","url":"/api/v1/book/chapter-danger","status":304,"duration":"37ms","ip":"::1","user":26}
+[2026-03-24T08:52:12.727Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (468ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"468ms","ip":"::1","user":26}
+[2026-03-24T08:52:13.024Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (289ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"289ms","ip":"::1","user":26}
+[2026-03-24T08:52:38.848Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (533ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"533ms","ip":"::1","user":26}
+[2026-03-24T08:52:39.120Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (261ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"261ms","ip":"::1","user":26}
+[2026-03-24T08:56:36.435Z] [INFO] GET /api/v1/orders/admin/stats 304 (79ms) {"method":"GET","url":"/api/v1/orders/admin/stats","status":304,"duration":"79ms","ip":"::1","user":26}
+[2026-03-24T08:56:36.514Z] [INFO] GET /api/v1/orders/admin/all?page=1&limit=10 304 (183ms) {"method":"GET","url":"/api/v1/orders/admin/all?page=1&limit=10","status":304,"duration":"183ms","ip":"::1","user":26}
+[2026-03-24T08:56:36.548Z] [INFO] GET /api/v1/orders/admin/stats 304 (91ms) {"method":"GET","url":"/api/v1/orders/admin/stats","status":304,"duration":"91ms","ip":"::1","user":26}
+[2026-03-24T08:56:36.608Z] [INFO] GET /api/v1/orders/admin/all?page=1&limit=10 304 (81ms) {"method":"GET","url":"/api/v1/orders/admin/all?page=1&limit=10","status":304,"duration":"81ms","ip":"::1","user":26}
+[2026-03-24T08:56:36.798Z] [INFO] GET /api/v1/orders/admin/all?page=1&limit=10 304 (79ms) {"method":"GET","url":"/api/v1/orders/admin/all?page=1&limit=10","status":304,"duration":"79ms","ip":"::1","user":26}
+[2026-03-24T08:56:39.264Z] [INFO] GET /api/v1/orders/admin/75 304 (22ms) {"method":"GET","url":"/api/v1/orders/admin/75","status":304,"duration":"22ms","ip":"::1","user":26}
+[2026-03-24T08:56:39.284Z] [INFO] GET /api/v1/orders/admin/75 304 (14ms) {"method":"GET","url":"/api/v1/orders/admin/75","status":304,"duration":"14ms","ip":"::1","user":26}
+[2026-03-24T08:56:41.285Z] [INFO] GET /api/v1/orders/invoice/75 200 (136ms) {"method":"GET","url":"/api/v1/orders/invoice/75","status":200,"duration":"136ms","ip":"::1","user":26}
