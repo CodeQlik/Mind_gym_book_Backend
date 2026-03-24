@@ -46,7 +46,7 @@ class OrderService {
     if (fixedOrderType === "physical") fixedOrderType = "physical_book";
 
     const isPhysical = fixedOrderType === "physical_book";
-    
+
     if (isPhysical && !address_id) {
       throw new Error("Shipping address ID is required for physical book orders.");
     }
@@ -119,8 +119,8 @@ class OrderService {
     }
 
     // 4. Calculate total with Tax
-    let orderSubtotal = 0; 
-    let orderTotalTax = 0; 
+    let orderSubtotal = 0;
+    let orderTotalTax = 0;
 
     const orderItems = itemsToProcess.map((item) => {
       const unitPrice = parseFloat(item.book.price);
@@ -286,7 +286,7 @@ class OrderService {
 
       let msg = payment_method === "cod" ? "📦 Order Placed (COD)!" : "📦 Order Confirmed!";
       let bodyText = `Your order ${orderWithDetails.order_no} has been ${payment_method === "cod" ? "placed" : "successfully confirmed"}.`;
-      
+
       if (order_type === "digital_book") {
         msg = "✅ Digital Access Unlocked!";
         bodyText = `Thank you for your purchase. You now have permanent access to the purchased books.`;
@@ -341,7 +341,7 @@ class OrderService {
         `We have received the payment for your order ${order.order_no}. We'll start processing it soon.`,
         { order_id: String(order.id), order_no: order.order_no },
       );
-    } catch (notifError) {}
+    } catch (notifError) { }
 
     // 2. AUTOMATION: Sync with Shiprocket (if not already synced)
     await this._syncOrderWithShiprocket(order.id);
@@ -577,7 +577,7 @@ class OrderService {
           tracking_url: tracking_url || "",
         },
       );
-    } catch (notifError) {}
+    } catch (notifError) { }
 
     return await this._getOrderWithDetails(order.id);
   }
@@ -654,7 +654,7 @@ class OrderService {
           shiprocket_order_id: String(shiprocketResult.order_id),
         },
       );
-    } catch (e) {}
+    } catch (e) { }
 
     return await this._getOrderWithDetails(order.id);
   }
@@ -899,7 +899,7 @@ class OrderService {
 
       const orderWithDetails = await this._getOrderWithDetails(order.id);
       logger.info(`[AUTO-DISPATCH] Attempting Shiprocket sync for Order: ${order.id}`);
-      
+
       const shiprocketResult = await shiprocketService.createCustomOrder(
         orderWithDetails,
         orderWithDetails.user,
@@ -939,7 +939,7 @@ class OrderService {
     if (trackingData.tracking_data.track_status === 1 && trackingData.tracking_data.shipment_track && trackingData.tracking_data.shipment_track[0]) {
       const track = trackingData.tracking_data.shipment_track[0];
       const srStatus = track.current_status?.toLowerCase();
-      
+
       let newStatus = order.delivery_status;
       if (["shipped", "picked up", "in transit", "out for delivery"].includes(srStatus)) {
         newStatus = "shipped";
@@ -950,7 +950,7 @@ class OrderService {
       }
 
       if (newStatus !== order.delivery_status) {
-        await this.updateOrderStatus(orderId, { 
+        await this.updateOrderStatus(orderId, {
           delivery_status: newStatus,
           tracking_id: track.awb_code || order.tracking_id
         });
@@ -966,7 +966,7 @@ class OrderService {
    */
   async handleShiprocketWebhook(payload) {
     const { order_id, shipment_id, status, awb } = payload;
-    
+
     // Find order by Shiprocket shipment_id or order_id
     const order = await Order.findOne({
       where: {
@@ -994,7 +994,7 @@ class OrderService {
     }
 
     if (newStatus !== order.delivery_status) {
-      await this.updateOrderStatus(order.id, { 
+      await this.updateOrderStatus(order.id, {
         delivery_status: newStatus,
         tracking_id: awb || order.tracking_id
       });
