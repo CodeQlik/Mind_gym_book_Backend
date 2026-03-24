@@ -312,7 +312,9 @@ class PaymentService {
 
   // ─── ADMIN: Process actual refund via Razorpay
   async processRefund(orderId) {
-    const order = await Order.findByPk(orderId);
+    const order = await Order.findByPk(orderId, {
+      include: [{ model: Book, as: 'books' }, 'items'] // Ensuring items are loaded for stock reversion
+    });
     if (!order) throw new Error("The specified order was not found.");
 
     if (!order.refund_requested) {
@@ -323,35 +325,56 @@ class PaymentService {
       throw new Error("This order has already been refunded.");
     }
 
-    // Find the successful payment record for this order
-    const payment = await Payment.findOne({
-      where: {
-        order_id: order.razorpay_order_id,
-        status: "captured",
-      },
-    });
+    // 1. Process money refund (Only if NOT COD)
+    let refund = null;
+    if (order.payment_method !== "cod") {
+      const payment = await Payment.findOne({
+        where: {
+          order_id: order.razorpay_order_id,
+          status: "captured",
+        },
+      });
 
-    if (!payment || !payment.payment_id) {
-      throw new Error(
-        "No successful transaction record found to process the refund.",
-      );
+      if (!payment || !payment.payment_id) {
+        throw new Error(
+          "No successful transaction record found to process the refund.",
+        );
+      }
+
+      // Call Razorpay Refund API
+      refund = await razorpay.payments.refund(payment.payment_id, {
+        amount: Math.round(parseFloat(order.total_amount) * 100),
+        notes: {
+          reason: order.refund_reason || "Refund processed by admin",
+          order_no: order.order_no,
+        },
+      });
+      
+      await payment.update({ status: "refunded" });
     }
 
-    // Call Razorpay Refund API
-    // Note: Razorpay uses paise (amt * 100)
-    const refund = await razorpay.payments.refund(payment.payment_id, {
-      amount: Math.round(parseFloat(order.total_amount) * 100),
-      notes: {
-        reason: order.refund_reason || "Refund processed by admin",
-        order_no: order.order_no,
-      },
-    });
+    // 2. Revert Stock (Add items back to inventory for both COD/Prepaid)
+    if (order.items && order.items.length > 0) {
+      try {
+        for (const item of order.items) {
+          if (item.book_id) {
+            await Book.increment('stock', {
+              by: item.quantity,
+              where: { id: item.book_id }
+            });
+          }
+        }
+        logger.info(`[REFUND]: Stock reverted for order ${order.order_no}`);
+      } catch (stockErr) {
+        logger.error(`[REFUND]: Failed to revert stock for order ${order.order_no}:`, stockErr);
+      }
+    }
 
-    // Update DB
-    await payment.update({ status: "refunded" });
+    // 3. Update DB Status
     await order.update({
       refund_requested: false,
       payment_status: "refunded",
+      status: "refunded" 
     });
 
     // Notify user about refund success

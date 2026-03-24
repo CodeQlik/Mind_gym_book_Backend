@@ -910,15 +910,18 @@ class OrderService {
       );
     }
 
-    const deliveryDate = new Date(order.delivered_at);
-    const now = new Date();
-    const diffTime = Math.abs(now - deliveryDate);
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+    // 3. Time window check (Only if already delivered)
+    if (order.delivered_at) {
+      const deliveryDate = new Date(order.delivered_at);
+      const now = new Date();
+      const diffTime = Math.abs(now - deliveryDate);
+      const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays > 7) {
-      throw new Error(
-        "The refund request window (7 days from delivery) has expired.",
-      );
+      if (diffDays > 7) {
+        throw new Error(
+          "The refund request window (7 days from delivery) has expired.",
+        );
+      }
     }
 
     await order.update({ refund_requested: true, refund_reason: reason });

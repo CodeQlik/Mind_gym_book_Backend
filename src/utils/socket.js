@@ -56,13 +56,25 @@ export const emitNotification = (userId, data, senderId = null) => {
       io.to(`user_${userId}`).emit("notification", data);
     }
 
-    let adminDest = io.to("admins");
-    if (senderRoom) adminDest = adminDest.except(senderRoom);
-    adminDest = adminDest.except(`user_${userId}`);
-
+    const adminDest = io.to("admins");
     adminDest.emit("notification", data);
+
+    // Special Event: Tell admin panel to refresh its data tables (Orders, Stock, etc.)
+    if (["ORDER_CREATED", "REFUND_REQUEST", "REFUND_PROCESSED", "ORDER_CANCELLED", "STOCK_UPDATE"].includes(data.type)) {
+      adminDest.emit("data_refresh", { type: data.type, timestamp: new Date() });
+    }
   } else {
+    const adminDest = io.to("admins");
     const broadcastDest = senderRoom ? io.except(senderRoom) : io;
-    broadcastDest.emit("notification", data);
+
+    // Secure Broadcast: Sensitive system types go ONLY to admins
+    const adminOnlyTypes = ["REFUND_REQUEST", "SYSTEM_ALERT", "STOCK_UPDATE", "CRON_JOB"];
+    if (adminOnlyTypes.includes(data.type)) {
+        adminDest.emit("notification", data);
+        adminDest.emit("data_refresh", { type: data.type, timestamp: new Date() });
+    } else {
+        // Safe broadcast for everyone
+        broadcastDest.emit("notification", data);
+    }
   }
 };

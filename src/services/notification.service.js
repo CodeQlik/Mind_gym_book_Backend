@@ -784,14 +784,18 @@ class NotificationService {
   }) {
     const offset = (page - 1) * limit;
     const where = {};
-    if (userId) where.userId = userId;
-    if (type) where.type = type;
-    if (status) where.status = status.toUpperCase();
-    if (target === "ALL") {
-      where.userId = null;
+    // Admins should see: 1. Broadcasts (userId null) OR 2. Notifications meant for them explicitly
+    // They should NOT see private notifications of other users by default unless searching for them.
+    if (!userId && !target) {
+      where.userId = null; 
+    } else if (userId) {
+      where.userId = userId;
     } else if (target === "USER") {
       where.userId = { [Op.ne]: null };
     }
+
+    if (type) where.type = type;
+    if (status) where.status = status.toUpperCase();
 
     const { count, rows } = await Notification.findAndCountAll({
       where,
