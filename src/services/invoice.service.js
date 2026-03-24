@@ -7,360 +7,163 @@ class InvoiceService {
     if (!order) throw new Error("Order not found");
 
     const pdfDoc = await PDFDocument.create();
-    const page = pdfDoc.addPage([600, 800]);
+    const page = pdfDoc.addPage([600, 850]);
     const { width, height } = page.getSize();
 
     const fontBold = await pdfDoc.embedFont(StandardFonts.HelveticaBold);
     const fontRegular = await pdfDoc.embedFont(StandardFonts.Helvetica);
 
-    const primaryColor = rgb(0.2, 0.3, 0.5); // Deep Indigo/Charcoal
-    const secondaryColor = rgb(0.4, 0.4, 0.4);
-    const lightGray = rgb(0.96, 0.97, 0.98);
+    // Color Palette based on Reference Image
+    const navyColor = rgb(0.08, 0.1, 0.18);
+    const orangeColor = rgb(1, 0.58, 0.0); // Vibrant Amber/Orange
+    const textDark = rgb(0.1, 0.1, 0.1);
+    const textGray = rgb(0.4, 0.4, 0.4);
 
-    // ─── Top Accent Bar ───────────────────────────────────────────────────
+    let yPos = height;
+
+    // ─── Header Section (Navy background with Orange slant) ──────────────
     page.drawRectangle({
       x: 0,
-      y: height - 10,
+      y: height - 130,
       width: width,
-      height: 10,
-      color: primaryColor,
+      height: 130,
+      color: navyColor,
     });
 
-    // ─── Header Section ───────────────────────────────────────────────────
-    page.drawText("TAX INVOICE", {
-      x: 50,
-      y: height - 55,
-      size: 28,
+    // Orange accent slant (Top Right area effect)
+    // Fix: Using SVG Path since drawPolygon is not an official method in pdf-lib PDFPage
+    page.drawSvgPath(`M ${width - 180} ${height} L ${width - 120} ${height - 130} L ${width - 60} ${height - 130} L ${width} ${height} Z`, { color: orangeColor });
+
+    page.drawText("MIND GYM BOOK", {
+      x: 40,
+      y: height - 60,
+      size: 26,
       font: fontBold,
-      color: primaryColor,
+      color: rgb(1, 1, 1),
     });
-
-    // Company Logo/Name Placeholder
-    page.drawText("MIND GYM BOOK PUBLICATION", {
-      x: width - 250,
-      y: height - 55,
-      size: 13,
-      font: fontBold,
-      color: primaryColor,
-    });
-
-    page.drawText(
-      "Empowering Minds, One Book at a Time\nSupport: contact@mindgym.com\nGSTIN: 27AAAAA0000A1Z5",
-      {
-        x: width - 250,
-        y: height - 75,
-        size: 9,
-        font: fontRegular,
-        color: secondaryColor,
-        lineHeight: 12,
-      },
-    );
-
-    // ─── Order Info Bar ───────────────────────────────────────────────────
-    page.drawRectangle({
-      x: 50,
-      y: height - 165,
-      width: 500,
-      height: 60,
-      color: lightGray,
-    });
-
-    // Left Side: Invoice Details
-    page.drawText("INVOICE DETAILS", {
-      x: 70,
-      y: height - 125,
-      size: 8,
-      font: fontBold,
-      color: primaryColor,
-    });
-    page.drawText(`No: INV-${order.order_no.split("-")[1]}`, {
-      x: 70,
-      y: height - 140,
-      size: 10,
-      font: fontBold,
-    });
-
-    const orderDate = order.created_at || order.createdAt || new Date();
-    page.drawText(
-      `Date: ${new Date(orderDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}`,
-      {
-        x: 70,
-        y: height - 155,
-        size: 9,
-        font: fontRegular,
-      },
-    );
-
-    // Right Side: Order Number & Type
-    page.drawText("ORDER INFO", {
-      x: 220,
-      y: height - 125,
-      size: 8,
-      font: fontBold,
-      color: primaryColor,
-    });
-    page.drawText(`ID: ${order.order_no}`, {
-      x: 220,
-      y: height - 140,
-      size: 10,
+    page.drawText("PUBLICATION", {
+      x: 40,
+      y: height - 85,
+      size: 16,
       font: fontRegular,
+      color: rgb(1, 1, 1),
     });
-    page.drawText(
-      `Type: ${order.order_type === "physical_book" ? "Physical Copy" : "Marketplace"}`,
-      { x: 220, y: height - 155, size: 9, font: fontRegular },
-    );
 
-    // Payment Status Badge (Small Box)
-    const isPaid = order.payment_status?.toLowerCase() === "paid";
-    page.drawRectangle({
-      x: 400,
-      y: height - 150,
-      width: 100,
-      height: 25,
-      color: isPaid ? rgb(0.9, 1, 0.9) : rgb(1, 0.9, 0.9),
-    });
-    page.drawText(order.payment_status?.toUpperCase() || "PENDING", {
-      x: 415,
-      y: height - 140,
-      size: 9,
+    page.drawText("INVOICE", {
+      x: width - 200,
+      y: height - 60,
+      size: 38,
       font: fontBold,
-      color: isPaid ? rgb(0, 0.5, 0) : rgb(0.8, 0, 0),
+      color: orangeColor,
     });
-
-    // ─── Billing Section ──────────────────────────────────────────────────
-    page.drawText("BILL TO:", {
-      x: 50,
-      y: height - 200,
-      size: 10,
-      font: fontBold,
-      color: primaryColor,
-    });
-
-    // Line under Billing title
-    page.drawLine({
-      start: { x: 50, y: height - 205 },
-      end: { x: 100, y: height - 205 },
-      thickness: 1.5,
-      color: primaryColor,
-    });
-
-    page.drawText(order.user?.name || "Customer", {
-      x: 50,
-      y: height - 225,
+    page.drawText(`ID NO : ${order.order_no.split("-")[1] || "0000"}`, {
+      x: width - 200,
+      y: height - 85,
       size: 12,
-      font: fontBold,
-    });
-    page.drawText(order.user?.email || "", {
-      x: 50,
-      y: height - 240,
-      size: 10,
       font: fontRegular,
-      color: secondaryColor,
-    });
-    page.drawText(order.shipping_address || "", {
-      x: 50,
-      y: height - 255,
-      size: 9,
-      font: fontRegular,
-      color: secondaryColor,
-      maxWidth: 300,
-      lineHeight: 12,
-    });
-
-    // ─── Items Table ──────────────────────────────────────────────────────
-    let yPos = height - 330;
-
-    // Table Header Styling
-    page.drawRectangle({
-      x: 50,
-      y: yPos - 5,
-      width: 500,
-      height: 25,
-      color: primaryColor,
-    });
-
-    const tableHeaderY = yPos + 2;
-    page.drawText("ITEM DESCRIPTION", {
-      x: 65,
-      y: tableHeaderY,
-      size: 9,
-      font: fontBold,
-      color: rgb(1, 1, 1),
-    });
-    page.drawText("QTY", {
-      x: 340,
-      y: tableHeaderY,
-      size: 9,
-      font: fontBold,
-      color: rgb(1, 1, 1),
-    });
-    page.drawText("UNIT PRICE", {
-      x: 400,
-      y: tableHeaderY,
-      size: 9,
-      font: fontBold,
-      color: rgb(1, 1, 1),
-    });
-    page.drawText("TOTAL", {
-      x: 490,
-      y: tableHeaderY,
-      size: 9,
-      font: fontBold,
       color: rgb(1, 1, 1),
     });
 
-    yPos -= 35;
+    // ─── Contact Information (To/From) ────────────────────────────────────
+    yPos = height - 180;
 
-    // Table Rows
-    order.items.forEach((item, index) => {
-      // Alternating row background
-      if (index % 2 === 1) {
-        page.drawRectangle({
-          x: 50,
-          y: yPos - 8,
-          width: 500,
-          height: 22,
-          color: rgb(0.98, 0.98, 1),
+    const drawSectionHeader = (x, y, text) => {
+      page.drawRectangle({ x, y: y - 10, width: 100, height: 18, color: textDark });
+      page.drawText(text, { x: x + 10, y: y - 3, size: 9, font: fontBold, color: rgb(1, 1, 1) });
+    };
+
+    // Invoice To
+    drawSectionHeader(40, yPos, "Invoice To :");
+    page.drawText(order.user?.name || "Customer Name", { x: 40, y: yPos - 30, size: 11, font: fontBold, color: textDark });
+    page.drawText(order.user?.email || "", { x: 40, y: yPos - 45, size: 9, font: fontRegular, color: textGray });
+    page.drawText(order.user?.phone || "", { x: 40, y: yPos - 60, size: 9, font: fontRegular, color: textGray });
+    page.drawText(order.shipping_address || "", { x: 40, y: yPos - 75, size: 8, font: fontRegular, color: textGray, maxWidth: 220, lineHeight: 11 });
+
+    // Invoice From
+    drawSectionHeader(340, yPos, "Invoice From :");
+    page.drawText("Mind Gym Book Publication", { x: 340, y: yPos - 30, size: 11, font: fontBold, color: textDark });
+    page.drawText("Support: +91 XXXXXXXXXX", { x: 340, y: yPos - 45, size: 9, font: fontRegular, color: textGray });
+    page.drawText("Email: contact@mindgym.com", { x: 340, y: yPos - 60, size: 9, font: fontRegular, color: textGray });
+    page.drawText("Jaipur, Rajasthan, 302020, India", { x: 340, y: yPos - 75, size: 9, font: fontRegular, color: textGray });
+
+    // ─── Table Header ─────────────────────────────────────────────────────
+    yPos -= 130;
+    page.drawRectangle({ x: 40, y: yPos, width: width - 80, height: 28, color: orangeColor });
+    
+    const tableHeaders = [
+        { text: "DESCRIPTION", x: 55 },
+        { text: "QTY", x: 280 },
+        { text: "PRICE", x: 350 },
+        { text: "TAX", x: 420 },
+        { text: "TOTAL", x: 495 }
+    ];
+
+    tableHeaders.forEach(h => {
+        page.drawText(h.text, { x: h.x, y: yPos + 9, size: 10, font: fontBold, color: rgb(1, 1, 1) });
+    });
+
+    // ─── Items Rows ───────────────────────────────────────────────────────
+    yPos -= 5;
+    order.items.forEach((item, idx) => {
+        yPos -= 28;
+        const bookTitle = item.book?.title || "Book Title";
+        page.drawText(bookTitle.length > 40 ? bookTitle.substring(0, 37) + "..." : bookTitle, { x: 55, y: yPos + 10, size: 10, font: fontRegular, color: textDark });
+        page.drawText(String(item.quantity), { x: 285, y: yPos + 10, size: 10, font: fontRegular, color: textDark });
+        page.drawText(`INR ${item.unit_price}`, { x: 350, y: yPos + 10, size: 10, font: fontRegular, color: textDark });
+        page.drawText(`${item.tax_rate}%`, { x: 425, y: yPos + 10, size: 10, font: fontRegular, color: textDark });
+        page.drawText(`INR ${item.subtotal}`, { x: 495, y: yPos + 10, size: 10, font: fontBold, color: textDark });
+
+        // Row border
+        page.drawLine({
+            start: { x: 40, y: yPos + 2 },
+            end: { x: 560, y: yPos + 2 },
+            thickness: 1,
+            color: rgb(0.85, 0.85, 0.85)
         });
-      }
-
-      const bookTitle = item.book?.title || "Book";
-      page.drawText(
-        bookTitle.length > 45 ? bookTitle.substring(0, 42) + "..." : bookTitle,
-        {
-          x: 65,
-          y: yPos,
-          size: 10,
-          font: fontRegular,
-        },
-      );
-      page.drawText(String(item.quantity).padStart(2, "0"), {
-        x: 345,
-        y: yPos,
-        size: 10,
-        font: fontRegular,
-      });
-      page.drawText(`INR ${item.unit_price}`, {
-        x: 405,
-        y: yPos,
-        size: 10,
-        font: fontRegular,
-      });
-      page.drawText(`INR ${item.subtotal}`, {
-        x: 490,
-        y: yPos,
-        size: 10,
-        font: fontBold,
-      });
-
-      yPos -= 25;
-
-      // Bottom border for each row
-      page.drawLine({
-        start: { x: 50, y: yPos + 15 },
-        end: { x: 550, y: yPos + 15 },
-        thickness: 0.2,
-        color: rgb(0.8, 0.8, 0.8),
-      });
     });
 
     // ─── Summary Section ──────────────────────────────────────────────────
-    yPos -= 20;
-    const summaryLabelX = 380;
-    const summaryValueX = 490;
+    yPos -= 60;
+    const summaryRightX = 540;
+    const labelX = 420;
 
-    const drawSummaryRow = (
-      label,
-      value,
-      isBold = false,
-      customColor = rgb(0, 0, 0),
-    ) => {
-      page.drawText(label, {
-        x: summaryLabelX,
-        y: yPos,
-        size: 10,
-        font: isBold ? fontBold : fontRegular,
-        color: customColor,
-      });
-      page.drawText(value, {
-        x: summaryValueX,
-        y: yPos,
-        size: 10,
-        font: isBold ? fontBold : fontRegular,
-        color: customColor,
-      });
-      yPos -= 20;
+    const drawSummaryRow = (label, value, isBold = false) => {
+        page.drawText(label, { x: labelX, y: yPos, size: 10, font: isBold ? fontBold : fontRegular, color: textDark });
+        const valWidth = fontBold.widthOfTextAtSize(String(value), 10);
+        page.drawText(String(value), { x: summaryRightX - valWidth, y: yPos, size: 10, font: isBold ? fontBold : fontRegular, color: textDark });
+        yPos -= 18;
     };
 
-    drawSummaryRow("Subtotal:", `INR ${order.subtotal_amount}`);
-    if (order.discount_amount > 0) {
-      drawSummaryRow(
-        "Discount:",
-        `-INR ${order.discount_amount}`,
-        false,
-        rgb(0.8, 0, 0),
-      );
+    drawSummaryRow("Subtotal :", `INR ${order.subtotal_amount}`);
+    drawSummaryRow("Tax :", `INR ${order.total_tax}`);
+    if (parseFloat(order.discount_amount) > 0) {
+        drawSummaryRow(`Discount :`, `-INR ${order.discount_amount}`);
     }
 
+    // Total Orange Row
     yPos -= 10;
-    // Grand Total Box
-    page.drawRectangle({
-      x: summaryLabelX - 15,
-      y: yPos - 10,
-      width: 200, // Increased from 180 to fit the text
-      height: 35,
-      color: primaryColor,
-    });
-    page.drawText("GRAND TOTAL:", {
-      x: summaryLabelX - 5,
-      y: yPos,
-      size: 11,
-      font: fontBold,
-      color: rgb(1, 1, 1),
-    });
-    page.drawText(`INR ${order.total_amount}`, {
-      x: 470, // Shifted left from 490 to avoid clipping
-      y: yPos,
-      size: 13,
-      font: fontBold,
-      color: rgb(1, 1, 1),
-    });
+    page.drawRectangle({ x: 370, y: yPos - 10, width: 190, height: 25, color: orangeColor });
+    page.drawText("TOTAL", { x: 385, y: yPos - 2, size: 11, font: fontBold, color: rgb(1, 1, 1) });
+    const grandTotalStr = `INR ${order.total_amount}`;
+    const gtWidth = fontBold.widthOfTextAtSize(grandTotalStr, 12);
+    page.drawText(grandTotalStr, { x: 550 - gtWidth, y: yPos - 2, size: 12, font: fontBold, color: rgb(1, 1, 1) });
 
-    // ─── Footer ───────────────────────────────────────────────────────────
-    const footerY = 80;
-    page.drawLine({
-      start: { x: 50, y: footerY + 20 },
-      end: { x: 550, y: footerY + 20 },
-      thickness: 0.5,
-      color: rgb(0.7, 0.7, 0.7),
-    });
+    // ─── Signature & Footer ───────────────────────────────────────────────
+    yPos -= 50;
+    page.drawText("Thanks for your business", { x: 40, y: yPos, size: 14, font: fontBold, color: navyColor });
+    yPos -= 25;
+    page.drawText("Disclaimer: This is a system generated order invoice and does not require", { x: 40, y: yPos, size: 8, font: fontRegular, color: textGray });
+    page.drawText("a physical signature.", { x: 40, y: yPos - 10, size: 8, font: fontRegular, color: textGray });
 
-    page.drawText("Notes & Instructions:", {
-      x: 50,
-      y: footerY,
-      size: 9,
-      font: fontBold,
-      color: primaryColor,
-    });
-    page.drawText(
-      "1. This is a computer generated invoice and does not require a physical signature.\n2. For any discrepancies, please contact support within 48 hours.\n3. Keep this invoice for any future warranty or return requests.",
-      {
-        x: 50,
-        y: footerY - 15,
-        size: 8,
-        font: fontRegular,
-        color: secondaryColor,
-        lineHeight: 11,
-      },
-    );
+    // Signature Line
+    const sigX = 420;
+    page.drawText("Mind Gym Book", { x: sigX, y: yPos - 15, size: 11, font: fontBold, color: textDark });
+    page.drawLine({ start: { x: sigX, y: yPos - 20 }, end: { x: sigX + 120, y: yPos - 20 }, thickness: 1.5, color: textDark });
+    page.drawText("SIGNATURE", { x: sigX + 35, y: yPos - 33, size: 9, font: fontBold, color: textDark });
 
-    page.drawText("Thank you for shopping with Mind Gym!", {
-      x: width / 2 - 80,
-      y: 30,
-      size: 10,
-      font: fontBold,
-      color: primaryColor,
-    });
+    // Bottom Slant Accent (SVG Paths)
+    page.drawSvgPath(`M 0 0 L 300 0 L 400 30 L 350 60 L 0 60 Z`, { color: navyColor });
+    page.drawSvgPath(`M 330 0 L ${width} 0 L ${width} 60 L 380 30 Z`, { color: orangeColor });
 
     const pdfBytes = await pdfDoc.save();
     return Buffer.from(pdfBytes);

@@ -10,6 +10,7 @@ const sendEmail = async (
   company,
   attachments,
 ) => {
+  console.log("Sending email to:", recipientEmail);
   let email = process.env.EMAIL_ID;
   let appPass = process.env.APP_PASS;
 
@@ -35,22 +36,26 @@ const sendEmail = async (
         pass: userAppPass,
       },
     });
-
     try {
       await testTransport.verify();
-
+      console.log("Custom SMTP working");
       email = userEmail;
       appPass = userAppPass;
-    } catch (error) {}
+    } catch (error) {
+      console.log("Custom SMTP Error:", error.message);
+    }
   }
 
   const transport = nodemailer.createTransport({
     host: process.env.NODEMAILER_HOST,
-    port: process.env.NODEMAILER_PORT,
-    secure: true,
+    port: parseInt(process.env.NODEMAILER_PORT), // Convert to number
+    secure: parseInt(process.env.NODEMAILER_PORT) === 465, // True for 465, false for 587
     auth: {
       user: email,
       pass: appPass,
+    },
+    tls: {
+      rejectUnauthorized: false, // Avoid SSL verification issues on some servers
     },
     socketTimeout: 60000,
   });

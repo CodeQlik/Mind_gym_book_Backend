@@ -42,6 +42,9 @@ class BookService {
       previewPages,
       dimensions,
       weight,
+      tax_applicable,
+      tax_type,
+      tax_rate,
     } = data;
 
     // Smart routing for 'book_file'
@@ -177,6 +180,9 @@ class BookService {
       previewPages: parseInt(previewPages) || 5, // Default 5 pages
       dimensions,
       weight,
+      tax_applicable: tax_applicable === "true" || tax_applicable === true,
+      tax_type: tax_type || "none",
+      tax_rate: parseFloat(tax_rate) || 0.0,
     };
 
     const book = await Book.create(bookDataForCreation);
@@ -583,7 +589,24 @@ class BookService {
 
     // 6. Final Scalar Updates
     book.images = gallery;
-    const scalarFields = ["description", "author", "price", "original_price", "condition", "stock", "published_date", "isbn", "language", "highlights", "previewPages", "dimensions", "weight"];
+    const scalarFields = [
+      "description",
+      "author",
+      "price",
+      "original_price",
+      "condition",
+      "stock",
+      "published_date",
+      "isbn",
+      "language",
+      "highlights",
+      "previewPages",
+      "dimensions",
+      "weight",
+      "tax_applicable",
+      "tax_type",
+      "tax_rate",
+    ];
     scalarFields.forEach((field) => {
       if (data[field] !== undefined) {
         if (field === "description" || field === "highlights") book[field] = String(data[field]).replace(/<[^>]*>?/gm, "");

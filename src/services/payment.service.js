@@ -12,6 +12,7 @@ import {
 import orderService from "./order.service.js";
 import { redisClient } from "../config/redis.js";
 import logger from "../utils/logger.js";
+import subscriptionService from "./subscription.service.js";
 
 const razorpay = new Razorpay({
   key_id: process.env.RAZORPAY_KEY_ID,
@@ -31,41 +32,16 @@ class PaymentService {
 
     // If it's a FREE plan, skip Razorpay and return success
     if (plan.plan_type === "free" || plan.price <= 0) {
-      const duration = parseInt(plan.duration_months) || 0;
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setMonth(startDate.getMonth() + duration);
-
-      // Expire previous active subscriptions
-      await Subscription.update(
-        { status: "expired" },
-        { where: { user_id: userId, status: "active" } }
-      );
-
-      const subscription = await Subscription.create({
+      const subscription = await subscriptionService.subscribeUser({
         user_id: userId,
         plan_id: plan.id,
-        plan_type: plan.plan_type,
-        amount: 0,
-        status: "active",
-        start_date: startDate,
-        end_date: endDate,
         payment_id: "FREE_PLAN",
       });
 
-      await User.update(
-        {
-          subscription_status: "active",
-          subscription_plan: plan.plan_type,
-          subscription_end_date: endDate,
-        },
-        { where: { id: userId } }
-      );
-
-      return { 
-        message: "Free subscription activated successfully", 
-        subscription, 
-        isFree: true 
+      return {
+        message: "Free subscription activated successfully",
+        subscription,
+        isFree: true,
       };
     }
 
@@ -89,8 +65,8 @@ class PaymentService {
     return { razorpay_order: order, plan };
   }
 
-  //  WEBSITE: Physical Book Payment (Online: UPI / Card / Prepaid)
-  async createPhysicalBookPaymentOrder(userId, orderData) {
+  //  SHARED: Book Order Payment (supports both Physical and Digital)
+  async createBookOrderPayment(userId, orderData) {
     // If orderData is just an ID (backward compatibility or retry), we fetch from DB
     let dbOrder = null;
     let finalOrderData = orderData;
@@ -137,6 +113,7 @@ class PaymentService {
       payment_type: "book_purchase",
       payment_method: finalOrderData.payment_method,
       status: "created",
+      book_id: finalOrderData.book_id || null, 
     });
 
     return {
@@ -184,14 +161,23 @@ class PaymentService {
     });
     if (!payment) throw new Error("Payment order record not found");
 
-    // 3. Prevent double processing
+    // 3. Prevent double processing (Checks if fulfillment already happened)
     if (payment.status === "captured") {
-      const existingSub = await Subscription.findOne({
-        where: { payment_id: razorpay_payment_id },
-      });
-
-      if (existingSub) {
-        return { payment, message: "Already processed" };
+      if (payment.payment_type === "subscription") {
+        const existingSub = await Subscription.findOne({
+          where: { payment_id: razorpay_payment_id },
+        });
+        if (existingSub) {
+          return { payment, subscription: existingSub, message: "Already processed" };
+        }
+      } else if (payment.payment_type === "book_purchase") {
+        const existingOrder = await Order.findOne({
+          where: { razorpay_order_id: razorpay_order_id },
+        });
+        // If order exists and is paid, then it's already processed
+        if (existingOrder && existingOrder.payment_status === "paid") {
+          return { payment, order: existingOrder, message: "Already processed" };
+        }
       }
     }
 
@@ -218,56 +204,15 @@ class PaymentService {
       const plan = await Plan.findOne({
         where: { plan_type: payment.plan_name },
       });
-      const duration = plan ? plan.duration_months : 1;
-      const startDate = new Date();
-      const endDate = new Date();
-      endDate.setMonth(startDate.getMonth() + duration);
 
-      // Expire previous subscriptions
-      await Subscription.update(
-        { status: "expired" },
-        { where: { user_id: payment.user_id, status: "active" } },
-      );
-
-      const subscription = await Subscription.create({
+      const subscription = await subscriptionService.subscribeUser({
         user_id: payment.user_id,
         plan_id: plan ? plan.id : null,
-        plan_type: payment.plan_name,
-        amount: payment.amount,
         payment_id: razorpay_payment_id,
         payment_record_id: payment.id,
         razorpay_order_id: razorpay_order_id,
-        start_date: startDate,
-        end_date: endDate,
-        status: "active",
+        amount: payment.amount,
       });
-
-      await User.update(
-        {
-          subscription_status: "active",
-          subscription_plan: payment.plan_name,
-          subscription_end_date: endDate,
-        },
-        { where: { id: payment.user_id } },
-      );
-
-      // Notify user about subscription activation
-      try {
-        const notificationService = (await import("./notification.service.js"))
-          .default;
-        await notificationService.sendToUser(
-          payment.user_id,
-          "SUBSCRIPTION_ACTIVATED",
-          "🎊 Subscription Activated!",
-          `Congratulations! Your ${payment.plan_name.toUpperCase()} subscription is now active until ${endDate.toLocaleDateString()}. Enjoy unlimited reading!`,
-          {
-            plan: payment.plan_name,
-            expiry_date: endDate.toISOString(),
-          },
-        );
-      } catch (notifErr) {
-        console.error("Failed to send subscription notification:", notifErr);
-      }
 
       return { payment, subscription, message: "Subscription activated" };
     } else if (payment.payment_type === "book_purchase") {

@@ -3,7 +3,7 @@ import notificationService from "./notification.service.js";
 
 class SubscriptionService {
   async subscribeUser(data) {
-    const { user_id, plan_id, payment_id, payment_record_id } = data;
+    const { user_id, plan_id, payment_id, payment_record_id, razorpay_order_id, amount } = data;
 
     if (!plan_id) {
       throw new Error("Plan ID is required to create a subscription.");
@@ -11,7 +11,9 @@ class SubscriptionService {
 
     const plan = await Plan.findByPk(parseInt(plan_id));
     if (!plan) {
-      throw new Error("Invalid Plan: The plan could not be found with the provided ID.");
+      throw new Error(
+        "Invalid Plan: The plan could not be found with the provided ID.",
+      );
     }
 
     const duration = parseInt(plan.duration_months) || 0;
@@ -29,9 +31,10 @@ class SubscriptionService {
       user_id,
       plan_id,
       plan_type: plan.plan_type,
-      amount: plan.price, // Storing plan price in subscription record
+      amount: amount || plan.price, // Use provided amount or fallback to plan price
       payment_id,
       payment_record_id,
+      razorpay_order_id,
       start_date,
       end_date,
       status: "active",

@@ -32,6 +32,21 @@ const Book = sequelize.define(
     original_price: {
       type: DataTypes.DECIMAL(10, 2),
     },
+    tax_applicable: {
+      type: DataTypes.BOOLEAN,
+      allowNull: false,
+      defaultValue: false,
+    },
+    tax_type: {
+      type: DataTypes.ENUM("inclusive", "exclusive", "none"),
+      allowNull: false,
+      defaultValue: "none",
+    },
+    tax_rate: {
+      type: DataTypes.DECIMAL(5, 2),
+      allowNull: false,
+      defaultValue: 0.00,
+    },
     condition: {
       type: DataTypes.ENUM("new", "fair", "good", "acceptable"),
       defaultValue: "good",

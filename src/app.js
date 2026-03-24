@@ -27,8 +27,6 @@ import faqRoutes from "./routes/faq.routes.js";
 import settingRoutes from "./routes/setting.routes.js";
 import contactRoutes from "./routes/contact.routes.js";
 
-
-
 import requestLogger from "./middlewares/requestLogger.middleware.js";
 import errorMiddleware from "./middlewares/error.middleware.js";
 import logger from "./utils/logger.js";
@@ -76,13 +74,11 @@ app.options("*", cors());
 app.use(cookieParser());
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }));
-
 app.use(requestLogger);
 
 app.use("/api/v1/users", userRoutes);
 app.use("/api/v1/user/addresses", addressRoutes);
 app.use("/api/v1/category", categoryRoutes);
-
 app.use("/api/v1/book", bookRoutes);
 app.use("/api/v1/cart", cartRoutes);
 app.use("/api/v1/wishlist", wishlistRoutes);
@@ -104,8 +100,6 @@ app.use("/api/v1/audiobook", audiobookRoutes);
 app.use("/api/v1/faqs", faqRoutes);
 app.use("/api/v1/settings", settingRoutes);
 app.use("/api/v1/contact", contactRoutes);
-
-
 
 app.get("/", (req, res) => {
   res.send("Welcome to Mind Gym Book API (Restructured Edition)");

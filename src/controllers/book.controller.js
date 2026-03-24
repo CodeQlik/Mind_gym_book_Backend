@@ -42,7 +42,17 @@ const cleanBookData = (
     is_premium: !!data.is_premium,
     is_bestselling: !!data.is_bestselling,
     images: data.images || [],
-  };
+    dimensions: data.dimensions || "",
+    weight: data.weight || "",
+    is_premium: data.is_premium || false,
+    stock: data.stock || 0,
+    condition: data.condition || "good",
+    published_date: data.published_date || "",
+     isbn: data.isbn || "",
+     tax_applicable: data.tax_applicable || false,
+     tax_type: data.tax_type || "none",
+     tax_rate: data.tax_rate ? parseFloat(data.tax_rate).toFixed(2) : "0.00",
+   };
 
   // 1. Handle Audio Book structure (Middle)
   if (
@@ -190,8 +200,7 @@ export const getAllBooks = asyncHandler(async (req, res) => {
     books[catName] = cleanedBooks;
   });
 
-  // Clear cache for books to reflect changes immediately
-  await clearCachePattern("books:*");
+  // Cache handles by service
 
   return sendResponse(res, 200, true, "Books fetched successfully", {
     totalItems: result.totalItems,

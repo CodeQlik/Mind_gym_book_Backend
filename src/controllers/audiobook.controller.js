@@ -61,7 +61,9 @@ const getAllAudiobooks = asyncHandler(async (req, res) => {
         id: audioData.id,
         chapter_number: audioData.chapter_number,
         title: audioData.chapter_title,
-        audio_url: `${baseUrl}/api/v1/audiobook/stream/${audioData.id}`,
+        audio_url: audioData.audio_file?.url
+          ? `${baseUrl}/api/v1/audiobook/stream/${audioData.id}`
+          : null,
 
         status: audioData.status,
 
@@ -71,7 +73,7 @@ const getAllAudiobooks = asyncHandler(async (req, res) => {
         createdAt: audioData.createdAt || audioData.created_at,
       };
 
-      if (isAdmin) {
+      if (isAdmin && audioData.audio_file?.url) {
         chapter.audio_file = {
           ...audioData.audio_file,
           url: audioData.audio_file?.url,
@@ -108,13 +110,17 @@ const getAudiobookById = asyncHandler(async (req, res) => {
 
   const structuredData = {
     book: book,
-    audio_url: `${baseUrl}/api/v1/audiobook/stream/${audioData.id}`,
+    audio_url: audio_file?.url
+      ? `${baseUrl}/api/v1/audiobook/stream/${audioData.id}`
+      : null,
 
-    audio_file: {
-      ...audio_file,
-      url: audio_file?.url,
-      is_encrypted: false,
-    },
+    audio_file: audio_file?.url
+      ? {
+          ...audio_file,
+          url: audio_file?.url,
+          is_encrypted: false,
+        }
+      : null,
     ...rest,
   };
 

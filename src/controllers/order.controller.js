@@ -9,22 +9,24 @@ export const checkoutFromCart = async (req, res, next) => {
   try {
     const result = await orderService.createOrderFromCart(req.user.id, req.body);
 
-    // If it's a prepaid order, the service returned orderData (not a DB model)
-    // We now automatically create the Razorpay order to return it to the frontend
+    // Prepaid: Initialize Razorpay payment
     if (req.body.payment_method !== "cod") {
-      const razorpayData = await paymentService.createPhysicalBookPaymentOrder(
+      const razorpayData = await paymentService.createBookOrderPayment(
         req.user.id,
         result,
       );
+      const isDigital = result.order_type === "digital_book";
+
       return sendResponse(
         res,
         200,
         true,
-        "Prepaid order initialized. Proceed to Razorpay checkout.",
+        `${isDigital ? "Digital" : "Physical"} book order initialized. Proceed to payment.`,
         {
           payment_type: "prepaid",
+          order_type: result.order_type,
           ...razorpayData,
-          order_data: result, // Full order details for frontend verification
+          order_data: result,
         },
       );
     }

@@ -1,6 +1,6 @@
 import sequelize from "../config/db.js";
 import { QueryTypes, Op } from "sequelize";
-import { Order, OrderItem, Book, User, Cart, Coupon, Address } from "../models/index.js";
+import { Order, OrderItem, Book, User, Cart, Coupon, Address, UserBook } from "../models/index.js";
 import notificationService from "./notification.service.js";
 import couponService from "./coupon.service.js";
 import shiprocketService from "./shiprocket.service.js";
@@ -9,13 +9,16 @@ import logger from "../utils/logger.js";
 class OrderService {
   async createOrderFromCart(
     userId,
-    { address_id, payment_method = "prepaid", coupon_code },
+    { address_id, payment_method = "prepaid", coupon_code, order_type = "physical_book", book_id, quantity = 1 },
   ) {
-    // This is now primarily for COD orders or as a wrapper
+    // This handles both cart-based (physical) and direct (digital/physical) orders
     const orderData = await this.prepareOrderData(userId, {
       address_id,
       payment_method,
       coupon_code,
+      order_type,
+      book_id,
+      quantity,
     });
 
     if (payment_method === "cod") {
@@ -31,9 +34,22 @@ class OrderService {
    */
   async prepareOrderData(
     userId,
-    { address_id, payment_method = "prepaid", coupon_code },
+    { address_id, payment_method = "prepaid", coupon_code, order_type = "physical_book", book_id, quantity = 1 },
   ) {
-    if (!address_id) throw new Error("Shipping address ID is required.");
+    let fixedOrderType = order_type;
+    if (!fixedOrderType || fixedOrderType.trim() === "") {
+      fixedOrderType = "physical_book";
+    }
+
+    // Map 'digital' -> 'digital_book' and 'physical' -> 'physical_book' for API flexibility
+    if (fixedOrderType === "digital") fixedOrderType = "digital_book";
+    if (fixedOrderType === "physical") fixedOrderType = "physical_book";
+
+    const isPhysical = fixedOrderType === "physical_book";
+    
+    if (isPhysical && !address_id) {
+      throw new Error("Shipping address ID is required for physical book orders.");
+    }
 
     const VALID_PAYMENT_METHODS = ["upi", "card", "prepaid", "cod"];
     if (!VALID_PAYMENT_METHODS.includes(payment_method)) {
@@ -42,91 +58,137 @@ class OrderService {
       );
     }
 
-    // 1. Get user's cart
-    const cartItems = await Cart.findAll({
-      where: { user_id: userId },
-      include: [
-        {
-          model: Book,
-          as: "book",
-          attributes: ["id", "title", "price", "stock", "reserved", "is_active"],
-        },
-      ],
-    });
-
-    if (!cartItems || cartItems.length === 0) {
-      throw new Error("The cart is empty. Please add books to your cart before placing an order.");
+    // 1. Get Items (Either single book or from cart)
+    let itemsToProcess = [];
+    if (book_id) {
+      const book = await Book.findByPk(book_id);
+      if (!book) throw new Error("The specified book was not found.");
+      itemsToProcess = [{ book_id, quantity: parseInt(quantity), book }];
+    } else {
+      itemsToProcess = await Cart.findAll({
+        where: { user_id: userId },
+        include: [
+          {
+            model: Book,
+            as: "book",
+            attributes: ["id", "title", "price", "stock", "reserved", "is_active", "tax_applicable", "tax_type", "tax_rate"],
+          },
+        ],
+      });
     }
 
-    // 2. Validate stock and activity
-    for (const item of cartItems) {
+    if (!itemsToProcess || itemsToProcess.length === 0) {
+      throw new Error("Nothing to order. Your cart is empty or no book was selected.");
+    }
+
+    // 2. Validate activity and stock (Stock only for Physical)
+    for (const item of itemsToProcess) {
       if (!item.book)
-        throw new Error(`Book not found for cart item #${item.id}.`);
+        throw new Error(`Book not found for item.`);
       if (!item.book.is_active)
         throw new Error(`The book "${item.book.title}" is currently unavailable.`);
 
-      const available = (item.book.stock || 0) - (item.book.reserved || 0);
-      if (available < item.quantity) {
-        throw new Error(
-          `Insufficient stock available for "${item.book.title}". Available: ${available}, Requested: ${item.quantity}.`,
-        );
+      if (isPhysical) {
+        const available = (item.book.stock || 0) - (item.book.reserved || 0);
+        if (available < item.quantity) {
+          throw new Error(
+            `Insufficient stock available for "${item.book.title}". Available: ${available}, Requested: ${item.quantity}.`,
+          );
+        }
       }
     }
 
-    // 3. Address snapshot
-    const [address] = await sequelize.query(
-      "SELECT * FROM addresses WHERE id = :address_id LIMIT 1",
-      { replacements: { address_id }, type: QueryTypes.SELECT },
-    );
-    if (!address) throw new Error("The specified shipping address was not found.");
+    // 3. Address snapshot (Only for Physical)
+    let addressSnapshot = null;
+    if (isPhysical) {
+      const [address] = await sequelize.query(
+        "SELECT * FROM addresses WHERE id = :address_id LIMIT 1",
+        { replacements: { address_id }, type: QueryTypes.SELECT },
+      );
+      if (!address) throw new Error("The specified shipping address was not found.");
 
-    const addressSnapshot = [
-      address.name ? `${address.name}, ` : "",
-      address.address_line1 || address.street || "",
-      address.address_line2 ? `, ${address.address_line2}` : "",
-      `, ${address.city}`,
-      `, ${address.state}`,
-      ` - ${address.pincode || address.pin_code}`,
-      `, ${address.country || "India"}`,
-    ].join("");
+      addressSnapshot = [
+        address.name ? `${address.name}, ` : "",
+        address.address_line1 || address.street || "",
+        address.address_line2 ? `, ${address.address_line2}` : "",
+        `, ${address.city}`,
+        `, ${address.state}`,
+        ` - ${address.pincode || address.pin_code}`,
+        `, ${address.country || "India"}`,
+      ].join("");
+    }
 
-    // 4. Calculate total
-    const subtotal = cartItems.reduce((sum, item) => {
-      return sum + parseFloat(item.book.price) * item.quantity;
-    }, 0);
+    // 4. Calculate total with Tax
+    let orderSubtotal = 0; 
+    let orderTotalTax = 0; 
 
-    let totalAmount = subtotal;
+    const orderItems = itemsToProcess.map((item) => {
+      const unitPrice = parseFloat(item.book.price);
+      const taxRate = parseFloat(item.book.tax_rate) || 0.0;
+      const taxType = item.book.tax_type || "none";
+      const isTaxApplicable = item.book.tax_applicable;
+
+      let basePrice, taxAmountPerUnit, itemTotalPerUnit;
+
+      if (!isTaxApplicable || taxType === "none" || taxRate === 0) {
+        basePrice = unitPrice;
+        taxAmountPerUnit = 0;
+        itemTotalPerUnit = unitPrice;
+      } else if (taxType === "exclusive") {
+        basePrice = unitPrice;
+        taxAmountPerUnit = (unitPrice * taxRate) / 100;
+        itemTotalPerUnit = unitPrice + taxAmountPerUnit;
+      } else if (taxType === "inclusive") {
+        itemTotalPerUnit = unitPrice;
+        basePrice = unitPrice / (1 + taxRate / 100);
+        taxAmountPerUnit = itemTotalPerUnit - basePrice;
+      }
+
+      const totalBase = basePrice * item.quantity;
+      const totalTax = taxAmountPerUnit * item.quantity;
+      const totalFinal = itemTotalPerUnit * item.quantity;
+
+      orderSubtotal += totalBase;
+      orderTotalTax += totalTax;
+
+      return {
+        book_id: item.book_id,
+        quantity: item.quantity,
+        unit_price: unitPrice.toFixed(2),
+        base_price: basePrice.toFixed(2),
+        tax_rate: taxRate.toFixed(2),
+        tax_amount: totalTax.toFixed(2),
+        subtotal: totalFinal.toFixed(2),
+      };
+    });
+
     let discountAmount = 0;
     let couponId = null;
 
     if (coupon_code) {
       const validation = await couponService.validateCoupon(
         coupon_code,
-        subtotal,
+        orderSubtotal + orderTotalTax,
       );
       couponId = validation.coupon_id;
       discountAmount = validation.discount_amount;
-      totalAmount = validation.total_amount;
     }
+
+    const totalAmount = orderSubtotal + orderTotalTax - discountAmount;
 
     return {
       userId,
-      address_id,
+      address_id: isPhysical ? address_id : null,
       shipping_address: addressSnapshot,
-      subtotal_amount: subtotal.toFixed(2),
+      subtotal_amount: orderSubtotal.toFixed(2),
+      total_tax: orderTotalTax.toFixed(2),
       discount_amount: discountAmount.toFixed(2),
-      total_amount: totalAmount.toFixed(2),
+      total_amount: Math.max(0, totalAmount).toFixed(2),
       coupon_id: couponId,
-      order_type: "physical_book",
+      order_type: fixedOrderType,
       payment_method,
-      items: cartItems.map((item) => ({
-        book_id: item.book_id,
-        quantity: item.quantity,
-        unit_price: parseFloat(item.book.price),
-        subtotal: parseFloat(
-          (parseFloat(item.book.price) * item.quantity).toFixed(2),
-        ),
-      })),
+      book_id: book_id || null, // Top level book_id for payment record
+      items: orderItems,
     };
   }
 
@@ -139,6 +201,7 @@ class OrderService {
       address_id,
       shipping_address,
       subtotal_amount,
+      total_tax,
       discount_amount,
       total_amount,
       coupon_id,
@@ -155,6 +218,7 @@ class OrderService {
           address_id,
           shipping_address,
           subtotal_amount,
+          total_tax,
           discount_amount,
           total_amount,
           coupon_id,
@@ -191,8 +255,21 @@ class OrderService {
         );
       }
 
-      // Clear cart
-      await Cart.destroy({ where: { user_id: userId }, transaction: t });
+      // Clear cart ONLY if it was a cart purchase
+      if (!orderData.book_id) {
+        await Cart.destroy({ where: { user_id: userId }, transaction: t });
+      }
+
+      // If Digital Book, grant permanent access automatically
+      if (order_type === "digital_book") {
+        const userBookPromises = items.map((item) =>
+          UserBook.findOrCreate({
+            where: { user_id: userId, book_id: item.book_id },
+            transaction: t,
+          }),
+        );
+        await Promise.all(userBookPromises);
+      }
 
       return newOrder;
     });
@@ -200,26 +277,35 @@ class OrderService {
     const orderWithDetails = await this._getOrderWithDetails(order.id);
     try {
       const payment_method = order.payment_method;
+      const order_type = order.order_type;
       const userId = order.user_id;
+
+      let msg = payment_method === "cod" ? "📦 Order Placed (COD)!" : "📦 Order Confirmed!";
+      let bodyText = `Your order ${orderWithDetails.order_no} has been ${payment_method === "cod" ? "placed" : "successfully confirmed"}.`;
+      
+      if (order_type === "digital_book") {
+        msg = "✅ Digital Access Unlocked!";
+        bodyText = `Thank you for your purchase. You now have permanent access to the purchased books.`;
+      }
 
       await notificationService.sendToUser(
         userId,
         "ORDER_CREATED",
-        payment_method === "cod"
-          ? "📦 Order Placed (COD)!"
-          : "📦 Order Confirmed!",
-        `Your order ${orderWithDetails.order_no} has been ${payment_method === "cod" ? "placed" : "successfully paid and recorded"}.`,
+        msg,
+        bodyText,
         { order_id: String(order.id), order_no: orderWithDetails.order_no },
       );
     } catch (err) {
       logger.error("Notification failed for order:", order.id, err.message);
     }
 
-    // 3. AUTOMATION: Sync with Shiprocket automatically
-    await this._syncOrderWithShiprocket(order.id);
+    // 3. AUTOMATION: Sync with Shiprocket automatically (ONLY Physical)
+    if (order.order_type === "physical_book") {
+      await this._syncOrderWithShiprocket(order.id);
+    }
 
     // Return the FINAL updated object
-    return await this._getOrderWithDetails(order.id);
+    return orderWithDetails;
   }
 
   /**

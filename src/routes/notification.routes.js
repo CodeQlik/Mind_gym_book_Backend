@@ -6,6 +6,7 @@ import {
   markAsRead,
   markAllAsRead,
   deleteNotification,
+  deleteAllNotifications,
   getFavoriteCategories,
   addFavoriteCategory,
   removeFavoriteCategory,
@@ -40,6 +41,7 @@ router.get("/", verifyJWT, getUserNotifications);
 router.get("/unread-count", verifyJWT, getUnreadCount);
 router.patch("/mark-all-read", verifyJWT, markAllAsRead);
 router.patch("/:id/read", verifyJWT, markAsRead);
+router.delete("/delete-all", verifyJWT, deleteAllNotifications);
 router.delete("/:id", verifyJWT, deleteNotification);
 // Favorite Categories
 router.get("/favorite-categories", verifyJWT, getFavoriteCategories);
