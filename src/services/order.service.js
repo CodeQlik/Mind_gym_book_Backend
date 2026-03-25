@@ -961,7 +961,13 @@ class OrderService {
 
     // Cancel in a transaction to ensure stock is returned
     await sequelize.transaction(async (t) => {
-      await order.update({ delivery_status: "cancelled" }, { transaction: t });
+      await order.update(
+        {
+          delivery_status: "cancelled",
+          refund_reason: reason || "Order cancelled by user",
+        },
+        { transaction: t },
+      );
 
       // Clear reserved stock
       for (const item of order.items) {

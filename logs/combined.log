@@ -20639,3 +20639,56 @@
 [2026-03-25T05:42:13.706Z] [INFO] GET /api/v1/orders/admin/all?page=1&limit=10 200 (73ms) {"method":"GET","url":"/api/v1/orders/admin/all?page=1&limit=10","status":200,"duration":"73ms","ip":"::1","user":26}
 [2026-03-25T05:42:13.834Z] [INFO] Checking email condition: status=SENT, finalSendEmail=true, userEmail=ashokvarma9636@gmail.com 
 [2026-03-25T05:42:13.837Z] [INFO] Attempting to send email to ashokvarma9636@gmail.com for type ORDER_CREATED 
+[2026-03-25T05:42:38.027Z] [INFO] [AUTO-DISPATCH] Attempting Shiprocket sync for Order: 78 
+[2026-03-25T05:42:38.276Z] [INFO] DEBUG: Input address object: {"id":5,"name":"Home","phone":"9876453232","address_line1":"84/101","address_line2":"Mansorovar Plaza","city":"Jaipur","state":"Rajasthan","pincode":"302020","country":"India","addresstype":"home","is_default":false,"createdAt":"2026-03-20T08:31:45.000Z","updatedAt":"2026-03-23T06:57:19.000Z"}
+[2026-03-25T05:42:38.295Z] [INFO] DEBUG: Resolved shippingAddr final: {"id":5,"name":"Home","phone":"9876453232","address_line1":"84/101","address_line2":"Mansorovar Plaza","city":"Jaipur","state":"Rajasthan","pincode":"302020","country":"India","addresstype":"home","is_default":false,"createdAt":"2026-03-20T08:31:45.000Z","updatedAt":"2026-03-23T06:57:19.000Z"}
+[2026-03-25T05:42:38.309Z] [INFO] DEBUG: Sending final payload to Shiprocket: {"order_id":"78","order_date":"2026-03-25 05:42:13","pickup_location":"Home","channel_id":"","comment":"Mind Gym Book physical order","billing_customer_name":"Ashok","billing_last_name":"Verma","billing_address":"84/101","billing_address_2":"Mansorovar Plaza","billing_city":"Jaipur","billing_pincode":"302020","billing_state":"Rajasthan","billing_country":"India","billing_email":"ashokvarma9636@gmail.com","billing_phone":"9876453232","shipping_is_billing":true,"shipping_customer_name":"Ashok","shipping_last_name":"Verma","shipping_address":"84/101","shipping_address_2":"Mansorovar Plaza","shipping_city":"Jaipur","shipping_pincode":"302020","shipping_state":"Rajasthan","shipping_country":"India","shipping_email":"ashokvarma9636@gmail.com","shipping_phone":"9876453232","order_items":[{"name":"Chapter Danger","sku":"BOOK-96","units":1,"selling_price":"100.00","discount":0,"tax":"5.00","hsn":4901}],"payment_method":"Prepaid","shipping_charges":51,"giftwrap_charges":0,"transaction_charges":0,"total_discount":5,"sub_total":"100.00","length":10,"breadth":10,"height":10,"weight":"0.500"}
+[2026-03-25T05:42:38.746Z] [INFO] SHIPROCKET API SUCCESS RESPONSE: {"order_id":1252871416,"channel_order_id":"78","shipment_id":1249170475,"status":"NEW","status_code":1,"onboarding_completed_now":0,"awb_code":"","courier_company_id":"","courier_name":"","new_channel":false,"packaging_box_error":""}
+[2026-03-25T05:42:38.776Z] [INFO] [AUTO-DISPATCH] SUCCESS: Order 78 pushed to Shiprocket. 
+[2026-03-25T05:42:39.033Z] [INFO] POST /api/v1/payment/verify 200 (26341ms) {"method":"POST","url":"/api/v1/payment/verify","status":200,"duration":"26341ms","ip":"::1","user":56}
+[2026-03-25T05:59:19.847Z] [INFO] POST /api/v1/users/login 200 (117ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"117ms","ip":"::1","user":"Guest"}
+[2026-03-25T06:15:13.674Z] [INFO] Redis Client Connected 
+[2026-03-25T06:17:47.073Z] [INFO] Redis Client Connected 
+[2026-03-25T06:19:16.819Z] [WARN] GET /api/v1/orders/admin/78 401 (10ms) {"method":"GET","url":"/api/v1/orders/admin/78","status":401,"duration":"10ms","ip":"::1","user":"Guest"}
+[2026-03-25T06:19:16.862Z] [WARN] GET /api/v1/orders/admin/78 401 (6ms) {"method":"GET","url":"/api/v1/orders/admin/78","status":401,"duration":"6ms","ip":"::1","user":"Guest"}
+[2026-03-25T06:19:27.696Z] [INFO] POST /api/v1/users/login 200 (141ms) {"method":"POST","url":"/api/v1/users/login","status":200,"duration":"141ms","ip":"::1","user":"Guest"}
+[2026-03-25T06:19:27.768Z] [INFO] GET /api/v1/users/profile 200 (23ms) {"method":"GET","url":"/api/v1/users/profile","status":200,"duration":"23ms","ip":"::1","user":58}
+[2026-03-25T06:19:27.964Z] [INFO] GET /api/v1/notifications 304 (58ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"58ms","ip":"::1","user":58}
+[2026-03-25T06:19:27.981Z] [INFO] GET /api/v1/users/profile 304 (55ms) {"method":"GET","url":"/api/v1/users/profile","status":304,"duration":"55ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.023Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 200 (76ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":200,"duration":"76ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.037Z] [INFO] GET /api/v1/notifications 304 (41ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"41ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.059Z] [INFO] GET /api/v1/notifications/admin/stats 200 (129ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":200,"duration":"129ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.139Z] [INFO] GET /api/v1/notifications 304 (86ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"86ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.205Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (122ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"122ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.245Z] [INFO] GET /api/v1/analytics/dashboard 200 (332ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":200,"duration":"332ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.262Z] [INFO] GET /api/v1/notifications 304 (51ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"51ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.290Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (74ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"74ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.327Z] [INFO] GET /api/v1/notifications/admin/stats 304 (220ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"220ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.348Z] [INFO] GET /api/v1/analytics/top-selling-books-week?limit=5 304 (39ms) {"method":"GET","url":"/api/v1/analytics/top-selling-books-week?limit=5","status":304,"duration":"39ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.422Z] [INFO] GET /api/v1/analytics/dashboard 304 (141ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"141ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.467Z] [INFO] GET /api/v1/notifications/admin/stats 304 (101ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"101ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.522Z] [INFO] GET /api/v1/analytics/dashboard 304 (92ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"92ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.555Z] [INFO] GET /api/v1/notifications/admin/stats 304 (80ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"80ms","ip":"::1","user":58}
+[2026-03-25T06:19:28.611Z] [INFO] GET /api/v1/analytics/dashboard 304 (77ms) {"method":"GET","url":"/api/v1/analytics/dashboard","status":304,"duration":"77ms","ip":"::1","user":58}
+[2026-03-25T06:20:58.897Z] [INFO] PUT /api/v1/users/update-profile 200 (1797ms) {"method":"PUT","url":"/api/v1/users/update-profile","status":200,"duration":"1797ms","ip":"::1","user":58}
+[2026-03-25T06:20:58.981Z] [INFO] GET /api/v1/notifications 304 (31ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"31ms","ip":"::1","user":58}
+[2026-03-25T06:20:59.036Z] [INFO] GET /api/v1/notifications 304 (21ms) {"method":"GET","url":"/api/v1/notifications","status":304,"duration":"21ms","ip":"::1","user":58}
+[2026-03-25T06:20:59.065Z] [INFO] GET /api/v1/notifications/admin/stats 304 (108ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"108ms","ip":"::1","user":58}
+[2026-03-25T06:20:59.097Z] [INFO] GET /api/v1/notifications/admin/stats 304 (26ms) {"method":"GET","url":"/api/v1/notifications/admin/stats","status":304,"duration":"26ms","ip":"::1","user":58}
+[2026-03-25T06:21:18.999Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 200 (878ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":200,"duration":"878ms","ip":"::1","user":58}
+[2026-03-25T06:21:20.896Z] [INFO] GET /api/v1/book/admin/all?page=1&limit=10 304 (1894ms) {"method":"GET","url":"/api/v1/book/admin/all?page=1&limit=10","status":304,"duration":"1894ms","ip":"::1","user":58}
+[2026-03-25T06:24:17.799Z] [INFO] GET /api/v1/orders/my-orders 200 (45ms) {"method":"GET","url":"/api/v1/orders/my-orders","status":200,"duration":"45ms","ip":"::1","user":56}
+[2026-03-25T06:24:39.683Z] [INFO] GET /api/v1/orders/admin/all?page=1&limit=10 200 (166ms) {"method":"GET","url":"/api/v1/orders/admin/all?page=1&limit=10","status":200,"duration":"166ms","ip":"::1","user":58}
+[2026-03-25T06:24:39.692Z] [INFO] GET /api/v1/orders/admin/stats 304 (197ms) {"method":"GET","url":"/api/v1/orders/admin/stats","status":304,"duration":"197ms","ip":"::1","user":58}
+[2026-03-25T06:24:39.779Z] [INFO] GET /api/v1/orders/admin/stats 304 (42ms) {"method":"GET","url":"/api/v1/orders/admin/stats","status":304,"duration":"42ms","ip":"::1","user":58}
+[2026-03-25T06:24:39.831Z] [INFO] GET /api/v1/orders/admin/all?page=1&limit=10 304 (126ms) {"method":"GET","url":"/api/v1/orders/admin/all?page=1&limit=10","status":304,"duration":"126ms","ip":"::1","user":58}
+[2026-03-25T06:24:39.932Z] [INFO] GET /api/v1/orders/admin/all?page=1&limit=10 304 (37ms) {"method":"GET","url":"/api/v1/orders/admin/all?page=1&limit=10","status":304,"duration":"37ms","ip":"::1","user":58}
+[2026-03-25T06:25:01.364Z] [INFO] GET /api/v1/orders/admin/stats 200 (17ms) {"method":"GET","url":"/api/v1/orders/admin/stats","status":200,"duration":"17ms","ip":"::1","user":58}
+[2026-03-25T06:25:01.377Z] [INFO] GET /api/v1/orders/admin/stats 304 (9ms) {"method":"GET","url":"/api/v1/orders/admin/stats","status":304,"duration":"9ms","ip":"::1","user":58}
+[2026-03-25T06:25:01.391Z] [INFO] GET /api/v1/orders/admin/all?page=1&limit=10 200 (44ms) {"method":"GET","url":"/api/v1/orders/admin/all?page=1&limit=10","status":200,"duration":"44ms","ip":"::1","user":58}
+[2026-03-25T06:25:01.445Z] [INFO] GET /api/v1/orders/admin/all?page=1&limit=10 304 (32ms) {"method":"GET","url":"/api/v1/orders/admin/all?page=1&limit=10","status":304,"duration":"32ms","ip":"::1","user":58}
+[2026-03-25T06:25:02.014Z] [INFO] Checking email condition: status=SENT, finalSendEmail=true, userEmail=ashokvarma9636@gmail.com 
+[2026-03-25T06:25:02.015Z] [INFO] Attempting to send email to ashokvarma9636@gmail.com for type ORDER_CANCELLED 
+[2026-03-25T06:25:26.011Z] [INFO] POST /api/v1/orders/cancel/78 200 (24847ms) {"method":"POST","url":"/api/v1/orders/cancel/78","status":200,"duration":"24847ms","ip":"::1","user":56}
+[2026-03-25T06:25:36.119Z] [INFO] GET /api/v1/orders/admin/78 200 (12ms) {"method":"GET","url":"/api/v1/orders/admin/78","status":200,"duration":"12ms","ip":"::1","user":58}
+[2026-03-25T06:25:36.144Z] [INFO] GET /api/v1/orders/admin/78 304 (10ms) {"method":"GET","url":"/api/v1/orders/admin/78","status":304,"duration":"10ms","ip":"::1","user":58}

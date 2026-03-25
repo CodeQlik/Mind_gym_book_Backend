@@ -98,6 +98,16 @@ export const requestRefund = async (req, res, next) => {
 export const cancelOrder = async (req, res, next) => {
   try {
     const { reason } = req.body;
+
+    if (!reason || reason.trim().length < 5) {
+      return sendResponse(
+        res,
+        400,
+        false,
+        "Please provide a valid reason for cancellation (at least 5 characters).",
+      );
+    }
+
     const order = await orderService.cancelOrder(
       req.user.id,
       req.params.orderId,
