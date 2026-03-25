@@ -71,6 +71,18 @@ const Subscription = sequelize.define(
       defaultValue: 0,
       allowNull: false,
     },
+    notified_3_days: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    notified_1_day: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
+    notified_expired: {
+      type: DataTypes.BOOLEAN,
+      defaultValue: false,
+    },
   },
   {
     timestamps: true,

@@ -3,9 +3,21 @@ import { Op } from "sequelize";
 import { Subscription, User } from "../models/index.js";
 
 export const runSubscriptionExpiryJob = async () => {
+  const { redis } = await import("../config/redis.js");
+  const lockKey = "cron:subscription_expiry:lock";
   const now = new Date();
-  const { default: notificationService } =
-    await import("../services/notification.service.js");
+  
+  try {
+    // ── Redis Lock: Prevent multiple instances from running the same job
+    // Set lock for 1 hour (3600 seconds)
+    const isLocked = await redis.set(lockKey, "LOCKED", "EX", 3600, "NX");
+    if (!isLocked) {
+      console.log("[CRON] ⚠️ Job already running on another instance. Skipping.");
+      return;
+    }
+
+    const { default: notificationService } =
+      await import("../services/notification.service.js");
 
   try {
     // ── Step 1: Expire overdue Subscription records
@@ -18,7 +30,10 @@ export const runSubscriptionExpiryJob = async () => {
     });
 
     const [expiredSubCount] = await Subscription.update(
-      { status: "expired" },
+      { 
+        status: "expired",
+        notified_expired: true 
+      },
       {
         where: {
           status: "active",
@@ -66,6 +81,7 @@ export const runSubscriptionExpiryJob = async () => {
       where: {
         status: "active",
         end_date: { [Op.between]: [threeDaysStart, threeDaysEnd] },
+        notified_3_days: false,
       },
     });
 
@@ -78,6 +94,9 @@ export const runSubscriptionExpiryJob = async () => {
           "Your membership will expire in 3 days. Renew now to avoid any interruption in your reading experience.",
           { days_left: "3" },
         );
+        // Mark as notified
+        sub.notified_3_days = true;
+        await sub.save();
       } catch (e) {}
     }
 
@@ -91,6 +110,7 @@ export const runSubscriptionExpiryJob = async () => {
       where: {
         status: "active",
         end_date: { [Op.between]: [tomorrowStart, tomorrowEnd] },
+        notified_1_day: false,
       },
     });
 
@@ -103,13 +123,22 @@ export const runSubscriptionExpiryJob = async () => {
           "Final Reminder: Your membership expires tomorrow. Don't lose access to your favorite books!",
           { days_left: "1" },
         );
+        // Mark as notified
+        sub.notified_1_day = true;
+        await sub.save();
       } catch (e) {}
     }
 
     // ── Step 5: Cleanup Old Notifications (Older than 30 days)
     await notificationService.cleanupOldNotifications();
+    } catch (error) {
+      console.error("[CRON] ❌ Subscription expiry job failed:", error.message);
+    } finally {
+      // Optional: Unlock manually if you want the job to be able to run again immediately
+      // await redis.del(lockKey); 
+    }
   } catch (error) {
-    console.error("[CRON] ❌ Subscription expiry job failed:", error.message);
+    console.error("[CRON] ❌ Redis lock or initialization failed:", error.message);
   }
 };
 
