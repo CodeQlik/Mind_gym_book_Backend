@@ -599,8 +599,11 @@
             "method": "POST",
             "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }, { "key": "Content-Type", "value": "application/json" }],
             "url": "{{base_url}}/orders/checkout",
-            "body": { "mode": "raw", "raw": "{\n  \"address_id\": 1\n}" },
-            "description": "Creates DB order from cart. Saves order_id to variable automatically."
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"address_id\": 1,\n  \"payment_method\": \"prepaid\",\n  \"coupon_code\": \"WELCOME23\"\n}"
+            },
+            "description": "Creates DB order from cart. Saves order_id to variable automatically. For physical books, address_id is required."
           }
         },
         {
@@ -661,9 +664,16 @@
           "name": "Cancel Order",
           "request": {
             "method": "POST",
-            "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
             "url": "{{base_url}}/orders/cancel/{{order_id}}",
-            "description": "User can cancel order only if it's in 'processing' state. Restocks items automatically."
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"reason\": \"Changed my mind, will order later.\"\n}"
+            },
+            "description": "User can cancel order only if it's in 'processing' state. Restocks items automatically. Reason is mandatory (min 5 chars)."
           }
         },
         {
@@ -784,6 +794,68 @@
             "url": "{{base_url}}/orders/admin/delete/{{order_id}}",
             "description": "Permanently deletes an order."
           }
+        },
+        {
+          "name": "🚀 Shiprocket Fulfillment (Admin)",
+          "item": [
+            {
+              "name": "Dispatch via Shiprocket (Automated)",
+              "request": {
+                "method": "PATCH",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{base_url}}/orders/admin/dispatch-shiprocket/{{order_id}}",
+                "description": "Sends order to Shiprocket and assigns the cheapest courier automatically."
+              }
+            },
+            {
+              "name": "Sync/Refresh Shiprocket Status",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{base_url}}/orders/admin/refresh-shiprocket/{{order_id}}",
+                "description": "Forcefully refetches latest tracking info from Shiprocket."
+              }
+            },
+            {
+              "name": "Assign AWB (Manual Courier Select)",
+              "request": {
+                "method": "POST",
+                "header": [
+                  { "key": "Authorization", "value": "Bearer {{token}}" },
+                  { "key": "Content-Type", "value": "application/json" }
+                ],
+                "url": "{{base_url}}/orders/admin/shiprocket/assign-awb/{{order_id}}",
+                "body": {
+                  "mode": "raw",
+                  "raw": "{\n  \"courierId\": \"123\"\n}"
+                }
+              }
+            },
+            {
+              "name": "Schedule Pickup",
+              "request": {
+                "method": "POST",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{base_url}}/orders/admin/shiprocket/schedule-pickup/{{order_id}}"
+              }
+            },
+            {
+              "name": "Generate Label",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{base_url}}/orders/admin/shiprocket/label/{{order_id}}"
+              }
+            },
+            {
+              "name": "Generate Manifest",
+              "request": {
+                "method": "GET",
+                "header": [{ "key": "Authorization", "value": "Bearer {{token}}" }],
+                "url": "{{base_url}}/orders/admin/shiprocket/manifest/{{order_id}}"
+              }
+            }
+          ]
         }
       ]
     },
@@ -1527,12 +1599,11 @@
             "header": [
               { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
-            "url": "{{base_url}}/testimonials/{{testimonial_id}}",
+            "url": "{{base_url}}/testimonials/{{ testimonial_id }}",
             "body": {
               "mode": "formdata",
               "formdata": [
-                { "key": "name", "value": "Jane Smith", "type": "text" },
-                { "key": "rating", "value": "5", "type": "text" }
+                { "key": "is_active", "value": "false", "type": "text" }
               ]
             }
           }
@@ -1544,7 +1615,180 @@
             "header": [
               { "key": "Authorization", "value": "Bearer {{token}}" }
             ],
-            "url": "{{base_url}}/testimonials/{{testimonial_id}}"
+            "url": "{{base_url}}/testimonials/{{ testimonial_id }}"
+          }
+        }
+      ]
+    },
+    {
+      "name": "🎧 Audiobooks",
+      "item": [
+        {
+          "name": "Get All Audiobooks",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/audiobook/all"
+          }
+        },
+        {
+          "name": "Stream Audiobook",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/audiobook/stream/1",
+            "description": "Stream MP3 file. Requires subscription for full audio."
+          }
+        },
+        {
+          "name": "Get Audiobook By ID",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/audiobook/1"
+          }
+        },
+        {
+          "name": "Admin — Add Audiobook",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/audiobook/add",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "book_id", "value": "1", "type": "text" },
+                { "key": "title", "value": "Chapter 1", "type": "text" },
+                { "key": "audio_file", "value": "", "type": "file" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Admin — Toggle Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/audiobook/toggle-status/1"
+          }
+        },
+        {
+          "name": "Admin — Delete",
+          "request": {
+            "method": "DELETE",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/audiobook/delete/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "❓ FAQs",
+      "item": [
+        {
+          "name": "Get All FAQs (Public)",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/faqs/"
+          }
+        },
+        {
+          "name": "Admin — Get All FAQs",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/faqs/admin"
+          }
+        },
+        {
+          "name": "Admin — Create FAQ",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/faqs/",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"question\": \"How to refund?\",\n  \"answer\": \"Go to orders and click refund.\",\n  \"category\": \"Refunds\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin — Toggle Status",
+          "request": {
+            "method": "PUT",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/faqs/toggle-status/1"
+          }
+        }
+      ]
+    },
+    {
+      "name": "⚙️ Settings",
+      "item": [
+        {
+          "name": "Get Site Settings",
+          "request": {
+            "method": "GET",
+            "url": "{{base_url}}/settings/"
+          }
+        },
+        {
+          "name": "Admin — Update Settings",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/settings/update",
+            "body": {
+              "mode": "formdata",
+              "formdata": [
+                { "key": "site_name", "value": "Mind Gym Book", "type": "text" },
+                { "key": "admin_signature", "value": "", "type": "file" }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    {
+      "name": "📞 Contact Requests",
+      "item": [
+        {
+          "name": "Submit Inquiry",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "url": "{{base_url}}/contact/submit",
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"John\",\n  \"email\": \"john@example.com\",\n  \"subject\": \"Bulk Order\",\n  \"message\": \"I want to buy 50 books.\"\n}"
+            }
+          }
+        },
+        {
+          "name": "Admin — Get All",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Authorization", "value": "Bearer {{token}}" }
+            ],
+            "url": "{{base_url}}/contact/admin/all"
           }
         }
       ]

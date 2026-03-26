@@ -5,7 +5,21 @@ import { uploadOnCloudinary } from "../config/cloudinary.js";
 export const getSettings = async (req, res, next) => {
   try {
     const settings = await settingService.getSettings();
-    return sendResponse(res, 200, true, "Settings fetched successfully", settings);
+    
+    // Convert to JSON and parse JSON strings if necessary
+    const settingsJson = settings.toJSON();
+    
+    ["logo", "favicon", "admin_signature"].forEach(field => {
+      if (typeof settingsJson[field] === "string") {
+        try {
+          settingsJson[field] = JSON.parse(settingsJson[field]);
+        } catch (e) {
+          // Keep as string if parsing fails
+        }
+      }
+    });
+
+    return sendResponse(res, 200, true, "Settings fetched successfully", settingsJson);
   } catch (error) {
     next(error);
   }
@@ -43,8 +57,20 @@ export const updateSettings = async (req, res, next) => {
     }
 
     const settings = await settingService.updateSettings(updateData);
-    return sendResponse(res, 200, true, "Settings updated successfully", settings);
+    
+    // Ensure the response also has parsed JSON for immediate UI update if needed
+    const settingsJson = settings.toJSON();
+    ["logo", "favicon", "admin_signature"].forEach(field => {
+      if (typeof settingsJson[field] === "string") {
+        try {
+          settingsJson[field] = JSON.parse(settingsJson[field]);
+        } catch (e) {}
+      }
+    });
+
+    return sendResponse(res, 200, true, "Settings updated successfully", settingsJson);
   } catch (error) {
     next(error);
   }
 };
+
